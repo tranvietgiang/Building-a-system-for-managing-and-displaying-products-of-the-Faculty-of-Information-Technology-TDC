@@ -304,6 +304,11 @@ class ChatBoxAi
 
     public function chat(Request $request)
     {
+        // Validate input
+        $request->validate([
+            'message' => 'nullable|string|max:1000',
+        ]);
+
         $user    = Auth::user();
         $role    = $user->role ?? 'guest';
         $majorId = $user->major_id ?? null;
@@ -322,6 +327,16 @@ class ChatBoxAi
 
         if ($message === '') {
             return response()->json(['reply' => 'Vui lòng nhập câu hỏi.'], 422);
+        }
+
+        // Check minimum length
+        if (strlen($message) < 3) {
+            return response()->json(['reply' => 'Câu hỏi phải ít nhất 3 ký tự.'], 422);
+        }
+
+        // Check maximum length
+        if (strlen($message) > 1000) {
+            return response()->json(['reply' => 'Câu hỏi không được vượt quá 1000 ký tự.'], 422);
         }
 
         if (!$this->isRelevantQuestion($message)) {

@@ -22,9 +22,19 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'username' => 'required|string',
-            'password' => 'required|string',
+            'username' => 'required|string|min:3|max:100',
+            'password' => 'required|string|min:6|max:255',
             'user_role' => 'required|string|in:student,lecturer,teacher,admin',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'username.min' => 'Tên đăng nhập phải ít nhất 3 ký tự.',
+            'username.max' => 'Tên đăng nhập không được vượt quá 100 ký tự.',
+            'password.min' => 'Mật khẩu phải ít nhất 6 ký tự.',
+            'password.max' => 'Mật khẩu không được vượt quá 255 ký tự.',
         ];
     }
 }

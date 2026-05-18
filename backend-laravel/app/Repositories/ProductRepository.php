@@ -681,7 +681,7 @@ class ProductRepository extends BaseRepository
     }
 
 
-    public function compareData(int $productId): ?Product
+    public function compareData(int $productId): ?object
     {
         return DB::table('products as p')
             ->join('majors as m', 'p.major_id', '=', 'm.major_id')

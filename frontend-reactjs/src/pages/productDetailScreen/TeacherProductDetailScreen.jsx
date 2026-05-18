@@ -40,7 +40,6 @@ const TeacherProductDetailScreen = () => {
   const [feedback, setFeedback] = useState("");
   const [reviewComment, setReviewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showAiCompareModal, setShowAiCompareModal] = useState(false);
 
   const { user } = useContext(AuthContext);
 
@@ -105,7 +104,6 @@ const TeacherProductDetailScreen = () => {
     setIsSubmitting(true);
     try {
       await handleSubmitReviewOriginal();
-      setShowAiCompareModal(true);
     } catch (err) {
       console.error(err);
     } finally {
@@ -140,10 +138,6 @@ const TeacherProductDetailScreen = () => {
 
   const handleReject = useCallback(() => {
     setShowFeedbackModal(true);
-  }, []);
-
-  const handleCloseAiModal = useCallback(() => {
-    setShowAiCompareModal(false);
   }, []);
 
   const handleCloseFeedbackModal = useCallback(() => {
@@ -238,12 +232,6 @@ const TeacherProductDetailScreen = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <ImageViewerModal />
-
-      <AiCompareModal
-        productId={id}
-        isOpen={showAiCompareModal}
-        onClose={handleCloseAiModal}
-      />
 
       {/* Modal từ chối */}
       {showFeedbackModal && (

@@ -12,6 +12,13 @@ class SearchAi
 {
     public function searchAi(Request $request)
     {
+        // Validate input
+        $request->validate([
+            'message' => 'nullable|string|max:200',
+            'query' => 'nullable|string|max:200',
+            'keyword' => 'nullable|string|max:200',
+        ]);
+
         $message = trim((string) (
             $request->input('message')
             ?? $request->input('query')
@@ -19,9 +26,37 @@ class SearchAi
             ?? ''
         ));
 
+        // Check empty
         if ($message === '') {
             return response()->json([
                 'message' => 'Vui lòng nhập nội dung tìm kiếm.',
+                'products' => [],
+                'count' => 0,
+            ], 422);
+        }
+
+        // Check minimum length
+        if (strlen($message) < 2) {
+            return response()->json([
+                'message' => 'Nội dung tìm kiếm phải ít nhất 2 ký tự.',
+                'products' => [],
+                'count' => 0,
+            ], 422);
+        }
+
+        // Check maximum length
+        if (strlen($message) > 200) {
+            return response()->json([
+                'message' => 'Nội dung tìm kiếm không được vượt quá 200 ký tự.',
+                'products' => [],
+                'count' => 0,
+            ], 422);
+        }
+
+        // Sanitize input - remove dangerous characters
+        if ($this->containsDangerousPatterns($message)) {
+            return response()->json([
+                'message' => 'Nội dung tìm kiếm chứa ký tự không hợp lệ.',
                 'products' => [],
                 'count' => 0,
             ], 422);
@@ -385,5 +420,65 @@ class SearchAi
             ->orderByDesc('products.submitted_at')
             ->limit($intent['limit'])
             ->get();
+    }
+
+    /**
+     * Check for dangerous patterns in search query
+     */
+    private function containsDangerousPatterns(string $message): bool
+    {
+        // SQL injection patterns
+        $sqlPatterns = [
+            '/(\b(UNION|SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|EXECUTE)\b)/i',
+            '/(-{2}|\/\*|\*\/|;)/i', // SQL comments and terminators
+            '/(CHAR|ASCII|SUBSTRING|LENGTH|CONCAT)/i',
+        ];
+
+        // XSS patterns
+        $xssPatterns = [
+            '/<script[^>]*>.*?<\/script>/i',
+            '/javascript:/i',
+            '/on\w+\s*=/i', // onerror=, onclick=, etc
+            '/<iframe/i',
+            '/<img[^>]*on/i',
+            '/<svg[^>]*on/i',
+        ];
+
+        // Command injection patterns
+        $commandPatterns = [
+            '/[;&|`$(){}]/i',
+            '/(cat|ls|rm|wget|curl|exec|system|passthru)\s+/i',
+        ];
+
+        $allPatterns = array_merge($sqlPatterns, $xssPatterns, $commandPatterns);
+
+        foreach ($allPatterns as $pattern) {
+            if (preg_match($pattern, $message)) {
+                Log::warning('Dangerous search pattern detected', [
+                    'message' => substr($message, 0, 100),
+                    'pattern' => $pattern,
+                ]);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Sanitize search message
+     */
+    private function sanitizeSearchMessage(string $message): string
+    {
+        // Remove excess whitespace
+        $message = preg_replace('/\s+/', ' ', trim($message));
+
+        // Remove HTML tags
+        $message = strip_tags($message);
+
+        // Escape for database queries (though Laravel will handle this)
+        $message = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
+
+        return $message;
     }
 }

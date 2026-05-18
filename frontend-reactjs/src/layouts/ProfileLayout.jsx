@@ -8,11 +8,12 @@ import BackButton from "../components/common/BackButton";
 import { getMajorTheme } from "../utils/uploadProductScreen/uploadRegistry";
 import { Icons } from "../components/common/Icon";
 import useMajorName from "../hooks/common/useMajorName";
+import { useProfileUpdate } from "../hooks/useProfile/useProfileUpdate";
 const ProfileScreen = () => {
   useTitle("Hồ sơ cá nhân");
   const { user, setUser } = useContext(AuthContext);
   const [isEditing, setIsEditing] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const { isLoading, updateProfile } = useProfileUpdate();
   const { majorName } = useMajorName(user?.major_id);
   // Lấy theme dựa trên major_id của user
   const theme = getMajorTheme(majorName);
@@ -60,18 +61,18 @@ const ProfileScreen = () => {
   };
 
   const handleSave = async () => {
-    setIsLoading(true);
     try {
-      // TODO: Call API to update profile
-      // await updateProfileAPI(formData);
-      setUser({ ...user, ...formData });
-      toast.success("Cập nhật hồ sơ thành công!");
-      setIsEditing(false);
+      // Loại bỏ những trường không được phép update
+      const { major_name, mssv, class_name, ...updateData } = formData;
+
+      const result = await updateProfile(updateData);
+
+      if (result?.success) {
+        setUser({ ...user, ...result.user });
+        setIsEditing(false);
+      }
     } catch (error) {
       console.error(error);
-      toast.error("Có lỗi xảy ra, vui lòng thử lại!");
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -133,33 +134,93 @@ const ProfileScreen = () => {
     </div>
   );
 
-  const EditableField = ({ label, name, type = "text", placeholder, icon }) => (
-    <div className="flex flex-col sm:flex-row sm:items-center py-3 border-b border-gray-100">
-      <div className="flex items-center gap-2 w-32">
-        {icon && <span className="text-gray-400">{icon}</span>}
-        <label className="text-sm font-medium text-gray-500">{label}</label>
+  // Giới hạn độ dài cho từng field
+  const fieldLimits = {
+    name: { min: 3, max: 100, required: true },
+    email: { min: 5, max: 100, required: true },
+    phone: { max: 20, required: false },
+    address: { max: 200, required: false },
+    bio: { max: 500, required: false },
+    mssv: { max: 20, required: false },
+    class_name: { max: 50, required: false },
+  };
+
+  const EditableField = ({ label, name, type = "text", placeholder, icon }) => {
+    const limits = fieldLimits[name] || { max: 255, required: false };
+    const currentLength = formData[name]?.length || 0;
+    const { min, max, required } = limits;
+
+    return (
+      <div className="flex flex-col sm:flex-row sm:items-start py-3 border-b border-gray-100">
+        <div className="flex items-center gap-2 w-32">
+          {icon && <span className="text-gray-400">{icon}</span>}
+          <label className="text-sm font-medium text-gray-500">
+            {label}
+            {required && <span className="text-red-500"> *</span>}
+          </label>
+        </div>
+        <div className="flex-1 mt-1 sm:mt-0 w-full">
+          {type === "textarea" ? (
+            <>
+              <textarea
+                name={name}
+                value={formData[name]}
+                onChange={(e) => {
+                  if (e.target.value.length <= max) {
+                    handleChange(e);
+                  }
+                }}
+                maxLength={max}
+                rows={3}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                placeholder={placeholder}
+              />
+              <div className="flex justify-between items-center mt-1">
+                {min && required && (
+                  <span
+                    className={`text-xs ${currentLength < min ? "text-red-500" : "text-green-500"}`}
+                  >
+                    {currentLength < min ? `Ít nhất ${min} ký tự` : "✓"}
+                  </span>
+                )}
+                <span className="text-xs text-gray-400 ml-auto">
+                  {currentLength}/{max}
+                </span>
+              </div>
+            </>
+          ) : (
+            <>
+              <input
+                type={type}
+                name={name}
+                value={formData[name]}
+                onChange={(e) => {
+                  if (e.target.value.length <= max) {
+                    handleChange(e);
+                  }
+                }}
+                maxLength={max}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                placeholder={placeholder}
+              />
+              <div className="flex justify-between items-center mt-1">
+                {min && required && (
+                  <span
+                    className={`text-xs ${currentLength < min ? "text-red-500" : "text-green-500"}`}
+                  >
+                    {currentLength < min ? `Ít nhất ${min} ký tự` : "✓"}
+                  </span>
+                )}
+                <span className="text-xs text-gray-400 ml-auto">
+                  {currentLength}/{max}
+                </span>
+              </div>
+            </>
+          )}
+        </div>
       </div>
-      {type === "textarea" ? (
-        <textarea
-          name={name}
-          value={formData[name]}
-          onChange={handleChange}
-          rows={3}
-          className="flex-1 mt-1 sm:mt-0 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-          placeholder={placeholder}
-        />
-      ) : (
-        <input
-          type={type}
-          name={name}
-          value={formData[name]}
-          onChange={handleChange}
-          className="flex-1 mt-1 sm:mt-0 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-          placeholder={placeholder}
-        />
-      )}
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
