@@ -21,7 +21,7 @@ class ProductViewRequest extends FormRequest
     public function validationData()
     {
         return array_merge($this->all(), [
-            'product_id' => $this->route('product_id'),
+            'product_id' => $this->route('product_id') ?? $this->input('product_id'),
         ]);
     }
 }

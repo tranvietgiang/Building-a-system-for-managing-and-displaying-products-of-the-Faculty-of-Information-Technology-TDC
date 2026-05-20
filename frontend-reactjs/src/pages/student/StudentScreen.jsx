@@ -4,6 +4,7 @@ import { AuthContext } from "../../contexts/AuthContext";
 import useTitle from "../../hooks/common/useTitle";
 import useMajorName from "../../hooks/common/useMajorName";
 import useProductAll from "../../hooks/useProduct/useProductAll";
+import useDeleteProduct from "../../hooks/useProduct/useDeleteProduct";
 import { useStudentStats } from "../../hooks/student/useStudentStats";
 import { mapCurrentStudent } from "../../utils/userMapper";
 import StudentHeader from "../../components/student/StudentHeader";
@@ -12,10 +13,13 @@ import { STATUS } from "../../utils/constants";
 import { getMajorTheme } from "../../utils/uploadProductScreen/uploadRegistry";
 import ChatBoxAi from "../../pages/ChatBoxAi/ChatBoxAi";
 import SearchAi from "../ai/SearchAi";
+import { confirmToast } from "../../components/common/ConfirmToast";
+import { toast } from "react-toastify";
 
 const StudentScreen = () => {
   const [activeTab, setActiveTab] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
+  const [deletedProductIds, setDeletedProductIds] = useState([]);
   const ITEMS_PER_PAGE = 6;
   useTitle("Trang chủ sinh viên");
   const navigate = useNavigate();
@@ -25,18 +29,22 @@ const StudentScreen = () => {
   localStorage.setItem("majorName", majorName);
 
   const { products, loading, error } = useProductAll();
+  const { deleteLoading, deleteProduct } = useDeleteProduct();
   const currentStudent = mapCurrentStudent(user, majorName);
   const aiBox = JSON.parse(sessionStorage.getItem("auth_user"));
   // console.log(user);
 
   const productData = products?.data;
-  // console.log("productData", productData);
+  console.log("productData", productData);
 
   const theme = getMajorTheme(majorName);
 
   const productsArray = useMemo(
-    () => (Array.isArray(productData) ? productData : []),
-    [productData],
+    () =>
+      (Array.isArray(productData) ? productData : []).filter(
+        (product) => !deletedProductIds.includes(product.product_id),
+      ),
+    [productData, deletedProductIds],
   );
 
   const { stats, animatedStats, filteredProducts } = useStudentStats(
@@ -60,14 +68,30 @@ const StudentScreen = () => {
   };
 
   const handleEdit = (product) => {
-    navigate("/edit-product", { state: { product } });
+    navigate("/edit-product", {
+      state: {
+        product,
+        productId: product.product_id,
+        mode: "edit",
+      },
+    });
   };
 
   const handleDelete = (id) => {
-    if (window.confirm("Bạn có chắc muốn xóa sản phẩm này?")) {
-      // Gọi API xóa ở đây
-      console.log("Xóa sản phẩm:", id);
-    }
+    if (deleteLoading) return;
+
+    confirmToast({
+      message: "Xác nhận xóa sản phẩm này?",
+      onConfirm: async () => {
+        toast.warning("Đang xóa sản phẩm...");
+        const deleted = await deleteProduct(id);
+
+        if (deleted) {
+          setDeletedProductIds((prev) => [...prev, id]);
+          setCurrentPage((prev) => Math.max(1, Math.min(prev, totalPages)));
+        }
+      },
+    });
   };
 
   if (loading) return <p className="p-6">Đang tải...</p>;

@@ -40,8 +40,8 @@ const programs = [
 ];
 
 const stats = [
-  { value: "2006", label: "Năm thành lập", icon: Award },
-  { value: "28", label: "Ngành đào tạo", icon: BookOpen },
+  { value: "2026", label: "Năm phát triển website", icon: Award },
+  { value: "4", label: "Ngành đào tạo chất lượng cao", icon: BookOpen },
 ];
 
 export const LoginUI = ({

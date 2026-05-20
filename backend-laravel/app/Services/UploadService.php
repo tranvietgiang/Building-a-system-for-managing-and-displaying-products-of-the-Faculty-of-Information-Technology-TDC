@@ -39,16 +39,19 @@ class UploadService extends BaseRepository
 
             foreach ($data['images'] as $index => $image) {
 
-                $result = $this->contentModeration->moderateProduct($image);
+                $result = $this->contentModeration->moderateUploadedImage($image, [
+                    'title' => $data['title'] ?? '',
+                    'description' => $data['description'] ?? '',
+                    'major' => $data['major_code'] ?? '',
+                ]);
 
                 Log::info([
                     'index' => $index,
-                    'nsfw' => $result['nsfw'],
                     'score' => $result['score'] ?? null,
                     'suggestive' => $result['suggestive'] ?? null,
                 ]);
 
-                if (!empty($result['nsfw'])) {
+                if (empty($result['approved'])) {
                     DB::rollBack();
 
                     return [
@@ -70,7 +73,6 @@ class UploadService extends BaseRepository
                 $uploadedImages[] = $url;
             }
 
-            $majorCode = $this->normalizeMajorCode->NormalizeMajorCode($data['major_code'] ?? null);
 
             $tags = array_filter($data['tags'] ?? []);
 
@@ -86,6 +88,7 @@ class UploadService extends BaseRepository
             ];
 
 
+            $majorCode = $this->normalizeMajorCode->NormalizeMajorCode($data['major_code'] ?? null);
 
             switch ($majorCode) {
                 case 'ai':

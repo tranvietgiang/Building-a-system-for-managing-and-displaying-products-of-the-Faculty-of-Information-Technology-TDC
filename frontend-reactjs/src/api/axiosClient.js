@@ -1,10 +1,13 @@
 import axios from "axios";
 import { getToken, clearAuth } from "../utils/storage";
 
+const API_VERSION = "/v1";
+const API_BASE_URL = `${import.meta.env.VITE_API_URL?.replace(/\/$/, "")}${API_VERSION}`;
+
 // Hàm tạo axios client
 const axiosClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-  withCredentials: true, // 🔥 QUAN TRỌNG NHẤT
+  baseURL: API_BASE_URL,
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",

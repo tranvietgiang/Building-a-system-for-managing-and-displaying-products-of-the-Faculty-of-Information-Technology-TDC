@@ -66,6 +66,15 @@ function RoleRoutes() {
           }
         />
 
+        <Route
+          path="/edit-product"
+          element={
+            <ProtectedRoute allowedRoles={[ROLE.STUDENT]}>
+              <UploadProductScreen />
+            </ProtectedRoute>
+          }
+        />
+
         {/* PRODUCT DETAIL - STUDENT */}
         <Route
           path="/detail"

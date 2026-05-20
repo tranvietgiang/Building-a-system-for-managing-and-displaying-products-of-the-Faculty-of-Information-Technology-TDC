@@ -21,10 +21,10 @@ class ProductStatisticSeeder extends Seeder
 
             $rows[] = [
                 'product_id'   => $p->product_id,
-                'views'        => rand(100, 5000),
-                'likes'        => rand(10, 500),
-                'downloads'    => rand(0, 300),
-                'shares'       => rand(0, 200),
+                'views'        => 0,
+                'likes'        => 0,
+                'downloads'    => 0,
+                'shares'       => 0,
                 'created_at'   => now(),
                 'updated_at'   => now(),
             ];

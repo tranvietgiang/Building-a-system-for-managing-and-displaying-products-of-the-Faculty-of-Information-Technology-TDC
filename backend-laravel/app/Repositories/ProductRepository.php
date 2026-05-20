@@ -132,7 +132,7 @@ class ProductRepository extends BaseRepository
 
         $statistics = DB::table('product_statistics')
             ->where('product_id', $productId)
-            ->select('views', 'downloads', 'shares')
+            ->select('views', 'likes', 'downloads', 'shares')
             ->first();
 
         $result = [
@@ -192,6 +192,7 @@ class ProductRepository extends BaseRepository
 
             'activity_logs' => [
                 'views' => $statistics->views ?? 0,
+                'likes' => $statistics->likes ?? 0,
                 'downloads' => $statistics->downloads ?? 0,
                 'shares' => $statistics->shares ?? 0,
             ],
@@ -237,8 +238,9 @@ class ProductRepository extends BaseRepository
 
         return $result;
     }
-    // lấy tất cả sản phẩm của học sinh theo id
-    public function productAllById(): LengthAwarePaginator
+
+    // lấy tất cả sản phẩm của sinh viên theo id
+    public function productAllById(int $perPage = 50): LengthAwarePaginator
     {
         $userId = $this->getCurrentUserId();
 
@@ -252,6 +254,7 @@ class ProductRepository extends BaseRepository
                 'products.thumbnail',
                 'products.description',
                 'products.status',
+                'products.cate_id',
                 'categories.category_name',
                 'products.submitted_at',
                 DB::raw('COALESCE(product_statistics.views, 0) as views'),
@@ -262,8 +265,26 @@ class ProductRepository extends BaseRepository
                 ORDER BY reviews.created_at DESC 
                 LIMIT 1) as feedback')
             )
-            ->orderByDesc('products.created_at')
-            ->paginate(9);
+            ->orderByDesc('products.approved_at')
+            ->paginate($perPage);
+    }
+
+    public function deleteProductStudent(int $productId): bool
+    {
+        $userId = $this->getCurrentUserId();
+
+        return DB::transaction(function () use ($productId, $userId) {
+            $product = Product::query()
+                ->where('product_id', $productId)
+                ->where('user_id', $userId)
+                ->first();
+
+            if (!$product) {
+                return false;
+            }
+
+            return (bool) $product->delete();
+        });
     }
 
     public function teacherAllData(): Collection
