@@ -13,13 +13,30 @@ const ProductsScreen = () => {
   const [products, setProducts] = useState([]);
   const [majors, setMajors] = useState([]);
   const [filters, setFilters] = useState({ q: "", status: "", major_id: "" });
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(12);
+  const [pagination, setPagination] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (targetPage = page) => {
     setLoading(true);
     try {
-      const res = await adminApi.getProducts({ ...filters, per_page: 50 });
-      setProducts(res.data?.data || []);
+      const res = await adminApi.getProducts({
+        ...filters,
+        page: targetPage,
+        per_page: perPage,
+      });
+      const paginator = res.data || {};
+
+      setProducts(paginator.data || []);
+      setPagination({
+        current_page: paginator.current_page || 1,
+        from: paginator.from || 0,
+        last_page: paginator.last_page || 1,
+        per_page: paginator.per_page || perPage,
+        to: paginator.to || 0,
+        total: paginator.total || 0,
+      });
     } finally {
       setLoading(false);
     }
@@ -30,24 +47,43 @@ const ProductsScreen = () => {
   }, []);
 
   useEffect(() => {
-    fetchProducts();
-  }, [filters.status, filters.major_id]);
+    setPage(1);
+    fetchProducts(1);
+  }, [filters.status, filters.major_id, perPage]);
 
   const handleSearch = (event) => {
     event.preventDefault();
-    fetchProducts();
+    setPage(1);
+    fetchProducts(1);
+  };
+
+  const goToPage = (nextPage) => {
+    const lastPage = pagination?.last_page || 1;
+    const safePage = Math.min(Math.max(nextPage, 1), lastPage);
+
+    setPage(safePage);
+    fetchProducts(safePage);
   };
 
   const changeStatus = async (productId, status) => {
     await adminApi.updateProductStatus(productId, status);
-    fetchProducts();
+    fetchProducts(page);
   };
 
   const deleteProduct = async (productId) => {
     if (!window.confirm("Xóa sản phẩm này?")) return;
     await adminApi.deleteProduct(productId);
-    fetchProducts();
+    fetchProducts(page);
   };
+
+  const pageNumbers = (() => {
+    const current = pagination?.current_page || page;
+    const last = pagination?.last_page || 1;
+    const start = Math.max(1, current - 2);
+    const end = Math.min(last, current + 2);
+
+    return Array.from({ length: end - start + 1 }, (_, index) => start + index);
+  })();
 
   return (
     <div className="space-y-5">
@@ -84,6 +120,27 @@ const ProductsScreen = () => {
           <button type="submit" className="h-11 rounded-lg bg-emerald-600 px-5 font-semibold text-white hover:bg-emerald-700">
             Tìm
           </button>
+        </div>
+        <div className="mt-3 flex items-center justify-between gap-3 text-sm text-slate-500">
+          <span>
+            {pagination?.total
+              ? `Hiển thị ${pagination.from}-${pagination.to} / ${pagination.total} sản phẩm`
+              : "Chưa có dữ liệu phân trang"}
+          </span>
+          <label className="flex items-center gap-2">
+            Mỗi trang
+            <select
+              value={perPage}
+              onChange={(event) => setPerPage(Number(event.target.value))}
+              className="h-9 rounded-lg border border-slate-200 px-2 outline-none focus:border-emerald-500"
+            >
+              {[10, 12, 20, 50].map((value) => (
+                <option key={value} value={value}>
+                  {value}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
       </form>
 
@@ -149,6 +206,46 @@ const ProductsScreen = () => {
             </tbody>
           </table>
         </div>
+        {pagination && pagination.last_page > 1 && (
+          <div className="flex flex-col gap-3 border-t border-slate-200 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-slate-500">
+              Trang {pagination.current_page} / {pagination.last_page}
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => goToPage(pagination.current_page - 1)}
+                disabled={pagination.current_page <= 1 || loading}
+                className="h-9 rounded-lg border border-slate-200 px-3 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Trước
+              </button>
+              {pageNumbers.map((pageNumber) => (
+                <button
+                  key={pageNumber}
+                  type="button"
+                  onClick={() => goToPage(pageNumber)}
+                  disabled={loading}
+                  className={`h-9 min-w-9 rounded-lg px-3 text-sm font-semibold ${
+                    pageNumber === pagination.current_page
+                      ? "bg-emerald-600 text-white"
+                      : "border border-slate-200 text-slate-600 hover:bg-slate-50"
+                  }`}
+                >
+                  {pageNumber}
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => goToPage(pagination.current_page + 1)}
+                disabled={pagination.current_page >= pagination.last_page || loading}
+                className="h-9 rounded-lg border border-slate-200 px-3 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Sau
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
