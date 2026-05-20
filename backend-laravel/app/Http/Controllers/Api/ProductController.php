@@ -43,7 +43,18 @@ class ProductController extends Controller
 
     public function productViewIdTeacher(ProductViewRequest $p_rq)
     {
-        $result = $this->productService->productViewIdTeacher($p_rq->product_id);
+        $result = $this->productService->productViewIdTeacher(
+            (int) $p_rq->product_id,
+            $p_rq->user()
+        );
+
+        if (!$result) {
+            return response()->json([
+                'message' => 'Không tìm thấy sản phẩm hoặc bạn không có quyền xem sản phẩm này.',
+                'product_result' => false,
+            ], 404);
+        }
+
         return response()->json(
             $result
         );

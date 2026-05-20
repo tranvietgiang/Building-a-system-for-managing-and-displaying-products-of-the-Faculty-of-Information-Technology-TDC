@@ -28,13 +28,13 @@ class ProductService extends BaseRepository
         return $this->productRepository->productAllById($perPage);
     }
 
-    public function productViewIdTeacher($productId): ?array
+    public function productViewIdTeacher(int $productId, ?object $user = null): ?array
     {
         if (!$this->productRepository->productExists($productId)) {
             return  null;
         };
 
-        return $this->productRepository->productViewIdTeacher($productId);
+        return $this->productRepository->productViewIdTeacher($productId, $user);
     }
 
     public function deleteProductStudent(int $productId): bool
