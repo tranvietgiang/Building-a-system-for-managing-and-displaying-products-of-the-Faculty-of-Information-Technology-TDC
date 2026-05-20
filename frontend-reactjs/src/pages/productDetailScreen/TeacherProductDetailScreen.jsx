@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useCallback, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../contexts/AuthContext";
 
@@ -11,17 +11,19 @@ import { getStatusColor } from "../../components/common/getStatusColor";
 import { getStatusText } from "../../components/common/getStatusText";
 import { getMajorTheme } from "../../utils/uploadProductScreen/uploadRegistry";
 
-import { useHandleApprove } from "../../hooks/useTeacher/useHandleApprove";
+import { useHandleApprove } from "../../hooks/useTeacher/useHandleApprove.jsx";
 import { useHandleSubmitReview } from "../../hooks/useTeacher/useHandleSubmitReview";
 import { useHandleSubmitRejection } from "../../hooks/useTeacher/useHandleSubmitRejection";
 
 import useTeacherApprove from "../../hooks/useTeacher/useTeacherApprove";
 import useTeacherReject from "../../hooks/useTeacher/useTeacherReject";
 import useReviewToggle from "../../hooks/common/useReviewToggle";
+import useCompareProduct from "../../hooks/ai/useCompareProduct";
 
 import LoadingSpinner from "../../components/common/LoadingOverlay";
 import { confirmToast } from "../../components/common/ConfirmToast";
 import BackButton from "../../components/common/BackButton";
+
 import { Icons } from "../../components/common/Icon";
 import { STATUS } from "../../utils/constants";
 
@@ -38,18 +40,23 @@ const TeacherProductDetailScreen = () => {
   const [feedback, setFeedback] = useState("");
   const [reviewComment, setReviewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
   const { user } = useContext(AuthContext);
 
   const { teacherApprove, loading_approve, error_approve } =
     useTeacherApprove();
-
   const { teacherReject, loading_reject, error_reject } = useTeacherReject();
 
-  const images = product?.images || [];
-  const productData = product?.product || {};
-  const reviews = product?.reviews || [];
+  const { checkCompareProduct, loadingCompare, errorCompare } =
+    useCompareProduct(id);
 
-  const theme = getMajorTheme(productData?.major_code);
+  const images = useMemo(() => product?.images || [], [product]);
+  const productData = useMemo(() => product?.product || {}, [product]);
+  const reviews = useMemo(() => product?.reviews || [], [product]);
+  const theme = useMemo(
+    () => getMajorTheme(productData?.major_code),
+    [productData?.major_code],
+  );
 
   const handleApproveOriginal = useHandleApprove(
     confirmToast,
@@ -77,23 +84,16 @@ const TeacherProductDetailScreen = () => {
     teacherReject,
   );
 
-  const handleApprove = async () => {
-    setIsSubmitting(true);
-    try {
-      await handleApproveOriginal(id, {
-        title: productData?.title,
-        description: productData?.description,
-        major: productData?.major_name || productData?.major_code,
-        image: productData?.thumbnail || images?.[0]?.image_url,
-      });
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const handleApprove = useCallback(async () => {
+    handleApproveOriginal.handleApprove(id, productData?.title, {
+      title: productData?.title,
+      description: productData?.description,
+      major: productData?.major_name || productData?.major_code,
+      image: productData?.thumbnail || images?.[0]?.image_url,
+    });
+  }, [id, productData, images, handleApproveOriginal]);
 
-  const handleSubmitReview = async () => {
+  const handleSubmitReview = useCallback(async () => {
     setIsSubmitting(true);
     try {
       await handleSubmitReviewOriginal();
@@ -102,9 +102,9 @@ const TeacherProductDetailScreen = () => {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [handleSubmitReviewOriginal]);
 
-  const submitRejection = async () => {
+  const submitRejection = useCallback(async () => {
     setIsSubmitting(true);
     try {
       await submitRejectionOriginal(id);
@@ -113,10 +113,62 @@ const TeacherProductDetailScreen = () => {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [id, submitRejectionOriginal]);
+
+  const handleReject = useCallback(() => {
+    setShowFeedbackModal(true);
+  }, []);
+
+  const handleCloseFeedbackModal = useCallback(() => {
+    setShowFeedbackModal(false);
+  }, []);
+
+  const handleFeedbackChange = useCallback((e) => {
+    setFeedback(e.target.value);
+  }, []);
+
+  const handleReviewCommentChange = useCallback((e) => {
+    setReviewComment(e.target.value);
+  }, []);
 
   const { getDisplayed, canShowMore, canCollapse, showMore, collapse } =
     useReviewToggle(3);
+
+  const displayedReviews = useMemo(
+    () => getDisplayed(reviews),
+    [reviews, getDisplayed],
+  );
+
+  const statusBadgeClass = useMemo(() => {
+    if (productData?.status === STATUS.APPROVED)
+      return "bg-green-500 text-white";
+    if (productData?.status === STATUS.PENDING)
+      return "bg-yellow-500 text-white";
+    return "bg-red-500 text-white";
+  }, [productData?.status]);
+
+  const handleCompare = async () => {
+    try {
+      const data = await checkCompareProduct();
+
+      console.log("FULL DATA", data);
+
+      if (data?.status == true) {
+        navigate("/nckh-compare", {
+          state: {
+            currentProduct: data?.current_product || null,
+            matches: data?.matches || [],
+            summary: data?.summary || "",
+            time: Date.now(),
+          },
+        });
+      } else {
+        toast.warning("không có sản phẩm nào trùng!");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   if (loading) {
     return (
@@ -155,10 +207,13 @@ const TeacherProductDetailScreen = () => {
     );
   }
 
+  // ✅ Lấy message string từ object
   if (error_approve) {
     return (
       <div className="mb-4 p-3 bg-red-100 text-red-600 rounded-lg">
-        {error_approve}
+        {error_approve?.message ||
+          error_approve?.reason ||
+          "Có lỗi xảy ra khi duyệt"}
       </div>
     );
   }
@@ -166,17 +221,27 @@ const TeacherProductDetailScreen = () => {
   if (error_reject) {
     return (
       <div className="mb-4 p-3 bg-red-100 text-red-600 rounded-lg">
-        {error_reject}
+        {typeof error_reject === "string"
+          ? error_reject
+          : error_reject?.message || "Có lỗi xảy ra khi từ chối"}
       </div>
     );
   }
 
-  const displayedReviews = getDisplayed(reviews);
-  const handleReject = () => setShowFeedbackModal(true);
+  if (errorCompare) {
+    return (
+      <div className="mb-4 p-3 bg-red-100 text-red-600 rounded-lg">
+        {errorCompare}
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <ImageViewerModal />
+
+      {/* Modal lỗi duyệt từ AI */}
+      {handleApproveOriginal.errorModalComponent}
 
       {/* Modal từ chối */}
       {showFeedbackModal && (
@@ -198,13 +263,13 @@ const TeacherProductDetailScreen = () => {
             <textarea
               rows={5}
               value={feedback}
-              onChange={(e) => setFeedback(e.target.value)}
+              onChange={handleFeedbackChange}
               placeholder="Nhập lý do từ chối sản phẩm..."
               className="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
             />
             <div className="flex gap-3 mt-6">
               <button
-                onClick={() => setShowFeedbackModal(false)}
+                onClick={handleCloseFeedbackModal}
                 className="flex-1 py-2.5 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition font-medium"
               >
                 Hủy
@@ -224,7 +289,7 @@ const TeacherProductDetailScreen = () => {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <BackButton loading={loading} />
 
-        {/* Header Card với gradient theo ngành */}
+        {/* Header Card */}
         <div
           className={`bg-gradient-to-r ${theme.gradient} rounded-2xl shadow-xl overflow-hidden mb-8`}
         >
@@ -236,13 +301,7 @@ const TeacherProductDetailScreen = () => {
                     {productData?.title}
                   </h1>
                   <span
-                    className={`px-3 py-1 text-xs font-semibold rounded-full ${
-                      productData?.status === STATUS.APPROVED
-                        ? "bg-green-500 text-white"
-                        : productData?.status === STATUS.PENDING
-                          ? "bg-yellow-500 text-white"
-                          : "bg-red-500 text-w  hite"
-                    }`}
+                    className={`px-3 py-1 text-xs font-semibold rounded-full ${statusBadgeClass}`}
                   >
                     {getStatusText(productData?.status)}
                   </span>
@@ -261,8 +320,6 @@ const TeacherProductDetailScreen = () => {
                   </span>
                 </div>
               </div>
-
-              {/* Badge ngành */}
               <div className="flex items-center gap-2">
                 <div className="px-4 py-2 bg-white/20 backdrop-blur rounded-full">
                   <span className="text-white text-sm font-medium flex items-center gap-2">
@@ -276,7 +333,7 @@ const TeacherProductDetailScreen = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - 2/3 */}
+          {/* Left Column */}
           <div className="lg:col-span-2 space-y-8">
             {/* Gallery ảnh */}
             {(productData?.thumbnail || images.length > 0) && (
@@ -398,12 +455,11 @@ const TeacherProductDetailScreen = () => {
                 </h2>
               </div>
               <div className="p-6">
-                {/* Form nhận xét */}
                 <div className={`${theme.light} rounded-xl p-4 mb-6`}>
                   <textarea
                     rows={3}
                     value={reviewComment}
-                    onChange={(e) => setReviewComment(e.target.value)}
+                    onChange={handleReviewCommentChange}
                     placeholder="Viết nhận xét về sản phẩm này..."
                     className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none bg-white"
                   />
@@ -419,7 +475,6 @@ const TeacherProductDetailScreen = () => {
                   </div>
                 </div>
 
-                {/* Danh sách nhận xét */}
                 {reviews?.length > 0 ? (
                   <div>
                     <div className="flex items-center gap-2 mb-4">
@@ -429,7 +484,6 @@ const TeacherProductDetailScreen = () => {
                       </span>
                       <div className="h-px flex-1 bg-gray-200"></div>
                     </div>
-
                     <div className="space-y-4">
                       {displayedReviews.map((review) => (
                         <div key={review?.review_id} className="flex gap-3">
@@ -462,7 +516,6 @@ const TeacherProductDetailScreen = () => {
                         </div>
                       ))}
                     </div>
-
                     <div className="flex justify-center gap-4 mt-4">
                       {canShowMore && (
                         <button
@@ -498,8 +551,9 @@ const TeacherProductDetailScreen = () => {
               </div>
             </div>
           </div>
+          {/* ✅ đóng Left Column */}
 
-          {/* Right Column - 1/3 */}
+          {/* Right Column */}
           <div className="space-y-6">
             {/* Author Info */}
             <div className="bg-white rounded-2xl shadow-lg p-6">
@@ -611,6 +665,7 @@ const TeacherProductDetailScreen = () => {
                 </div>
               </div>
             )}
+            {/* ✅ đóng Links section */}
 
             {/* Thông tin duyệt */}
             <div className="bg-white rounded-2xl shadow-lg p-6">
@@ -644,7 +699,9 @@ const TeacherProductDetailScreen = () => {
               </div>
             </div>
           </div>
+          {/* ✅ đóng Right Column */}
         </div>
+        {/* ✅ đóng grid */}
 
         {/* Action Buttons - Sticky */}
         {productData?.status === "pending" && (
@@ -666,10 +723,28 @@ const TeacherProductDetailScreen = () => {
                 <Icons.CheckCircle className="w-5 h-5" />
                 {loading_approve ? "Đang duyệt..." : "Duyệt sản phẩm"}
               </button>
+              <button
+                onClick={handleCompare}
+                disabled={loadingCompare}
+                className="px-6 py-2.5 bg-blue-600 text-white rounded-xl flex items-center gap-2 disabled:opacity-50"
+              >
+                {loadingCompare ? (
+                  <>
+                    <span className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+                    Đang kiểm tra...
+                  </>
+                ) : (
+                  <>
+                    <Icons.Zap className="w-5 h-5" />
+                    So sánh trùng
+                  </>
+                )}
+              </button>
             </div>
           </div>
         )}
       </div>
+      {/* ✅ đóng max-w-6xl */}
 
       {isSubmitting && (
         <LoadingSpinner fullScreen={true} message="Đang xử lý..." size="md" />

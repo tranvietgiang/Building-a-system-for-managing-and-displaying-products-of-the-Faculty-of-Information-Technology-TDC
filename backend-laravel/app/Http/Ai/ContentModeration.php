@@ -82,6 +82,9 @@ class ContentModeration
 
             // ❌ REAL API ERROR
             if ($response->failed()) {
+                $errorBody = $response->json();
+                $errorMessage = $this->extractErrorMessage($errorBody);
+
                 Log::error('OpenAI moderation API failed', [
                     'status' => $response->status(),
                     'body' => $response->body(),
@@ -90,7 +93,7 @@ class ContentModeration
 
                 return [
                     'approved' => false,
-                    'reason' => 'AI API error: ' . $response->body(),
+                    'reason' => 'Lỗi AI: ' . $errorMessage,
                     'violations' => ['api_error'],
                     'raw' => null,
                 ];
@@ -248,12 +251,47 @@ class ContentModeration
             return $imageUrl;
         }
 
-        return rtrim(config('app.url'), '/') . '/' . ltrim($imageUrl, '/');
+        return rtrim(config('app.url', ''), '/') . '/' . ltrim($imageUrl, '/');
     }
 
     private function isSupportedImageReference(string $imageUrl): bool
     {
         return Str::startsWith($imageUrl, ['http://', 'https://', 'data:image/']);
+    }
+
+    /**
+     * Extract readable error message from OpenAI API error response
+     * Chuyển lỗi API thành thông báo dễ hiểu bằng tiếng Việt
+     */
+    private function extractErrorMessage(array $errorBody): string
+    {
+        // Check standard OpenAI error format: error.message
+        if (isset($errorBody['error']['message'])) {
+            $msg = $errorBody['error']['message'];
+
+            // Translate common error messages to Vietnamese
+            if (strpos($msg, 'invalid_image_url') !== false || strpos($msg, 'downloading') !== false) {
+                return 'Lỗi ảnh: URL ảnh không hợp lệ hoặc không thể tải xuống';
+            }
+            if (strpos($msg, 'timeout') !== false) {
+                return 'Lỗi: Yêu cầu quá thời gian chờ';
+            }
+            if (strpos($msg, 'rate_limit') !== false) {
+                return 'Lỗi: Quá nhiều yêu cầu, vui lòng thử lại sau';
+            }
+            if (strpos($msg, 'authentication') !== false || strpos($msg, 'unauthorized') !== false) {
+                return 'Lỗi: Xác thực không hợp lệ';
+            }
+            if (strpos($msg, 'unsupported_image_format') !== false) {
+                return 'Lỗi ảnh: Định dạng ảnh không được hỗ trợ';
+            }
+
+            // Return original message if no translation
+            return $msg;
+        }
+
+        // Fallback to generic error message
+        return 'Lỗi hệ thống AI: vui lòng thử lại sau';
     }
 
     private function blocked(string $reason): array

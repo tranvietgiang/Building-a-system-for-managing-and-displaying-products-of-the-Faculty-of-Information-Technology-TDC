@@ -11,7 +11,7 @@ import ProductCard from "../../components/student/ProductCard";
 import { STATUS } from "../../utils/constants";
 import { getMajorTheme } from "../../utils/uploadProductScreen/uploadRegistry";
 import ChatBoxAi from "../../pages/ChatBoxAi/ChatBoxAi";
-import SearchAi from "../search/SearchAi";
+import SearchAi from "../ai/SearchAi";
 
 const StudentScreen = () => {
   const [activeTab, setActiveTab] = useState("all");
