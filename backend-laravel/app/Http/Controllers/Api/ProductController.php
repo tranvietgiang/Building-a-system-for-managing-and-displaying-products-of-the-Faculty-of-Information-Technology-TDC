@@ -73,4 +73,10 @@ class ProductController extends Controller
             $result
         );
     }
+
+    public function getMatchingAiProducts(int $id)
+    {
+        $result = $this->productService->getMatchingAiProducts($id);
+        return response()->json($result);
+    }
 }

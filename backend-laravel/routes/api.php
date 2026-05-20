@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\MajorController;
 use App\Http\Controllers\Api\ProductController;
@@ -9,6 +10,7 @@ use App\Http\Controllers\Api\TeacherController;
 use App\Http\Controllers\Api\UploadController;
 use App\Http\Ai\ChatBoxAi;
 use App\Http\Ai\SearchAi;
+use App\Http\Ai\CompareAi;
 use Illuminate\Support\Facades\Artisan;
 /*
 |--------------------------------------------------------------------------
@@ -29,12 +31,28 @@ Route::get('/me', [AuthController::class, 'me'])->middleware('auth:sanctum');
 // đăng xuất
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
-
 /*
 |--------------------------------------------------------------------------
-| Majors ROUTES
+| User/Profile ROUTES
 |--------------------------------------------------------------------------
 */
+Route::middleware('auth:sanctum')->group(function () {
+    // Profile endpoints
+    Route::get('/profile', [UserController::class, 'profile']);
+    Route::put('/profile', [UserController::class, 'update']);
+    Route::post('/profile/password', [UserController::class, 'updatePassword']);
+    Route::get('/profile/statistics', [UserController::class, 'statistics']);
+
+    // Get user by ID
+    Route::get('/user/{userId}', [UserController::class, 'show']);
+});
+
+// Search users (admin/teacher only)
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/users/search', [UserController::class, 'search']);
+});
+
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/major/code/{id}', [MajorController::class, 'majorNameCode']);
 });
@@ -50,6 +68,7 @@ Route::get('/major/{id}', [MajorController::class, 'majorName']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/product/{id}', [ProductController::class, 'productViewId']);
     Route::get('/products', [ProductController::class, 'productAll']);
+    // Route::get('/product/{id}/matching-ai', [ProductController::class, 'getMatchingAiProducts']);
 });
 
 Route::middleware('auth:sanctum')->prefix('student')->group(function () {
@@ -106,8 +125,8 @@ Route::prefix('visitor')->group(function () {
 */
 
 Route::post('/ai/send', [ChatBoxAi::class, 'chat']);
-
 Route::post('/ai/search', [SearchAi::class, 'searchAi']);
+Route::middleware('auth:sanctum')->get('/ai/compare/{productId}', [CompareAi::class, 'compareProduct']);
 
 /*
 |--------------------------------------------------------------------------

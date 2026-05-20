@@ -48,7 +48,7 @@ class TeacherService extends BaseRepository
 
     public function showTeacherData(): Collection
     {
-        $products = $this->teacherRepository->teacherAllData();
+        $products = $this->product_repo->teacherAllData();
 
         return collect([
             'pending_result' => $products->where('status', 'pending')->values(),
@@ -81,20 +81,28 @@ class TeacherService extends BaseRepository
             ];
         }
 
-        if ($status === 'approved') {
-            $moderation = $this->contentModerationService->moderateProduct($product, $moderationContext);
+        $now = Product::where('product_id', $product_id)->first();
 
-            if (!$moderation['approved']) {
-                return [
-                    'result' => false,
-                    'blocked_by_ai' => true,
-                    'message' => 'AI đã chặn duyệt sản phẩm: ' . $moderation['reason'],
-                    'reason' => $moderation['reason'],
-                    'violations' => $moderation['violations'] ?? [],
-                    'moderation' => $moderation,
-                ];
+        if ($status === 'approved') {
+            // Skip AI moderation if force_approve is true
+            $forceApprove = $moderationContext['force_approve'] ?? false;
+
+            if (!$forceApprove) {
+                $moderation = $this->contentModerationService->moderateProduct($product, $moderationContext);
+
+                if (!$moderation['approved']) {
+                    return [
+                        'result' => false,
+                        'blocked_by_ai' => true,
+                        'message' => 'AI đã chặn duyệt sản phẩm: ' . $moderation['reason'],
+                        'reason' => $moderation['reason'],
+                        'violations' => $moderation['violations'] ?? [],
+                        'moderation' => $moderation,
+                    ];
+                }
             }
         }
+
 
         // 👉 xử lý theo status
         if ($status === 'approved') {
@@ -107,6 +115,8 @@ class TeacherService extends BaseRepository
             $data = [
                 'status' => 'rejected',
                 'approved_by' => null,
+                'approved_at' => now(),    // ✅ lưu thời điểm xử lý
+
             ];
         }
 
@@ -119,12 +129,8 @@ class TeacherService extends BaseRepository
                 'teacher_id' => $userId,
                 'comment' => $feedback
             ]);
-
-            $now = Product::where('product_id', $product_id)->first();
-            $now->created_at = now();
-
-            $now->save();
         }
+
 
         return [
             'result' => true,

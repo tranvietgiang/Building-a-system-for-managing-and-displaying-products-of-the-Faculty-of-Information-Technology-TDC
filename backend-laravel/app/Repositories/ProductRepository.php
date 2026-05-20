@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Repositories\MajorRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use App\Models\User;
 
 class ProductRepository extends BaseRepository
 {
@@ -265,104 +266,45 @@ class ProductRepository extends BaseRepository
             ->paginate(9);
     }
 
-    // public function productViewIdTeacher($productId)
-    // {
-    //     $product = DB::table('products')
-    //         ->join('categories', 'products.cate_id', '=', 'categories.cate_id')
-    //         ->join('majors', 'products.major_id', '=', 'majors.major_id')
-    //         ->leftJoin('users as approved_user', 'products.approved_by', '=', 'approved_user.user_id')
-    //         ->leftJoin('users as student', 'products.user_id', '=', 'student.user_id')
+    public function teacherAllData(): Collection
+    {
+        $idUser = $this->getCurrentUserId();
 
-    //         // 👇 JOIN ảnh (lấy 1 ảnh làm thumbnail)
-    //         ->leftJoin('product_images as pi', function ($join) {
-    //             $join->on('products.product_id', '=', 'pi.product_id');
-    //         })
+        $idMajor = User::query()
+            ->join('majors', 'users.major_id', '=', 'majors.major_id')
+            ->where('users.user_id', $idUser)
+            ->value('majors.major_id');
 
-    //         ->select(
-    //             'products.*',
-    //             'majors.major_name',
-    //             'majors.major_code',
-    //             'categories.category_name',
-    //             'categories.description as category_description',
-
-    //             'approved_user.name as approved_by_fullname',
-    //             'student.name as student_name',
-    //             'student.email as student_email',
-    //             'student.role as student_role',
-    //             'student.class as student_class',
-    //             'student.user_id as student_id',
-    //         )
-
-    //         ->where('products.product_id', $productId)
-    //         ->where('student.role', 'student')
-    //         ->whereIn('products.status', ['pending', 'rejected', 'approved'])
-
-    //         ->groupBy(
-    //             'products.product_id',
-    //             'majors.major_name',
-    //             'majors.major_code',
-    //             'categories.category_name',
-    //             'categories.description',
-    //             'approved_user.name',
-    //             'student.name',
-    //             'student.email'
-    //         )
-
-    //         ->first();
-
-    //     if (!$product) {
-    //         return null;
-    //     }
-
-    //     $images = DB::table('product_images')
-    //         ->where('product_id', $productId)
-    //         ->get();
-
-    //     $files = DB::table('product_files')
-    //         ->where('product_id', $productId)
-    //         ->get();
-
-    //     $tags = DB::table('product_tags')
-    //         ->where('product_id', $productId)
-    //         ->select('product_tag_id', 'tag_name')
-    //         ->get();
-
-    //     $reviews = DB::table('reviews')
-    //         ->leftJoin('users as teacher', 'reviews.teacher_id', '=', 'teacher.user_id')
-    //         ->where('reviews.product_id', $productId)
-    //         ->select(
-    //             'reviews.review_id',
-    //             'reviews.comment',
-    //             'reviews.created_at',
-    //             'teacher.name as teacher_name'
-    //         )
-    //         ->get();
-
-    //     $author = [
-    //         'name'  => $product->student_name,
-    //         'email' => $product->student_email,
-    //         'role' => $product->student_role,
-    //         'class' => $product->student_class,
-    //         'mssv' => $product->student_id
-    //     ];
-
-    //     unset(
-    //         $product->student_name,
-    //         $product->student_email,
-    //         $product->student_role,
-    //         $product->student_class,
-    //         $product->student_id,
-    //     );
-
-    //     return [
-    //         'product' => $product,
-    //         'author'  => $author,
-    //         'images'  => $images,
-    //         'files'   => $files,
-    //         'tags'    => $tags,
-    //         'reviews' => $reviews,
-    //     ];
-    // }
+        return Product::query()
+            ->leftJoin('majors', 'products.major_id', '=', 'majors.major_id')
+            ->leftJoin('users', 'products.user_id', '=', 'users.user_id')
+            ->leftJoin('categories', 'products.cate_id', '=', 'categories.cate_id')
+            ->where('products.major_id', $idMajor)
+            ->select(
+                'products.product_id',
+                'products.title',
+                'products.description',
+                'products.thumbnail',
+                'products.github_link',
+                'products.demo_link',
+                'products.status',
+                'products.user_id',
+                'products.major_id',
+                'products.approved_by',
+                'products.approved_at',
+                'products.created_at',
+                'products.updated_at',
+                'majors.major_name',
+                'majors.major_code',
+                'categories.category_name',
+                'categories.description as category_description',
+                'users.name as student_fullname',
+                'users.email as student_email',
+                'users.class as student_class',
+            )
+            ->orderBy('products.approved_at', 'desc')
+            ->get();
+    }
 
     public function productViewIdTeacher($productId)
     {
@@ -705,5 +647,103 @@ class ProductRepository extends BaseRepository
 
             'major_detail' => $detail,
         ];
+    }
+
+    // Find matching AI products based on model_used, framework, and language
+    public function findMatchingAiProducts(int $productId): array
+    {
+        // Get current product's AI details
+        $currentProduct = DB::table('products as p')
+            ->leftJoin('product_ai as ai', 'p.product_id', '=', 'ai.product_id')
+            ->where('p.product_id', $productId)
+            ->select(
+                'ai.model_used',
+                'ai.framework',
+                'ai.language'
+            )
+            ->first();
+
+        if (!$currentProduct) {
+            return [];
+        }
+
+        // Find all other approved AI products with same model_used, framework, and language
+        $matchingProducts = DB::table('products as p')
+            ->join('majors as m', 'p.major_id', '=', 'm.major_id')
+            ->leftJoin('product_ai as ai', 'p.product_id', '=', 'ai.product_id')
+            ->leftJoin('users as u', 'p.user_id', '=', 'u.user_id')
+            ->where('p.product_id', '!=', $productId)
+            ->where(function ($query) use ($currentProduct) {
+                $query->where('ai.model_used', $currentProduct->model_used)
+                    ->where('ai.framework', $currentProduct->framework)
+                    ->where('ai.language', $currentProduct->language);
+            })
+            ->select(
+                'p.product_id',
+                'p.title',
+                'p.description',
+                'p.thumbnail',
+                'p.status',
+                'p.created_at',
+                'p.approved_at',
+                'u.name as fullname',
+                'm.major_name',
+                'ai.model_used',
+                'ai.framework',
+                'ai.language',
+                'ai.dataset_used',
+                'ai.accuracy_score'
+            )
+            ->orderBy('p.status', 'desc')
+            ->orderByDesc('p.created_at')
+            ->get()
+            ->map(function ($product) {
+                return [
+                    'product_id' => $product->product_id,
+                    'title' => $product->title,
+                    'description' => $product->description,
+                    'thumbnail' => $product->thumbnail,
+                    'status' => $product->status,
+                    'created_at' => $product->created_at,
+                    'approved_at' => $product->approved_at,
+                    'fullname' => $product->fullname,
+                    'major_name' => $product->major_name,
+                    'model_used' => $product->model_used,
+                    'framework' => $product->framework,
+                    'language' => $product->language,
+                    'dataset_used' => $product->dataset_used,
+                    'accuracy_score' => $product->accuracy_score,
+                ];
+            })
+            ->toArray();
+
+        return $matchingProducts;
+    }
+
+
+    public function compareData(int $productId): ?object
+    {
+        return DB::table('products as p')
+            ->join('majors as m', 'p.major_id', '=', 'm.major_id')
+            ->leftJoin('product_ai as ai', 'p.product_id', '=', 'ai.product_id')
+            ->leftJoin('users as u', 'p.user_id', '=', 'u.user_id')
+            ->where('p.product_id', $productId)
+            ->select(
+                'p.product_id',
+                'p.title',
+                'p.description',
+                'p.thumbnail',
+                'p.status',
+                'p.created_at',
+                'p.approved_at',
+                'u.name as fullname',
+                'm.major_name',
+                'ai.model_used',
+                'ai.framework',
+                'ai.language',
+                'ai.dataset_used',
+                'ai.accuracy_score'
+            )
+            ->first();
     }
 }

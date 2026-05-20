@@ -50,4 +50,13 @@ class ProductService extends BaseRepository
 
         return $this->productRepository->getVisitorProductById($productId);
     }
+
+    public function getMatchingAiProducts($productId): array
+    {
+        if (!$this->productRepository->productExists($productId)) {
+            return [];
+        }
+
+        return $this->productRepository->findMatchingAiProducts($productId);
+    }
 }

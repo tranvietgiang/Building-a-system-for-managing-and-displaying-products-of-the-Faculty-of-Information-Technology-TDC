@@ -9,6 +9,8 @@ import NotFoundScreen from "../pages/notFoundScreen/NotFoundScreen";
 const StudentScreen = lazy(() => import("../pages/student/StudentScreen"));
 const TeacherScreen = lazy(() => import("../pages/teacher/TeacherScreen"));
 
+const CompareTeacher = lazy(() => import("../pages/ai/CompareProductAi"));
+
 const UploadProductScreen = lazy(
   () => import("../pages/uploadProductScreen/UploadProductScreen"),
 );
@@ -20,6 +22,8 @@ const ProductDetailScreen = lazy(
 const TeacherProductDetailScreen = lazy(
   () => import("../pages/productDetailScreen/TeacherProductDetailScreen"),
 );
+
+const CompareProductAi = lazy(() => import("../pages/ai/CompareProductAi"));
 
 /* ================= ROUTES ================= */
 function RoleRoutes() {
@@ -54,7 +58,7 @@ function RoleRoutes() {
 
         {/* UPLOAD */}
         <Route
-          path="/upload-product"
+          path="/upload"
           element={
             <ProtectedRoute allowedRoles={[ROLE.STUDENT]}>
               <UploadProductScreen />
@@ -64,7 +68,7 @@ function RoleRoutes() {
 
         {/* PRODUCT DETAIL - STUDENT */}
         <Route
-          path="/product-detail"
+          path="/detail"
           element={
             <ProtectedRoute allowedRoles={[ROLE.STUDENT]}>
               <ProductDetailScreen />
@@ -74,10 +78,20 @@ function RoleRoutes() {
 
         {/* PRODUCT DETAIL - TEACHER */}
         <Route
-          path="/product-detail-teacher"
+          path="/detail-teacher"
           element={
             <ProtectedRoute allowedRoles={[ROLE.TEACHER]}>
               <TeacherProductDetailScreen />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* COMPARE AI PRODUCTS */}
+        <Route
+          path="/nckh-compare"
+          element={
+            <ProtectedRoute allowedRoles={[ROLE.TEACHER]}>
+              <CompareProductAi />
             </ProtectedRoute>
           }
         />

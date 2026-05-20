@@ -319,10 +319,15 @@ export default function ChatBoxAi({ user }) {
               <input
                 type="text"
                 value={input}
-                onChange={(e) => setInput(e.target.value)}
+                onChange={(e) => {
+                  if (e.target.value.length <= 1000) {
+                    setInput(e.target.value);
+                  }
+                }}
                 onKeyPress={handleKeyPress}
                 placeholder="Nhập tin nhắn..."
                 disabled={isTyping}
+                maxLength={1000}
                 className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
               />
               <button

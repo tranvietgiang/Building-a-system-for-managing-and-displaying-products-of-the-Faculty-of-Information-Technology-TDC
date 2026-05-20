@@ -59,7 +59,10 @@ class TeacherController extends Controller
                 $product_id,
                 $status,
                 null,
-                $request->only(['title', 'description', 'major', 'image', 'thumbnail'])
+                array_merge(
+                    $request->only(['title', 'description', 'major', 'image', 'thumbnail']),
+                    ['force_approve' => $request->boolean('force_approve', false)]
+                )
             );
 
             return response()->json(
