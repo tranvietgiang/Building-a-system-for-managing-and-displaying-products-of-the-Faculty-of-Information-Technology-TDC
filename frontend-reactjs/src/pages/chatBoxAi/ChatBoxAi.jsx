@@ -150,9 +150,9 @@ export default function ChatBoxAi({ user }) {
     let url = "/visitor-detail";
 
     if (userRole == ROLE.TEACHER) {
-      url = "/product-detail-teacher";
+      url = "/detail-teacher";
     } else if (userRole == ROLE.STUDENT) {
-      url = "/product-detail";
+      url = "/detail";
     } else if (userRole == "guest") {
       url = "/visitor-detail";
     }

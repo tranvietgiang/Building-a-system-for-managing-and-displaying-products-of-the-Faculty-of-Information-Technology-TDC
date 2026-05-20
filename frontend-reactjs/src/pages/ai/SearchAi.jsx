@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useNavigate } from "react-router-dom";
 import { STATUS } from "../../utils/constants";
 import {
@@ -153,20 +159,23 @@ export default function SearchAi({
     return products.slice(start, start + ITEMS_PER_PAGE);
   }, [products, currentPage]);
 
-  const saveSearchHistory = useCallback((value) => {
-    const nextKeyword = String(value || "").trim();
-    if (!nextKeyword) return;
+  const saveSearchHistory = useCallback(
+    (value) => {
+      const nextKeyword = String(value || "").trim();
+      if (!nextKeyword) return;
 
-    setSearchHistory((prev) => {
-      const nextHistory = [
-        nextKeyword,
-        ...prev.filter((item) => item !== nextKeyword),
-      ].slice(0, 8);
+      setSearchHistory((prev) => {
+        const nextHistory = [
+          nextKeyword,
+          ...prev.filter((item) => item !== nextKeyword),
+        ].slice(0, 8);
 
-      localStorage.setItem(historyKey, JSON.stringify(nextHistory));
-      return nextHistory;
-    });
-  }, [historyKey]);
+        localStorage.setItem(historyKey, JSON.stringify(nextHistory));
+        return nextHistory;
+      });
+    },
+    [historyKey],
+  );
 
   const runSearch = async (value) => {
     const nextKeyword = String(value || "").trim();
@@ -197,12 +206,12 @@ export default function SearchAi({
 
   const handleViewDetail = (productId) => {
     if (role === ROLE.TEACHER) {
-      navigate("/product-detail-teacher", { state: { productId } });
+      navigate("/detail-teacher", { state: { productId } });
       return;
     }
 
     if (role === ROLE.STUDENT) {
-      navigate("/product-detail", { state: { productId } });
+      navigate("/detail", { state: { productId } });
       return;
     }
 
