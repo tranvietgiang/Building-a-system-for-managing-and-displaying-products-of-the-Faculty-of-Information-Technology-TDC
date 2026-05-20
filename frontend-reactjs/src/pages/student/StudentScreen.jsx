@@ -56,7 +56,7 @@ const StudentScreen = () => {
   };
 
   const handleViewDetail = (id) => {
-    navigate("/product-detail", { state: { productId: id } });
+    navigate("/detail", { state: { productId: id } });
   };
 
   const handleEdit = (product) => {
@@ -83,7 +83,7 @@ const StudentScreen = () => {
         activeTab={activeTab}
         setActiveTab={handleTabChange}
         theme={theme}
-        onUploadClick={() => navigate("/upload-product")}
+        onUploadClick={() => navigate("/upload")}
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

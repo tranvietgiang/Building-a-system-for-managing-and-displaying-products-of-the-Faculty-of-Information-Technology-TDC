@@ -556,11 +556,11 @@ class ChatBoxAi
             return ['__error' => 'Ngành học không tồn tại.'];
         }
 
-        // lấy hết sản phẩm trong ngành
         $products = DB::table('products')
             ->leftJoin('categories', 'products.cate_id', '=', 'categories.cate_id')
             ->leftJoin('product_statistics', 'products.product_id', '=', 'product_statistics.product_id')
             ->where('products.major_id', $majorId)
+            ->where('products.status', 'approved') // ✅ Chỉ approved
             ->select(
                 'products.product_id',
                 'products.title',
@@ -578,6 +578,7 @@ class ChatBoxAi
         $topStats = DB::table('product_statistics')
             ->join('products', 'product_statistics.product_id', '=', 'products.product_id')
             ->where('products.major_id', $majorId)
+            ->where('products.status', 'approved') // ✅
             ->select('products.title', 'product_statistics.views', 'product_statistics.likes')
             ->orderByDesc('product_statistics.views')
             ->limit(10)
@@ -586,6 +587,7 @@ class ChatBoxAi
         $popularTags = DB::table('product_tags')
             ->join('products', 'product_tags.product_id', '=', 'products.product_id')
             ->where('products.major_id', $majorId)
+            ->where('products.status', 'approved') // ✅
             ->selectRaw('product_tags.tag_name, COUNT(*) as total')
             ->groupBy('product_tags.tag_name')
             ->orderByDesc('total')
@@ -604,6 +606,7 @@ class ChatBoxAi
         $categories = DB::table('categories')
             ->join('products', 'categories.cate_id', '=', 'products.cate_id')
             ->where('products.major_id', $majorId)
+            ->where('products.status', 'approved') // ✅
             ->selectRaw('categories.category_name, COUNT(*) as total')
             ->groupBy('categories.cate_id', 'categories.category_name')
             ->orderByDesc('total')
@@ -633,6 +636,7 @@ class ChatBoxAi
             return DB::table('product_ai')
                 ->join('products', 'product_ai.product_id', '=', 'products.product_id')
                 ->where('products.major_id', $majorId)
+                ->where('products.status', 'approved') // ✅ thêm
                 ->select('products.product_id', 'products.title', 'products.github_link', 'products.demo_link', 'product_ai.model_used', 'product_ai.framework', 'product_ai.language', 'product_ai.accuracy_score')
                 ->get()->toArray();
         }
@@ -641,6 +645,7 @@ class ChatBoxAi
             return DB::table('product_cntt')
                 ->join('products', 'product_cntt.product_id', '=', 'products.product_id')
                 ->where('products.major_id', $majorId)
+                ->where('products.status', 'approved') // ✅ thêm
                 ->select('products.product_id', 'products.title', 'products.github_link', 'products.demo_link', 'product_cntt.programming_language', 'product_cntt.framework', 'product_cntt.database_used')
                 ->get()->toArray();
         }
@@ -649,6 +654,7 @@ class ChatBoxAi
             return DB::table('product_graphic')
                 ->join('products', 'product_graphic.product_id', '=', 'products.product_id')
                 ->where('products.major_id', $majorId)
+                ->where('products.status', 'approved') // ✅ thêm
                 ->select('products.product_id', 'products.title', 'products.demo_link', 'product_graphic.design_type', 'product_graphic.tools_used', 'product_graphic.behance_link')
                 ->get()->toArray();
         }
@@ -657,6 +663,7 @@ class ChatBoxAi
             return DB::table('product_mmt')
                 ->join('products', 'product_mmt.product_id', '=', 'products.product_id')
                 ->where('products.major_id', $majorId)
+                ->where('products.status', 'approved') // ✅ thêm
                 ->select('products.product_id', 'products.title', 'products.github_link', 'products.demo_link', 'product_mmt.simulation_tool', 'product_mmt.network_protocol', 'product_mmt.topology_type')
                 ->get()->toArray();
         }
@@ -669,11 +676,11 @@ class ChatBoxAi
         $majors     = DB::table('majors')->select('major_name', 'major_code')->get();
         $categories = DB::table('categories')->select('category_name')->get();
 
-        // ✅ Lấy hết sản phẩm cho guest kèm github_link, demo_link
         $allProducts = DB::table('products')
             ->leftJoin('product_statistics', 'products.product_id', '=', 'product_statistics.product_id')
             ->leftJoin('majors', 'products.major_id', '=', 'majors.major_id')
             ->leftJoin('categories', 'products.cate_id', '=', 'categories.cate_id')
+            ->where('products.status', 'approved') // ✅ Chỉ approved
             ->select(
                 'products.product_id',
                 'products.title',
@@ -687,12 +694,13 @@ class ChatBoxAi
                 'product_statistics.likes'
             )
             ->orderByDesc('product_statistics.views')
+            ->limit(20) // ✅ Giới hạn để không quá nặng
             ->get();
 
         return [
             'majors'          => $majors,
             'categories'      => $categories,
-            'totalProducts'   => $allProducts->count(),
+            'totalProducts'   => DB::table('products')->where('status', 'approved')->count(),
             'totalCategories' => $categories->count(),
             'allProducts'     => $allProducts,
         ];
@@ -702,27 +710,33 @@ class ChatBoxAi
     {
         $query = DB::table('products')
             ->leftJoin('product_statistics', 'products.product_id', '=', 'product_statistics.product_id')
-            ->select('products.product_id as id', 'products.title', 'product_statistics.views');
+            ->select('products.product_id as id', 'products.title', 'product_statistics.views')
+            ->where('products.status', 'approved'); // ✅ Luôn chỉ lấy approved
 
-        // ✅ Student và Teacher chỉ lấy đúng ngành của mình
         if (in_array($role, ['student', 'teacher']) && $majorId) {
-            $query->where('products.major_id', $majorId);
+            $query->where('products.major_id', $majorId); // ✅ Filter ngành cho student/teacher
         }
+        // guest và admin không filter major → lấy tất cả ngành
 
         $allProducts = $query->get();
 
-        $mentioned = $allProducts->filter(fn($product) => str_contains($reply, $product->title));
+        $mentioned = $allProducts
+            ->filter(fn($product) => str_contains($reply, $product->title))
+            ->unique('id'); // ✅ Tránh trùng lặp
 
         if ($mentioned->isEmpty()) {
-            $fallback = DB::table('products')
+            return DB::table('products')
                 ->leftJoin('product_statistics', 'products.product_id', '=', 'product_statistics.product_id')
-                ->select('products.product_id as id', 'products.title', 'product_statistics.views');
-
-            if (in_array($role, ['student', 'teacher']) && $majorId) {
-                $fallback->where('products.major_id', $majorId);
-            }
-
-            return $fallback->orderByDesc('product_statistics.views')->limit(5)->get()->toArray();
+                ->select('products.product_id as id', 'products.title', 'product_statistics.views')
+                ->where('products.status', 'approved')
+                ->when(
+                    in_array($role, ['student', 'teacher']) && $majorId,
+                    fn($q) => $q->where('products.major_id', $majorId)
+                )
+                ->orderByDesc('product_statistics.views')
+                ->limit(5)
+                ->get()
+                ->toArray();
         }
 
         return $mentioned->values()->toArray();
