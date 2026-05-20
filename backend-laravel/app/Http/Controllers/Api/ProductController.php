@@ -83,6 +83,32 @@ class ProductController extends Controller
         );
     }
 
+    public function incrementView(int $id)
+    {
+        $result = $this->productService->incrementView($id);
+
+        if (!$result) {
+            return response()->json([
+                'message' => 'Khong tim thay san pham.',
+            ], 404);
+        }
+
+        return response()->json($result);
+    }
+
+    public function incrementLike(int $id)
+    {
+        $result = $this->productService->incrementLike($id);
+
+        if (!$result) {
+            return response()->json([
+                'message' => 'Khong tim thay san pham.',
+            ], 404);
+        }
+
+        return response()->json($result);
+    }
+
     public function getMatchingAiProducts(int $id)
     {
         $result = $this->productService->getMatchingAiProducts($id);

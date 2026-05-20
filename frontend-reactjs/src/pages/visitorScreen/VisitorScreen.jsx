@@ -14,6 +14,7 @@ import useVisitorProduct from "../../hooks/useProduct/useVisitorProduct";
 import ChatBoxAi from "../../pages/chatBoxAi/ChatBoxAi";
 import useSearchAi from "../../hooks/ai/useSearchAi";
 import useDebounce from "../../hooks/common/useDebounce";
+import { productApi } from "../../api";
 const HeartIcon = ({ filled = false }) => (
   <svg
     className={`w-4 h-4 ${
@@ -193,18 +194,38 @@ export default function VisitorScreen() {
   }, [debouncedSearchTerm, clearSearch, searchAi]);
 
   const handleViewDetail = useCallback(
-    (id) => {
+    async (id) => {
+      if (!id) return;
+
+      try {
+        await productApi.incrementView(id);
+      } catch (error) {
+        console.error(error);
+      }
+
       navigate("/visitor-detail", { state: { productId: id } });
     },
     [navigate],
   );
 
-  const handleLike = useCallback((id) => {
+  const handleLike = useCallback(async (id) => {
+    if (!id || likedProducts[id]) return;
+
     setLikedProducts((prev) => ({
       ...prev,
-      [id]: !prev[id],
+      [id]: true,
     }));
-  }, []);
+
+    try {
+      await productApi.incrementLike(id);
+    } catch (error) {
+      console.error(error);
+      setLikedProducts((prev) => ({
+        ...prev,
+        [id]: false,
+      }));
+    }
+  }, [likedProducts]);
 
   const filteredProducts = useMemo(() => {
     const base = productsSource;

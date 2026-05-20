@@ -11,6 +11,8 @@ const productApi = {
   deleteProduct: (id) => axiosClient.post("/student/delete", { product_id: id }),
   getVisitorProducts: () => axiosClient.get("/visitor/products"),
   getVisitorProductById: (id) => axiosClient.get(`/visitor/product/${id}`),
+  incrementView: (id) => axiosClient.post(`/visitor/product/${id}/view`),
+  incrementLike: (id) => axiosClient.post(`/visitor/product/${id}/like`),
 };
 
 export default productApi;
