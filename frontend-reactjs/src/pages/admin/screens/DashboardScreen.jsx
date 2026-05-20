@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
 import {
+  AlertTriangle,
   CheckCircle2,
   Clock3,
   GraduationCap,
+  Lightbulb,
   PackageCheck,
+  Sparkles,
   Users,
   XCircle,
 } from "lucide-react";
@@ -45,6 +48,12 @@ const DashboardScreen = () => {
   }
 
   const totals = dashboard?.totals || {};
+  const aiInsights = dashboard?.ai_insights;
+  const priorityClass = {
+    high: "bg-rose-50 text-rose-700 border-rose-200",
+    medium: "bg-amber-50 text-amber-700 border-amber-200",
+    low: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  };
 
   return (
     <div className="space-y-6">
@@ -54,6 +63,66 @@ const DashboardScreen = () => {
         <StatCard title="Đang chờ duyệt" value={totals.pending_products} icon={Clock3} tone="bg-amber-50 text-amber-700" />
         <StatCard title="Chuyên ngành" value={totals.majors} icon={GraduationCap} tone="bg-violet-50 text-violet-700" />
       </section>
+
+      {aiInsights && (
+        <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+            <div className="flex items-start gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-700">
+                <Sparkles size={22} />
+              </div>
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="text-lg font-bold text-slate-900">
+                    AI phân tích thống kê
+                  </h3>
+                  <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+                    {aiInsights.source === "ai" ? "OpenAI" : "Tự động"}
+                  </span>
+                </div>
+                <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+                  {aiInsights.summary}
+                </p>
+              </div>
+            </div>
+            <span className={`w-fit rounded-full border px-3 py-1 text-xs font-bold uppercase ${priorityClass[aiInsights.priority] || priorityClass.low}`}>
+              {aiInsights.priority || "low"}
+            </span>
+          </div>
+
+          <div className="mt-5 grid gap-4 lg:grid-cols-2">
+            <div className="rounded-lg border border-slate-100 bg-slate-50 p-4">
+              <div className="mb-3 flex items-center gap-2 font-semibold text-slate-800">
+                <AlertTriangle size={18} className="text-amber-600" />
+                Điểm cần chú ý
+              </div>
+              <ul className="space-y-2 text-sm text-slate-600">
+                {(aiInsights.risks || []).map((risk, index) => (
+                  <li key={`${risk}-${index}`} className="flex gap-2">
+                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
+                    <span>{risk}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="rounded-lg border border-slate-100 bg-slate-50 p-4">
+              <div className="mb-3 flex items-center gap-2 font-semibold text-slate-800">
+                <Lightbulb size={18} className="text-indigo-600" />
+                Gợi ý hành động
+              </div>
+              <ul className="space-y-2 text-sm text-slate-600">
+                {(aiInsights.recommendations || []).map((item, index) => (
+                  <li key={`${item}-${index}`} className="flex gap-2">
+                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-500" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
+      )}
 
       <section className="grid gap-6 xl:grid-cols-[1fr_1.4fr]">
         <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
