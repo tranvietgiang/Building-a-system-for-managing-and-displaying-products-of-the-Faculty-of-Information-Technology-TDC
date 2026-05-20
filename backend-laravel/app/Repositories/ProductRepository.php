@@ -670,6 +670,64 @@ class ProductRepository extends BaseRepository
         ];
     }
 
+    public function incrementView(int $productId): array
+    {
+        if (!DB::table('product_statistics')->where('product_id', $productId)->exists()) {
+            DB::table('product_statistics')->insert([
+                'product_id' => $productId,
+                'views' => 0,
+                'likes' => 0,
+                'downloads' => 0,
+                'shares' => 0,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        DB::table('product_statistics')
+            ->where('product_id', $productId)
+            ->increment('views');
+
+        $statistics = DB::table('product_statistics')
+            ->where('product_id', $productId)
+            ->select('views', 'likes')
+            ->first();
+
+        return [
+            'views' => (int) ($statistics->views ?? 0),
+            'likes' => (int) ($statistics->likes ?? 0),
+        ];
+    }
+
+    public function incrementLike(int $productId): array
+    {
+        if (!DB::table('product_statistics')->where('product_id', $productId)->exists()) {
+            DB::table('product_statistics')->insert([
+                'product_id' => $productId,
+                'views' => 0,
+                'likes' => 0,
+                'downloads' => 0,
+                'shares' => 0,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        DB::table('product_statistics')
+            ->where('product_id', $productId)
+            ->increment('likes');
+
+        $statistics = DB::table('product_statistics')
+            ->where('product_id', $productId)
+            ->select('views', 'likes')
+            ->first();
+
+        return [
+            'views' => (int) ($statistics->views ?? 0),
+            'likes' => (int) ($statistics->likes ?? 0),
+        ];
+    }
+
     // Find matching AI products based on model_used, framework, and language
     public function findMatchingAiProducts(int $productId): array
     {

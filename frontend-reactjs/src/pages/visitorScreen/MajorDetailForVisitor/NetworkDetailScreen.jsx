@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import BackButton from "../../../components/common/BackButton";
 import useImageViewer from "../../../shared/useImageViewer";
 import { Icons } from "../../../components/common/Icon";
+import { productApi } from "../../../api";
 
 const NetworkDetailScreen = ({
   productVisitorDetail,
@@ -17,13 +18,22 @@ const NetworkDetailScreen = ({
   const { openViewer, ImageViewerModal } = useImageViewer();
   const majorDetail = productVisitorDetail?.major_detail || {};
 
-  const handleLike = () => {
-    if (isLiked) {
-      setLikeCount(likeCount - 1);
-    } else {
-      setLikeCount(likeCount + 1);
+  const handleLike = async () => {
+    if (isLiked) return;
+
+    setIsLiked(true);
+    setLikeCount((prev) => prev + 1);
+
+    try {
+      const res = await productApi.incrementLike(productVisitorDetail?.id);
+      if (typeof res?.likes === "number") {
+        setLikeCount(res.likes);
+      }
+    } catch (error) {
+      console.error(error);
+      setIsLiked(false);
+      setLikeCount((prev) => Math.max(0, prev - 1));
     }
-    setIsLiked(!isLiked);
   };
 
   if (loadingVisitorDetail) {

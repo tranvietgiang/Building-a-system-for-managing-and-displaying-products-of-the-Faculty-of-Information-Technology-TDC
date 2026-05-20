@@ -7,6 +7,8 @@ export default function useVisitorProduct(id) {
   const [errorVisitorDetail, setError] = useState(null);
 
   useEffect(() => {
+    if (!id) return;
+
     const toastId = "product-detail-toast-visitor-detail";
     const getVisitorProducts = async () => {
       try {
@@ -28,6 +30,6 @@ export default function useVisitorProduct(id) {
     return () => {
       toast.dismiss(toastId);
     };
-  }, []);
+  }, [id]);
   return { productVisitorDetail, loadingVisitorDetail, errorVisitorDetail };
 }
