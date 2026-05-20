@@ -1,7 +1,5 @@
-import React, { useState } from "react";
-
+import { useState } from "react";
 import AdminLayout from "../../layouts/AdminLayout";
-
 import DashboardScreen from "./screens/DashboardScreen";
 import UserScreen from "./screens/UserManager/UsersScreen";
 import ProductScreen from "./screens/ProductsScreen";
@@ -10,7 +8,6 @@ import SettingScreen from "./screens/SettingsScreen";
 
 const AdminScreen = () => {
   const [activeSection, setActiveSection] = useState("dashboard");
-  // useTitle("Trang admin");
 
   const menuMap = {
     dashboard: {

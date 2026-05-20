@@ -17,4 +17,9 @@ class Major extends Model
         'major_code',
         'description'
     ];
+
+    public function products()
+    {
+        return $this->hasMany(Product::class, 'major_id', 'major_id');
+    }
 }

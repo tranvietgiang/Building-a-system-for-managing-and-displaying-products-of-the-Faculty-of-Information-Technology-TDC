@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\MajorController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\TeacherController;
 use App\Http\Controllers\Api\UploadController;
+use App\Http\Controllers\Api\AdminController;
 use App\Http\Ai\ChatBoxAi;
 use App\Http\Ai\SearchAi;
 use App\Http\Ai\CompareAi;
@@ -137,6 +138,31 @@ Route::prefix('visitor')->group(function () {
     Route::post('/ai/send', [ChatBoxAi::class, 'chat']);
     Route::post('/ai/search', [SearchAi::class, 'searchAi']);
     Route::middleware('auth:sanctum')->get('/ai/compare/{productId}', [CompareAi::class, 'compareProduct']);
+
+    /*
+|--------------------------------------------------------------------------
+| Admin ROUTES
+|--------------------------------------------------------------------------
+*/
+    Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
+        Route::get('/dashboard', [AdminController::class, 'dashboard']);
+
+        Route::get('/users', [AdminController::class, 'users']);
+        Route::post('/users', [AdminController::class, 'storeUser']);
+        Route::put('/users/{userId}', [AdminController::class, 'updateUser']);
+        Route::delete('/users/{userId}', [AdminController::class, 'destroyUser']);
+
+        Route::get('/products', [AdminController::class, 'products']);
+        Route::patch('/products/{productId}/status', [AdminController::class, 'updateProductStatus']);
+        Route::delete('/products/{productId}', [AdminController::class, 'destroyProduct']);
+
+        Route::get('/majors', [AdminController::class, 'majors']);
+        Route::post('/majors', [AdminController::class, 'storeMajor']);
+        Route::put('/majors/{majorId}', [AdminController::class, 'updateMajor']);
+        Route::delete('/majors/{majorId}', [AdminController::class, 'destroyMajor']);
+
+        Route::get('/categories', [AdminController::class, 'categories']);
+    });
 });
 
 /*
