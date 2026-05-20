@@ -117,6 +117,80 @@ export default function CompareProductAi() {
     ];
   };
 
+  const getFullComparisonFields = (product, majorName) => {
+    const majorLower = (majorName || product?.major_name || "").toLowerCase();
+
+    if (
+      majorLower.includes("ai") ||
+      majorLower.includes("artificial") ||
+      product?.model_used
+    ) {
+      return [
+        { key: "title", label: "Tiêu đề", getValue: (p) => p.title },
+        { key: "model_used", label: "Model", getValue: (p) => p.model_used },
+        { key: "framework", label: "Framework", getValue: (p) => p.framework },
+        { key: "language", label: "Ngôn ngữ", getValue: (p) => p.language },
+        { key: "dataset_used", label: "Dataset", getValue: (p) => p.dataset_used },
+        { key: "accuracy_score", label: "Độ chính xác", getValue: (p) => p.accuracy_score },
+        { key: "ai_similarity", label: "Độ tương đồng AI", getValue: (p) => p.ai_similarity },
+        { key: "ai_level", label: "Cấp độ AI", getValue: (p) => p.ai_level },
+      ];
+    }
+
+    if (
+      majorLower.includes("cntt") ||
+      majorLower.includes("computer") ||
+      majorLower.includes("công nghệ thông tin") ||
+      product?.programming_language ||
+      product?.database_used
+    ) {
+      return [
+        { key: "title", label: "Tiêu đề", getValue: (p) => p.title },
+        { key: "programming_language", label: "Ngôn ngữ lập trình", getValue: (p) => p.programming_language },
+        { key: "framework", label: "Framework", getValue: (p) => p.framework },
+        { key: "database_used", label: "Cơ sở dữ liệu", getValue: (p) => p.database_used },
+      ];
+    }
+
+    if (
+      majorLower.includes("multimedia") ||
+      majorLower.includes("mmt") ||
+      majorLower.includes("đa phương tiện") ||
+      product?.simulation_tool ||
+      product?.network_protocol ||
+      product?.topology_type
+    ) {
+      return [
+        { key: "title", label: "Tiêu đề", getValue: (p) => p.title },
+        { key: "simulation_tool", label: "Công cụ mô phỏng", getValue: (p) => p.simulation_tool },
+        { key: "network_protocol", label: "Giao thức mạng", getValue: (p) => p.network_protocol },
+        { key: "topology_type", label: "Loại hệ thống", getValue: (p) => p.topology_type },
+        { key: "config_file", label: "File config", getValue: (p) => p.config_file },
+      ];
+    }
+
+    if (
+      majorLower.includes("graphics") ||
+      majorLower.includes("graphic") ||
+      majorLower.includes("đồ họa") ||
+      product?.design_type ||
+      product?.tools_used
+    ) {
+      return [
+        { key: "title", label: "Tiêu đề", getValue: (p) => p.title },
+        { key: "design_type", label: "Loại thiết kế", getValue: (p) => p.design_type },
+        { key: "tools_used", label: "Công cụ sử dụng", getValue: (p) => p.tools_used },
+        { key: "drive_link", label: "Link Drive", getValue: (p) => p.drive_link },
+        { key: "behance_link", label: "Link Behance", getValue: (p) => p.behance_link },
+      ];
+    }
+
+    return [
+      { key: "title", label: "Tiêu đề", getValue: (p) => p.title },
+      { key: "description", label: "Mô tả", getValue: (p) => p.description },
+    ];
+  };
+
   const calculateOverlap = (product1, product2, fields) => {
     let matchCount = 0;
     const details = [];
@@ -159,7 +233,7 @@ export default function CompareProductAi() {
     );
   }
 
-  const comparisonFields = getComparisonFields(productData, majorName);
+  const comparisonFields = getFullComparisonFields(productData, majorName);
   const overlap = selectedMatch
     ? calculateOverlap(productData, selectedMatch, comparisonFields)
     : null;
@@ -216,6 +290,73 @@ export default function CompareProductAi() {
             <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm">
               Chưa duyệt/Từ chối: {initialMatches?.unapproved?.length || 0}
             </span>
+          </div>
+        )}
+
+        {allMatches.length > 0 && (
+          <div className="mb-8 bg-white rounded-xl shadow p-4">
+            <div className="flex items-center justify-between gap-3 mb-4">
+              <h2 className="text-lg font-bold text-gray-900">
+                Danh sách sản phẩm phát hiện
+              </h2>
+              <span className="text-sm text-gray-500">
+                Hiển thị {allMatches.length} sản phẩm
+              </span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+              {allMatches.map((product) => {
+                const statusBadge = getStatusBadge(product.status);
+                const isSelected = selectedMatch?.product_id === product.product_id;
+                const duplicateFields = product.duplicate_fields || [];
+
+                return (
+                  <button
+                    key={product.product_id}
+                    type="button"
+                    onClick={() => setSelectedMatch(product)}
+                    className={`text-left rounded-lg border p-4 transition ${
+                      isSelected
+                        ? "border-blue-500 bg-blue-50 shadow-sm"
+                        : "border-gray-200 bg-white hover:border-blue-300 hover:bg-gray-50"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <h3 className="font-semibold text-gray-900 line-clamp-2">
+                        {product.title}
+                      </h3>
+                      <span
+                        className={`shrink-0 px-2 py-1 rounded-full text-xs font-semibold ${statusBadge?.bg} ${statusBadge?.text}`}
+                      >
+                        {statusBadge?.label || product.status}
+                      </span>
+                    </div>
+
+                    <p className="text-sm text-gray-600 mt-2">
+                      {product.fullname || "Chưa có tác giả"}
+                    </p>
+
+                    <div className="mt-3 flex items-center gap-2 flex-wrap">
+                      <span className="px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold">
+                        AI: {product.ai_similarity ?? 0}%
+                      </span>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                          duplicateFields.length > 0
+                            ? "bg-green-50 text-green-700"
+                            : "bg-gray-100 text-gray-600"
+                        }`}
+                      >
+                        Trùng {duplicateFields.length} trường
+                      </span>
+                    </div>
+
+                    <p className="text-xs text-gray-600 mt-3 line-clamp-2">
+                      {product.duplicate_message || "Không có trường chính trùng"}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         )}
 
@@ -496,7 +637,7 @@ export default function CompareProductAi() {
             )}
 
             {/* AI Similarity Info (if available) */}
-            {selectedMatch.ai_similarity && (
+            {selectedMatch.ai_similarity !== null && selectedMatch.ai_similarity !== undefined && (
               <div className="bg-white rounded-2xl shadow-lg overflow-hidden mt-6">
                 <div className="bg-gray-800 text-white p-4">
                   <h2 className="text-xl font-bold">🤖 Đánh giá từ AI</h2>

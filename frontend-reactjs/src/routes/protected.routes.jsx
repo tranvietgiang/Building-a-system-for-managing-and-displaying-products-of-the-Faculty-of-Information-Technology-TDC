@@ -8,6 +8,7 @@ import NotFoundScreen from "../pages/notFoundScreen/NotFoundScreen";
 
 const StudentScreen = lazy(() => import("../pages/student/StudentScreen"));
 const TeacherScreen = lazy(() => import("../pages/teacher/TeacherScreen"));
+const AdminScreen = lazy(() => import("../pages/admin/AdminScreen"));
 
 const CompareTeacher = lazy(() => import("../pages/ai/CompareProductAi"));
 
@@ -36,6 +37,16 @@ function RoleRoutes() {
       }
     >
       <Routes>
+        {/* ADMIN */}
+        <Route
+          path="/nckh-admin"
+          element={
+            <ProtectedRoute allowedRoles={[ROLE.ADMIN]}>
+              <AdminScreen />
+            </ProtectedRoute>
+          }
+        />
+
         {/* STUDENT */}
         <Route
           path="/nckh-student"

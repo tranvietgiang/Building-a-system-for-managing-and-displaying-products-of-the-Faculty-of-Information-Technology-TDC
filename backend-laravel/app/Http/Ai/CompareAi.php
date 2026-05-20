@@ -62,11 +62,18 @@ class CompareAi
             foreach ($matchingProducts as $product) {
 
                 $gpt = $this->compareWithAi($currentProduct, $product, $projectType);
+                $duplicateFields = $this->getDuplicateFields($currentProduct, $product, $projectType);
 
                 $enriched[] = array_merge($product, [
                     'ai_similarity' => $gpt['similarity'] ?? 0,
                     'ai_level' => $gpt['level'] ?? 'low',
                     'ai_reason' => $gpt['reason'] ?? '',
+                    'has_duplicate_fields' => count($duplicateFields) > 0,
+                    'duplicate_count' => count($duplicateFields),
+                    'duplicate_fields' => $duplicateFields,
+                    'duplicate_message' => count($duplicateFields) > 0
+                        ? 'Trùng: ' . implode(', ', $duplicateFields)
+                        : 'Không có trường chính trùng',
                 ]);
             }
 
@@ -112,7 +119,7 @@ class CompareAi
             || str_contains($majorCode, 'trí tuệ')
             || str_contains($majorCode, 'artificial')
         ) {
-            return $currentProduct->model_used ? 'AI' : null;
+            return 'AI';
         }
 
         if (
@@ -149,6 +156,7 @@ class CompareAi
     private function compareWithAi($a, $b, $projectType = 'AI')
     {
         try {
+
             $prompt = $this->buildComparisonPrompt($a, $b, $projectType);
 
             $response = Http::withHeaders([
@@ -186,12 +194,19 @@ class CompareAi
         $commonPrompt = "
         So sánh 2 dự án sinh viên.
 
+        Nếu tiêu đề giống nhau hoặc các công nghệ chính giống nhau thì phải đánh similarity cao.
+        Nếu gần như trùng thông tin thì similarity phải từ 90 đến 100.
         Trả lời JSON ONLY:
         {
             \"similarity\": number (0-100),
             \"level\": \"low\" | \"medium\" | \"high\",
             \"reason\": \"giải thích ngắn bằng tiếng Việt\"
         }
+
+        Quy tắc bắt buộc khi chấm similarity:
+        - Nếu các trường chính giống nhau hoặc gần giống nhau, phải đánh similarity cao từ 85-100.
+        - Nếu tiêu đề giống nhau và công nghệ giống nhau, similarity phải là 95-100.
+        - Với similarity từ 85 trở lên, level phải là \"high\".
         ";
 
         if ($projectType === 'AI') {
@@ -280,6 +295,67 @@ class CompareAi
 
         So sánh độ tương đồng giữa 2 dự án này.
         ";
+    }
+
+    private function getDuplicateFields($a, $b, $projectType): array
+    {
+        $fieldsByType = [
+            'AI' => [
+                'title' => 'Tiêu đề',
+                'model_used' => 'Model',
+                'framework' => 'Framework',
+                'language' => 'Ngôn ngữ',
+                'dataset_used' => 'Dataset',
+            ],
+
+            'CNTT' => [
+                'title' => 'Tiêu đề',
+                'programming_language' => 'Ngôn ngữ lập trình',
+                'framework' => 'Framework',
+                'database_used' => 'Cơ sở dữ liệu',
+            ],
+
+            'Multimedia' => [
+                'title' => 'Tiêu đề',
+                'simulation_tool' => 'Công cụ mô phỏng',
+                'network_protocol' => 'Giao thức mạng',
+                'topology_type' => 'Loại hệ thống',
+                'config_file' => 'File config',
+            ],
+
+            'Graphics' => [
+                'title' => 'Tiêu đề',
+                'design_type' => 'Loại thiết kế',
+                'tools_used' => 'Công cụ sử dụng',
+                'drive_link' => 'Link Drive',
+                'behance_link' => 'Link Behance',
+            ],
+        ];
+
+        $fields = $fieldsByType[$projectType] ?? [
+            'title' => 'Tiêu đề',
+            'description' => 'Mô tả',
+        ];
+
+        $duplicated = [];
+
+        foreach ($fields as $key => $label) {
+            $valueA = $this->normalizeCompareValue($a->$key ?? '');
+            $valueB = $this->normalizeCompareValue($b[$key] ?? '');
+
+            if ($valueA !== '' && $valueA === $valueB) {
+                $duplicated[] = $label;
+            }
+        }
+
+        return $duplicated;
+    }
+
+    private function normalizeCompareValue($value): string
+    {
+        $value = trim(strtolower((string) $value));
+
+        return preg_replace('/\s+/', ' ', $value) ?? '';
     }
 
     private function formatProduct($p)

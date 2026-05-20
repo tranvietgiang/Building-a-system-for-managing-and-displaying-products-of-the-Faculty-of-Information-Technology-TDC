@@ -731,31 +731,74 @@ class ProductRepository extends BaseRepository
     // Find matching AI products based on model_used, framework, and language
     public function findMatchingAiProducts(int $productId): array
     {
-        // Get current product's AI details
-        $currentProduct = DB::table('products as p')
+        $current = DB::table('products as p')
             ->leftJoin('product_ai as ai', 'p.product_id', '=', 'ai.product_id')
+            ->leftJoin('product_cntt as cntt', 'p.product_id', '=', 'cntt.product_id')
+            ->leftJoin('product_mmt as mmt', 'p.product_id', '=', 'mmt.product_id')
+            ->leftJoin('product_graphic as gr', 'p.product_id', '=', 'gr.product_id')
             ->where('p.product_id', $productId)
             ->select(
+                'p.*',
                 'ai.model_used',
-                'ai.framework',
-                'ai.language'
+                'ai.framework as ai_framework',
+                'ai.language',
+                'ai.dataset_used',
+                'cntt.programming_language',
+                'cntt.framework as cntt_framework',
+                'cntt.database_used',
+                'mmt.simulation_tool',
+                'mmt.network_protocol',
+                'mmt.topology_type',
+                'mmt.config_file',
+                'gr.design_type',
+                'gr.tools_used',
+                'gr.drive_link',
+                'gr.behance_link'
             )
             ->first();
 
-        if (!$currentProduct) {
+        if (!$current) {
             return [];
         }
 
-        // Find all other approved AI products with same model_used, framework, and language
-        $matchingProducts = DB::table('products as p')
+        return DB::table('products as p')
             ->join('majors as m', 'p.major_id', '=', 'm.major_id')
-            ->leftJoin('product_ai as ai', 'p.product_id', '=', 'ai.product_id')
             ->leftJoin('users as u', 'p.user_id', '=', 'u.user_id')
+            ->leftJoin('product_ai as ai', 'p.product_id', '=', 'ai.product_id')
+            ->leftJoin('product_cntt as cntt', 'p.product_id', '=', 'cntt.product_id')
+            ->leftJoin('product_mmt as mmt', 'p.product_id', '=', 'mmt.product_id')
+            ->leftJoin('product_graphic as gr', 'p.product_id', '=', 'gr.product_id')
             ->where('p.product_id', '!=', $productId)
-            ->where(function ($query) use ($currentProduct) {
-                $query->where('ai.model_used', $currentProduct->model_used)
-                    ->where('ai.framework', $currentProduct->framework)
-                    ->where('ai.language', $currentProduct->language);
+            ->where('p.major_id', $current->major_id)
+            ->where(function ($q) use ($current) {
+                $q->where('p.title', $current->title)
+                    ->orWhere('p.description', $current->description)
+                    ->orWhere('p.thumbnail', $current->thumbnail)
+                    ->orWhere('p.github_link', $current->github_link)
+                    ->orWhere('p.demo_link', $current->demo_link)
+
+                    // AI
+                    ->orWhere('ai.model_used', $current->model_used)
+                    ->orWhere('ai.framework', $current->ai_framework)
+                    ->orWhere('ai.language', $current->language)
+                    ->orWhere('ai.dataset_used', $current->dataset_used)
+
+                    // CNTT
+                    ->orWhere('cntt.programming_language', $current->programming_language)
+                    ->orWhere('cntt.framework', $current->cntt_framework)
+                    ->orWhere('cntt.database_used', $current->database_used)
+
+                    // MMT
+                    ->orWhere('mmt.simulation_tool', $current->simulation_tool)
+                    ->orWhere('mmt.network_protocol', $current->network_protocol)
+                    ->orWhere('mmt.topology_type', $current->topology_type)
+                    ->orWhere('mmt.config_file', $current->config_file)
+
+                    // Graphic
+                    ->orWhere('gr.design_type', $current->design_type)
+                    ->orWhere('gr.tools_used', $current->tools_used)
+                    ->orWhere('gr.drive_link', $current->drive_link)
+                    ->orWhere('gr.behance_link', $current->behance_link);
             })
             ->select(
                 'p.product_id',
@@ -767,38 +810,62 @@ class ProductRepository extends BaseRepository
                 'p.approved_at',
                 'u.name as fullname',
                 'm.major_name',
+
                 'ai.model_used',
                 'ai.framework',
                 'ai.language',
                 'ai.dataset_used',
-                'ai.accuracy_score'
+                'ai.accuracy_score',
+
+                'cntt.programming_language',
+                'cntt.framework as cntt_framework',
+                'cntt.database_used',
+
+                'mmt.simulation_tool',
+                'mmt.network_protocol',
+                'mmt.topology_type',
+                'mmt.config_file',
+
+                'gr.design_type',
+                'gr.tools_used',
+                'gr.drive_link',
+                'gr.behance_link'
             )
-            ->orderBy('p.status', 'desc')
             ->orderByDesc('p.created_at')
+            ->limit(10)
             ->get()
-            ->map(function ($product) {
-                return [
-                    'product_id' => $product->product_id,
-                    'title' => $product->title,
-                    'description' => $product->description,
-                    'thumbnail' => $product->thumbnail,
-                    'status' => $product->status,
-                    'created_at' => $product->created_at,
-                    'approved_at' => $product->approved_at,
-                    'fullname' => $product->fullname,
-                    'major_name' => $product->major_name,
-                    'model_used' => $product->model_used,
-                    'framework' => $product->framework,
-                    'language' => $product->language,
-                    'dataset_used' => $product->dataset_used,
-                    'accuracy_score' => $product->accuracy_score,
-                ];
-            })
+            ->map(fn($p) => [
+                'product_id' => $p->product_id,
+                'title' => $p->title,
+                'description' => $p->description,
+                'thumbnail' => $p->thumbnail,
+                'status' => $p->status,
+                'created_at' => $p->created_at,
+                'approved_at' => $p->approved_at,
+                'fullname' => $p->fullname,
+                'major_name' => $p->major_name,
+
+                'model_used' => $p->model_used,
+                'framework' => $p->framework ?? $p->cntt_framework,
+                'language' => $p->language,
+                'dataset_used' => $p->dataset_used,
+                'accuracy_score' => $p->accuracy_score,
+
+                'programming_language' => $p->programming_language,
+                'database_used' => $p->database_used,
+
+                'simulation_tool' => $p->simulation_tool,
+                'network_protocol' => $p->network_protocol,
+                'topology_type' => $p->topology_type,
+                'config_file' => $p->config_file,
+
+                'design_type' => $p->design_type,
+                'tools_used' => $p->tools_used,
+                'drive_link' => $p->drive_link,
+                'behance_link' => $p->behance_link,
+            ])
             ->toArray();
-
-        return $matchingProducts;
     }
-
 
     public function compareData(int $productId): ?object
     {
