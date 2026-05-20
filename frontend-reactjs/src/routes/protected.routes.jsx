@@ -58,7 +58,7 @@ function RoleRoutes() {
 
         {/* UPLOAD */}
         <Route
-          path="/upload-product"
+          path="/upload"
           element={
             <ProtectedRoute allowedRoles={[ROLE.STUDENT]}>
               <UploadProductScreen />
@@ -68,7 +68,7 @@ function RoleRoutes() {
 
         {/* PRODUCT DETAIL - STUDENT */}
         <Route
-          path="/product-detail"
+          path="/detail"
           element={
             <ProtectedRoute allowedRoles={[ROLE.STUDENT]}>
               <ProductDetailScreen />
@@ -78,7 +78,7 @@ function RoleRoutes() {
 
         {/* PRODUCT DETAIL - TEACHER */}
         <Route
-          path="/product-detail-teacher"
+          path="/detail-teacher"
           element={
             <ProtectedRoute allowedRoles={[ROLE.TEACHER]}>
               <TeacherProductDetailScreen />

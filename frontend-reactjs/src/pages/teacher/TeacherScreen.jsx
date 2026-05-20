@@ -1,5 +1,6 @@
 import React, { useState, useContext, useCallback, useMemo } from "react";
 import UserDropdown from "../../shared/UserDropdown";
+import "./style.css";
 import useTitle from "../../hooks/common/useTitle";
 import { AuthContext } from "../../contexts/AuthContext";
 import useMajorName from "../../hooks/common/useMajorName";
@@ -187,7 +188,7 @@ const TeacherScreen = () => {
   const { majorName } = useMajorName(user?.major_id);
   const { teacherStatistic } = useTeacherStatistic();
   const { ProductsData, loading, error } = useTeacherPendingApproval();
-  const handleViewDetail = useViewDetail("product-detail-teacher");
+  const handleViewDetail = useViewDetail("detail-teacher");
   const { openViewer, ImageViewerModal } = useImageViewer();
 
   // useMemo: chỉ tính lại khi data thay đổi
@@ -564,22 +565,6 @@ const TeacherScreen = () => {
       </div>
 
       <ImageViewerModal />
-
-      <style jsx>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.3s ease-out;
-        }
-      `}</style>
     </div>
   );
 };

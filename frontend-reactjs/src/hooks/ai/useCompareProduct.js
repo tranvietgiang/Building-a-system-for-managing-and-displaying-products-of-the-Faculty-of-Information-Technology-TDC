@@ -15,8 +15,8 @@ export default function useCompareProduct(product_id) {
     try {
       const res = await aiApi.compareAiProduct(product_id);
 
-      setResult(res.data);
-      return res.data;
+      setResult(res);
+      return res;
     } catch (err) {
       console.error(err);
       setErrorCompare("Lỗi server khi so sánh sản phẩm");

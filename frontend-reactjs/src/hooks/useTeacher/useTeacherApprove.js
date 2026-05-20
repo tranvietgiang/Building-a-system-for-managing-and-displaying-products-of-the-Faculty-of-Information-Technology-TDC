@@ -12,26 +12,50 @@ export default function useTeacherApprove() {
 
     try {
       const res = await teacherApi.approve(productId, moderationPayload);
-      console.log(res);
 
       if (!res.result) {
-        const message =
-          res?.reason || res?.message || "AI đã chặn duyệt sản phẩm";
-        setError(message);
-        toast.error(message);
-        return null;
+        const errorObj = {
+          result: false,
+          blocked_by_ai: res?.blocked_by_ai || false,
+          reason: res?.reason,
+          message: res?.message,
+          violations: res?.violations || [],
+          moderation: res?.moderation,
+        };
+
+        if (!res?.blocked_by_ai) {
+          toast.error(res?.reason || res?.message || "Có lỗi xảy ra");
+        }
+
+        return errorObj;
       }
 
       return res;
     } catch (err) {
-      const message =
-        err?.response?.data?.reason ||
-        err?.response?.data?.message ||
-        "Không duyệt được sản phẩm";
-      setError(message);
-      toast.error(message);
+      const data = err?.response?.data;
+
+      // ✅ 422 = AI blocked
+      const isAiBlocked =
+        err?.response?.status === 422 || data?.blocked_by_ai === true;
+
+      const errorObj = {
+        result: false,
+        blocked_by_ai: isAiBlocked,
+        reason: data?.reason,
+        message: data?.message,
+        violations: data?.violations || [],
+        moderation: data?.moderation,
+      };
+
+      // ✅ Chỉ toast nếu KHÔNG phải AI blocked (AI blocked sẽ show modal)
+      if (!isAiBlocked) {
+        toast.error(
+          data?.reason || data?.message || "Không duyệt được sản phẩm",
+        );
+      }
+
       console.error(err);
-      return null;
+      return errorObj; // ✅ return thay vì throw để useHandleApprove nhận được
     } finally {
       setLoading(false);
     }

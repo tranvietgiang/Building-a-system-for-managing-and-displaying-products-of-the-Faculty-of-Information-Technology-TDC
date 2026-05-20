@@ -11,7 +11,7 @@ import { getStatusColor } from "../../components/common/getStatusColor";
 import { getStatusText } from "../../components/common/getStatusText";
 import { getMajorTheme } from "../../utils/uploadProductScreen/uploadRegistry";
 
-import { useHandleApprove } from "../../hooks/useTeacher/useHandleApprove";
+import { useHandleApprove } from "../../hooks/useTeacher/useHandleApprove.jsx";
 import { useHandleSubmitReview } from "../../hooks/useTeacher/useHandleSubmitReview";
 import { useHandleSubmitRejection } from "../../hooks/useTeacher/useHandleSubmitRejection";
 
@@ -85,19 +85,12 @@ const TeacherProductDetailScreen = () => {
   );
 
   const handleApprove = useCallback(async () => {
-    setIsSubmitting(true);
-    try {
-      await handleApproveOriginal(id, {
-        title: productData?.title,
-        description: productData?.description,
-        major: productData?.major_name || productData?.major_code,
-        image: productData?.thumbnail || images?.[0]?.image_url,
-      });
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsSubmitting(false);
-    }
+    handleApproveOriginal.handleApprove(id, productData?.title, {
+      title: productData?.title,
+      description: productData?.description,
+      major: productData?.major_name || productData?.major_code,
+      image: productData?.thumbnail || images?.[0]?.image_url,
+    });
   }, [id, productData, images, handleApproveOriginal]);
 
   const handleSubmitReview = useCallback(async () => {
@@ -121,20 +114,6 @@ const TeacherProductDetailScreen = () => {
       setIsSubmitting(false);
     }
   }, [id, submitRejectionOriginal]);
-
-  const handleCompare = useCallback(async () => {
-    const data = await checkCompareProduct();
-
-    if (data?.status) {
-      navigate("/nckh-compare", {
-        state: {
-          currentProduct: data.dataCompare.current_product,
-          matches: data.dataCompare.matches,
-          summary: data.summary,
-        },
-      });
-    }
-  }, [checkCompareProduct, navigate]);
 
   const handleReject = useCallback(() => {
     setShowFeedbackModal(true);
@@ -167,6 +146,29 @@ const TeacherProductDetailScreen = () => {
       return "bg-yellow-500 text-white";
     return "bg-red-500 text-white";
   }, [productData?.status]);
+
+  const handleCompare = async () => {
+    try {
+      const data = await checkCompareProduct();
+
+      console.log("FULL DATA", data);
+
+      if (data?.status == true) {
+        navigate("/nckh-compare", {
+          state: {
+            currentProduct: data?.current_product || null,
+            matches: data?.matches || [],
+            summary: data?.summary || "",
+            time: Date.now(),
+          },
+        });
+      } else {
+        toast.warning("không có sản phẩm nào trùng!");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   if (loading) {
     return (
@@ -205,10 +207,13 @@ const TeacherProductDetailScreen = () => {
     );
   }
 
+  // ✅ Lấy message string từ object
   if (error_approve) {
     return (
       <div className="mb-4 p-3 bg-red-100 text-red-600 rounded-lg">
-        {error_approve}
+        {error_approve?.message ||
+          error_approve?.reason ||
+          "Có lỗi xảy ra khi duyệt"}
       </div>
     );
   }
@@ -216,7 +221,9 @@ const TeacherProductDetailScreen = () => {
   if (error_reject) {
     return (
       <div className="mb-4 p-3 bg-red-100 text-red-600 rounded-lg">
-        {error_reject}
+        {typeof error_reject === "string"
+          ? error_reject
+          : error_reject?.message || "Có lỗi xảy ra khi từ chối"}
       </div>
     );
   }
@@ -232,6 +239,9 @@ const TeacherProductDetailScreen = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <ImageViewerModal />
+
+      {/* Modal lỗi duyệt từ AI */}
+      {handleApproveOriginal.errorModalComponent}
 
       {/* Modal từ chối */}
       {showFeedbackModal && (

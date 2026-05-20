@@ -68,7 +68,7 @@ Route::get('/major/{id}', [MajorController::class, 'majorName']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/product/{id}', [ProductController::class, 'productViewId']);
     Route::get('/products', [ProductController::class, 'productAll']);
-    Route::get('/product/{id}/matching-ai', [ProductController::class, 'getMatchingAiProducts']);
+    // Route::get('/product/{id}/matching-ai', [ProductController::class, 'getMatchingAiProducts']);
 });
 
 Route::middleware('auth:sanctum')->prefix('student')->group(function () {
