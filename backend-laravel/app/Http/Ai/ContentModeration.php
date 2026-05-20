@@ -117,7 +117,7 @@ class ContentModeration
             }
 
             $approved = (bool) ($result['approved'] ?? false);
-            $violations = array_values(array_filter($result['violations'] ?? []));
+            $violations = $this->formatViolations($result['violations'] ?? []);
             $reason = trim($result['reason'] ?? '');
 
             //  reduce false positive (important)
@@ -226,7 +226,7 @@ class ContentModeration
             return [
                 'approved' => (bool) ($result['approved'] ?? false),
                 'reason' => trim($result['reason'] ?? ''),
-                'violations' => array_values(array_filter($result['violations'] ?? [])),
+                'violations' => $this->formatViolations($result['violations'] ?? []),
                 'raw' => $result,
             ];
         } catch (\Throwable $e) {
@@ -253,6 +253,32 @@ class ContentModeration
         }
 
         return null;
+    }
+
+    private function formatViolations($violations): array
+    {
+        if (!is_array($violations)) {
+            $violations = [$violations];
+        }
+
+        return array_values(array_filter(array_map(function ($violation) {
+            if (is_array($violation)) {
+                $source = $violation['source'] ?? $violation['type'] ?? null;
+                $content = $violation['content'] ?? $violation['text'] ?? $violation['detail'] ?? null;
+                $reason = $violation['reason'] ?? $violation['message'] ?? null;
+
+                $parts = array_values(array_filter([$content, $reason]));
+                $text = implode(' - ', $parts);
+
+                if ($source && str_contains(strtolower((string) $source), 'image')) {
+                    $text = 'Ảnh: ' . $text;
+                }
+
+                return trim($text ?: json_encode($violation, JSON_UNESCAPED_UNICODE));
+            }
+
+            return trim((string) $violation);
+        }, $violations)));
     }
 
     private function resolveImageUrl(Product $product, array $frontendContext): ?string
@@ -373,6 +399,10 @@ class ContentModeration
         - Nếu role = teacher → cho phép một số nội dung giáo dục ở mức ranh giới
         - Chỉ trả về JSON hợp lệ
         - Không giải thích ngoài JSON
+        - Trường "violations" phải là mảng các chuỗi tiếng Việt mô tả cụ thể nội dung vi phạm
+        - Nếu vi phạm nằm trong hình ảnh, mỗi phần tử violations phải bắt đầu bằng "Ảnh:" và ghi rõ nội dung nhìn thấy trong ảnh
+        - Nếu trong ảnh có chữ, logo, watermark, thông tin nhạy cảm hoặc nội dung gây vi phạm, hãy ghi lại ngắn gọn chính thông tin/chữ đó trong violations
+        - Không trả violations chung chung như "image_related" hoặc "adult_or_sensitive"; phải ghi rõ ví dụ: "Ảnh: có chữ ...", "Ảnh: có watermark ...", "Ảnh: nội dung không liên quan ..."
 
         Định dạng trả về:
 

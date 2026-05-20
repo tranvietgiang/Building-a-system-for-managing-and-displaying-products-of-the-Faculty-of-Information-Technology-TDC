@@ -12,6 +12,23 @@ export const ApprovalErrorModal = ({
 }) => {
   if (!isOpen) return null;
 
+  const violationToText = (violation) => {
+    if (!violation || typeof violation !== "object") {
+      return String(violation || "");
+    }
+
+    const source = violation.source || violation.type;
+    const content = violation.content || violation.text || violation.detail;
+    const violationReason = violation.reason || violation.message;
+    const text = [content, violationReason].filter(Boolean).join(" - ");
+
+    if (source && String(source).toLowerCase().includes("image")) {
+      return `Ảnh: ${text || JSON.stringify(violation)}`;
+    }
+
+    return text || JSON.stringify(violation);
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
@@ -64,7 +81,9 @@ export const ApprovalErrorModal = ({
                     <span className="text-red-500 text-lg leading-none mt-0.5">
                       •
                     </span>
-                    <span className="text-sm text-red-600">{violation}</span>
+                    <span className="text-sm text-red-600">
+                      {violationToText(violation)}
+                    </span>
                   </li>
                 ))}
               </ul>
