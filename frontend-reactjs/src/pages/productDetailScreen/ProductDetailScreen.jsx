@@ -19,7 +19,7 @@ const GraphicDetailScreen = lazy(
   () => import("../../components/student-detail/GraphicDetail"),
 );
 
-const DetailFallback = () => <p>Đang tải...</p>;
+const DetailFallback = () => <p className="p-6">Đang tải...</p>;
 
 export default function ProductDetailScreen() {
   const location = useLocation();

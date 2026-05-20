@@ -1,5 +1,5 @@
-import React, { useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useContext, useMemo } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import BackButton from "../../components/common/BackButton";
 import { AuthContext } from "../../contexts/AuthContext";
@@ -11,8 +11,11 @@ import useTitle from "../../hooks/common/useTitle";
 import { getUploadResources } from "../../utils/uploadProductScreen/uploadRegistry";
 const UploadProductScreen = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useContext(AuthContext);
   const { majorName } = useMajorName(user?.major_id);
+  const editProduct = location.state?.product;
+  const isEditMode = location.state?.mode === "edit" && editProduct;
 
   const currentStudent = mapCurrentStudent(user, majorName);
 
@@ -26,9 +29,55 @@ const UploadProductScreen = () => {
   const { useHook, FormComponent, title, description, gradient, icon } =
     resources;
 
-  useTitle(title);
+  useTitle(isEditMode ? "Chỉnh sửa sản phẩm" : title);
 
-  const form = useHook();
+  const editData = useMemo(() => {
+    if (!isEditMode) return null;
+
+    return {
+      title: editProduct.title || "",
+      description: editProduct.description || "",
+      cate_id: editProduct.cate_id || "",
+      awards: editProduct.awards || "",
+      github_link: editProduct.github_link || "",
+      demo_link: editProduct.demo_link || "",
+      model_used: editProduct.model_used || "",
+      framework: editProduct.framework || "",
+      language: editProduct.language || "",
+      dataset_used: editProduct.dataset_used || "",
+      accuracy_score: editProduct.accuracy_score || "",
+      programming_language: editProduct.programming_language || "",
+      database_used: editProduct.database_used || "",
+      simulation_tool: editProduct.simulation_tool || "",
+      network_protocol: editProduct.network_protocol || "",
+      topology_type: editProduct.topology_type || "",
+      config_file: editProduct.config_file || "",
+      design_type: editProduct.design_type || "",
+      tools_used: editProduct.tools_used || "",
+      drive_link: editProduct.drive_link || "",
+      behance_link: editProduct.behance_link || "",
+    };
+  }, [editProduct, isEditMode]);
+
+  const editImages = useMemo(() => {
+    if (!isEditMode || !editProduct.thumbnail) return [];
+
+    return [
+      {
+        id: `thumbnail-${editProduct.product_id}`,
+        url: editProduct.thumbnail,
+        name: "Ảnh đại diện hiện tại",
+        size: "",
+      },
+    ];
+  }, [editProduct, isEditMode]);
+
+  const form = useHook({
+    editData,
+    editImages,
+    editFiles: [],
+    editTags: Array.isArray(editProduct?.tags) ? editProduct.tags : [],
+  });
 
   const {
     formData,
@@ -146,8 +195,14 @@ const UploadProductScreen = () => {
             <span className="text-4xl">{icon}</span>
           </div>
 
-          <h1 className="text-4xl font-bold text-gray-900">{title}</h1>
-          <p className="mt-2 text-gray-600">{description}</p>
+          <h1 className="text-4xl font-bold text-gray-900">
+            {isEditMode ? "Chỉnh sửa sản phẩm" : title}
+          </h1>
+          <p className="mt-2 text-gray-600">
+            {isEditMode
+              ? "Cập nhật thông tin sản phẩm của bạn"
+              : description}
+          </p>
         </div>
 
         {/* STEP BAR */}

@@ -6,14 +6,21 @@ import { useState, useContext, useCallback } from "react";
 
 export default function useUploadBaseForm({
   initialData,
+  editData,
+  editImages,
+  editFiles,
+  editTags,
   validateStep,
   draftKey,
   stepsConfig,
 } = {}) {
-  const [formData, setFormData] = useState({});
-  const [images, setImages] = useState([]);
-  const [files, setFiles] = useState([]);
-  const [tags, setTags] = useState([]);
+  const [formData, setFormData] = useState(() => ({
+    ...(initialData || {}),
+    ...(editData || {}),
+  }));
+  const [images, setImages] = useState(editImages || []);
+  const [files, setFiles] = useState(editFiles || []);
+  const [tags, setTags] = useState(editTags || []);
   const [tagInput, setTagInput] = useState("");
   const [errors, setErrors] = useState({});
   const [currentStep, setCurrentStep] = useState(1);

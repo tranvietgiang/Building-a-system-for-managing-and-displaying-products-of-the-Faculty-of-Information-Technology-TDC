@@ -3,16 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ProductRequest;
 use App\Http\Requests\ProductViewRequest;
-use Illuminate\Http\Request;
 use App\Services\ProductService;
-use BcMath\Number;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    //
+
     public function __construct(
         protected ProductService $productService
     ) {}
@@ -33,9 +30,12 @@ class ProductController extends Controller
         );
     }
 
-    public function productAll()
+    public function productAll(Request $request)
     {
-        $result = $this->productService->getAllProductsByUserId();
+        $perPage = (int) $request->query('per_page', 50);
+        $perPage = max(1, min($perPage, 100));
+
+        $result = $this->productService->getAllProductsByUserId($perPage);
         return response()->json(
             $result
         );
@@ -51,10 +51,19 @@ class ProductController extends Controller
 
     public function deleteProductStudent(ProductViewRequest $p_rq)
     {
-        $result = $this->productService->productViewIdTeacher($p_rq->product_id);
-        return response()->json(
-            $result
-        );
+        $deleted = $this->productService->deleteProductStudent((int) $p_rq->product_id);
+
+        if (!$deleted) {
+            return response()->json([
+                'message' => 'Khong tim thay san pham hoac ban khong co quyen xoa san pham nay.',
+                'deleted' => false,
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'Xóa sản phẩm thành công',
+            'deleted' => true,
+        ]);
     }
 
     public function getProductsVisitor()

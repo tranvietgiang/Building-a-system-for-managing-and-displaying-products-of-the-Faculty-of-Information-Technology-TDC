@@ -104,7 +104,7 @@ class TeacherService extends BaseRepository
         }
 
 
-        // 👉 xử lý theo status
+        // xử lý theo status
         if ($status === 'approved') {
             $data = [
                 'status' => 'approved',
@@ -122,7 +122,7 @@ class TeacherService extends BaseRepository
 
         $this->product_repo->update($product, $data);
 
-        // 👉 nếu reject thì lưu feedback
+        // nếu reject thì lưu feedback
         if ($status === 'rejected' && $feedback) {
             $this->review_repo->create([
                 'product_id' => $productId,

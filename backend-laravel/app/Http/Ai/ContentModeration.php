@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Http\UploadedFile;
 
 class ContentModeration
 {
@@ -119,7 +120,7 @@ class ContentModeration
             $violations = array_values(array_filter($result['violations'] ?? []));
             $reason = trim($result['reason'] ?? '');
 
-            // ✅ reduce false positive (important)
+            //  reduce false positive (important)
             if (!$approved && count($violations) === 0) {
                 return [
                     'approved' => true,
@@ -142,6 +143,93 @@ class ContentModeration
                 'line' => $e->getLine(),
             ]);
 
+            return $this->blocked($e->getMessage());
+        }
+    }
+
+    public function moderateUploadedImage(UploadedFile $image, array $frontendContext = []): array
+    {
+        $apiKey = env('OPENAI_API_KEY');
+
+        if (!$apiKey) {
+            return $this->blocked('Missing OPENAI_API_KEY');
+        }
+
+        $base64 = base64_encode(file_get_contents($image->getRealPath()));
+        $mime = $image->getMimeType();
+
+        $imageUrl = "data:{$mime};base64,{$base64}";
+
+        $payload = [
+            'title' => $frontendContext['title'] ?? '',
+            'description' => $frontendContext['description'] ?? '',
+            'major' => $frontendContext['major'] ?? 'Unknown',
+            'image' => 'uploaded_image',
+        ];
+
+        $content = [
+            [
+                'type' => 'text',
+                'text' => $this->buildPrompt($payload),
+            ],
+            [
+                'type' => 'image_url',
+                'image_url' => [
+                    'url' => $imageUrl,
+                ],
+            ],
+        ];
+
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $apiKey,
+                'Content-Type' => 'application/json',
+            ])
+                ->timeout(45)
+                ->post('https://api.openai.com/v1/chat/completions', [
+                    'model' => env('OPENAI_VISION_MODEL', 'gpt-4o-mini'),
+                    'messages' => [
+                        [
+                            'role' => 'system',
+                            'content' => 'Return ONLY valid JSON. No explanation. No markdown.',
+                        ],
+                        [
+                            'role' => 'user',
+                            'content' => $content,
+                        ],
+                    ],
+                    'temperature' => 0.2,
+                    'max_tokens' => 1000,
+                ]);
+
+            if ($response->failed()) {
+                return [
+                    'approved' => false,
+                    'reason' => 'Lỗi AI: ' . $response->body(),
+                    'violations' => ['api_error'],
+                    'raw' => null,
+                ];
+            }
+
+            $text = data_get($response->json(), 'choices.0.message.content');
+
+            if (!$text) {
+                return $this->blocked('Empty AI response');
+            }
+
+            $result = $this->parseJson($text);
+
+            if (!$result) {
+                return $this->blocked('Invalid AI response format');
+            }
+
+            return [
+                'approved' => (bool) ($result['approved'] ?? false),
+                'reason' => trim($result['reason'] ?? ''),
+                'violations' => array_values(array_filter($result['violations'] ?? [])),
+                'raw' => $result,
+            ];
+        } catch (\Throwable $e) {
             return $this->blocked($e->getMessage());
         }
     }

@@ -23,9 +23,9 @@ class ProductService extends BaseRepository
         return $this->productRepository->findProductById($productId);
     }
 
-    public function getAllProductsByUserId(): LengthAwarePaginator
+    public function getAllProductsByUserId(int $perPage = 50): LengthAwarePaginator
     {
-        return $this->productRepository->productAllById();
+        return $this->productRepository->productAllById($perPage);
     }
 
     public function productViewIdTeacher($productId): ?array
@@ -35,6 +35,15 @@ class ProductService extends BaseRepository
         };
 
         return $this->productRepository->productViewIdTeacher($productId);
+    }
+
+    public function deleteProductStudent(int $productId): bool
+    {
+        if (!$this->productRepository->productExists($productId)) {
+            return false;
+        }
+
+        return $this->productRepository->deleteProductStudent($productId);
     }
 
     public function getProductsVisitor(): array
