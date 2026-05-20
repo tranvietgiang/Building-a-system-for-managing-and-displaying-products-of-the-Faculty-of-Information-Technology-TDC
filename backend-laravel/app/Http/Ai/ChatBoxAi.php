@@ -309,7 +309,7 @@ class ChatBoxAi
             'message' => 'nullable|string|max:1000',
         ]);
 
-        $user    = Auth::user();
+        $user    = $this->resolveUser($request);
         $role    = $user->role ?? 'guest';
         $majorId = $user->major_id ?? null;
 
@@ -354,11 +354,16 @@ class ChatBoxAi
         }
 
         /* ── 2. OVERRIDE MAJOR TỪ TEXT ───────────────────────────── */
+        if (in_array($role, ['student', 'teacher'], true) && !$majorId) {
+            return response()->json([
+                'reply' => 'Tài khoản của bạn chưa được gán ngành học nên chưa thể tra cứu dữ liệu theo ngành.',
+                'products' => [],
+            ], 403);
+        }
+
         $majorCode = $this->normalizeMajorCode->NormalizeMajorCode($message);
         if ($majorCode) {
-            $detectedMajorId = DB::table('majors')
-                ->where('major_code', $majorCode)
-                ->value('major_id');
+            $detectedMajorId = $this->resolveMajorIdFromCode($majorCode);
 
             // Student chỉ được hỏi đúng ngành của mình
             if ($role === 'student' && $detectedMajorId && $detectedMajorId != $majorId) {
@@ -446,21 +451,47 @@ class ChatBoxAi
      *  CONTEXT BUILDERS
      * ═══════════════════════════════════════════════════════════════ */
 
+    private function resolveUser(Request $request): ?object
+    {
+        return Auth::guard('sanctum')->user()
+            ?? $request->user()
+            ?? Auth::user();
+    }
+
+    private function resolveMajorIdFromCode(?string $majorCode): ?int
+    {
+        if (!$majorCode) {
+            return null;
+        }
+
+        $normalizedCode = strtoupper(trim($majorCode));
+        $aliases = match ($normalizedCode) {
+            'TKDH', 'GRAPHIC', 'GRAPHICS' => ['TKDH', 'GRAPHIC', 'GRAPHICS'],
+            'CNTT', 'IT' => ['CNTT', 'IT'],
+            'MMT', 'NETWORK' => ['MMT', 'NETWORK'],
+            'AI' => ['AI'],
+            default => [$normalizedCode],
+        };
+
+        return DB::table('majors')
+            ->whereIn(DB::raw('UPPER(major_code)'), $aliases)
+            ->value('major_id');
+    }
+
     private function buildTeacherContext(?int $majorId): array
     {
         if (!$majorId) {
             return ['__error' => 'Bạn chưa được gán ngành học.'];
         }
 
-        $pendingReviews = DB::table('reviews')
+        $recentReviews = DB::table('reviews')
             ->join('products', 'reviews.product_id', '=', 'products.product_id')
             ->where('products.major_id', $majorId)
-            ->where('reviews.status', 'pending')
             ->select('reviews.review_id', 'products.title as product_title', 'reviews.comment', 'reviews.created_at')
             ->latest('reviews.created_at')
             ->get();
 
-        return ['pending_reviews' => $pendingReviews];
+        return ['recent_reviews_by_teacher_context' => $recentReviews];
     }
 
     private function buildAdminContext(): array
@@ -475,33 +506,40 @@ class ChatBoxAi
             'total_images'     => DB::table('product_images')->count(),
         ];
 
-        $productsByMajor = DB::table('products')
-            ->join('majors', 'products.major_id', '=', 'majors.major_id')
-            ->selectRaw('majors.major_name, majors.major_code, COUNT(*) as total')
-            ->groupBy('majors.major_id', 'majors.major_name', 'majors.major_code')
+        $productsByMajor = DB::table('majors as m')
+            ->leftJoin('products as p', 'p.major_id', '=', 'm.major_id')
+            ->selectRaw('m.major_name, m.major_code, COUNT(p.product_id) as total')
+            ->groupBy('m.major_id', 'm.major_name', 'm.major_code')
             ->orderByDesc('total')
             ->get();
 
-        $topViewedProducts = DB::table('product_statistics')
-            ->join('products', 'product_statistics.product_id', '=', 'products.product_id')
-            ->select('products.product_id', 'products.title', 'products.github_link', 'products.demo_link', 'product_statistics.views', 'product_statistics.likes')
-            ->orderByDesc('product_statistics.views')
+        $topViewedProducts = DB::table('products as p')
+            ->leftJoin('product_statistics as ps', 'ps.product_id', '=', 'p.product_id')
+            ->select(
+                'p.product_id',
+                'p.title',
+                'p.github_link',
+                'p.demo_link',
+                DB::raw('COALESCE(ps.views, 0) as views'),
+                DB::raw('COALESCE(ps.likes, 0) as likes')
+            )
+            ->orderByDesc('views')
             ->limit(10)
             ->get();
 
-        $recentReviewsAll = DB::table('reviews')
-            ->join('products', 'reviews.product_id', '=', 'products.product_id')
-            ->join('users', 'reviews.teacher_id', '=', 'users.id')
-            ->select('products.title as product_title', 'users.name as teacher_name', 'reviews.comment', 'reviews.created_at')
-            ->latest('reviews.created_at')
+        $recentReviewsAll = DB::table('reviews as r')
+            ->join('products as p', 'r.product_id', '=', 'p.product_id')
+            ->leftJoin('users as u', 'r.teacher_id', '=', 'u.user_id')
+            ->select('p.title as product_title', 'u.name as teacher_name', 'r.comment', 'r.created_at')
+            ->latest('r.created_at')
             ->limit(10)
             ->get();
 
-        $statsByMajor = DB::table('product_statistics')
-            ->join('products', 'product_statistics.product_id', '=', 'products.product_id')
-            ->join('majors', 'products.major_id', '=', 'majors.major_id')
-            ->selectRaw('majors.major_name, SUM(product_statistics.views) as total_views, SUM(product_statistics.likes) as total_likes')
-            ->groupBy('majors.major_id', 'majors.major_name')
+        $statsByMajor = DB::table('majors as m')
+            ->leftJoin('products as p', 'p.major_id', '=', 'm.major_id')
+            ->leftJoin('product_statistics as ps', 'ps.product_id', '=', 'p.product_id')
+            ->selectRaw('m.major_name, COALESCE(SUM(ps.views), 0) as total_views, COALESCE(SUM(ps.likes), 0) as total_likes')
+            ->groupBy('m.major_id', 'm.major_name')
             ->orderByDesc('total_views')
             ->get();
 
@@ -512,10 +550,10 @@ class ChatBoxAi
             ->limit(15)
             ->get();
 
-        $categoriesWithCount = DB::table('categories')
-            ->leftJoin('products', 'categories.cate_id', '=', 'products.cate_id')
-            ->selectRaw('categories.category_name, COUNT(products.product_id) as product_count')
-            ->groupBy('categories.cate_id', 'categories.category_name')
+        $categoriesWithCount = DB::table('categories as c')
+            ->leftJoin('products as p', 'p.cate_id', '=', 'c.cate_id')
+            ->selectRaw('c.category_name, COUNT(p.product_id) as product_count')
+            ->groupBy('c.cate_id', 'c.category_name')
             ->orderByDesc('product_count')
             ->get();
 
@@ -526,9 +564,10 @@ class ChatBoxAi
             'MMT'     => DB::table('product_mmt')->count(),
         ];
 
-        $recentActivities = DB::table('activity_logs')
-            ->select('user_id', 'action', 'description', 'created_at')
-            ->latest('created_at')
+        $recentActivities = DB::table('activity_logs as al')
+            ->leftJoin('users as u', 'al.user_id', '=', 'u.user_id')
+            ->select('al.user_id', 'u.name as user_name', 'al.action', 'al.description', 'al.created_at')
+            ->latest('al.created_at')
             ->limit(10)
             ->get();
 
@@ -596,7 +635,7 @@ class ChatBoxAi
 
         $recentReviews = DB::table('reviews')
             ->join('products', 'reviews.product_id', '=', 'products.product_id')
-            ->join('users', 'reviews.teacher_id', '=', 'users.id')
+            ->join('users', 'reviews.teacher_id', '=', 'users.user_id')
             ->where('products.major_id', $majorId)
             ->select('products.title as product_title', 'users.name as teacher_name', 'reviews.comment', 'reviews.created_at')
             ->latest('reviews.created_at')
@@ -793,6 +832,10 @@ class ChatBoxAi
                 "13. Khuyến khích người dùng đăng nhập để xem thông tin chi tiết hơn.",
         };
 
+        $majorScopeRule = in_array($role, ['student', 'teacher'], true)
+            ? "\n14. BẮT BUỘC: Chỉ được nhắc tới và trả về sản phẩm thuộc ngành \"{$data['major_name']}\" ({$data['major_code']}). Nếu người dùng hỏi ngành khác, hãy từ chối lịch sự và không gợi ý sản phẩm ngành khác."
+            : "";
+
         return <<<PROMPT
         Bạn là trợ lý thông minh của hệ thống quản lý đồ án / tài liệu học thuật.
 
@@ -812,6 +855,7 @@ class ChatBoxAi
         9. Với đồ án MMT: có thể nêu công cụ mô phỏng, giao thức, topology
         {$greetingRule}
         {$scopeRule}
+        {$majorScopeRule}
 
         DỮ LIỆU HỆ THỐNG:
         {$dataJson}

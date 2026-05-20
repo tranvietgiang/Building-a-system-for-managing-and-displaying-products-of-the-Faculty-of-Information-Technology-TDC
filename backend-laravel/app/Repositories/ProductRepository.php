@@ -327,9 +327,16 @@ class ProductRepository extends BaseRepository
             ->get();
     }
 
-    public function productViewIdTeacher($productId)
+    public function productViewIdTeacher(int $productId, ?object $user = null)
     {
-        $product = DB::table('products')
+        $role = $user->role ?? null;
+        $majorId = $user->major_id ?? null;
+
+        if ($role === 'teacher' && !$majorId) {
+            return null;
+        }
+
+        $query = DB::table('products')
             ->join('categories', 'products.cate_id', '=', 'categories.cate_id')
             ->join('majors', 'products.major_id', '=', 'majors.major_id')
             ->leftJoin('users as approved_user', 'products.approved_by', '=', 'approved_user.user_id')
@@ -351,8 +358,13 @@ class ProductRepository extends BaseRepository
 
             ->where('products.product_id', $productId)
             ->where('student.role', 'student')
-            ->whereIn('products.status', ['pending', 'rejected', 'approved'])
-            ->first();
+            ->whereIn('products.status', ['pending', 'rejected', 'approved']);
+
+        if ($role === 'teacher') {
+            $query->where('products.major_id', $majorId);
+        }
+
+        $product = $query->first();
 
         if (!$product) {
             return null;
