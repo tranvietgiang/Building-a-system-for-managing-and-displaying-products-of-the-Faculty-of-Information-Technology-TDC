@@ -184,102 +184,102 @@ class CompareAi
     private function buildComparisonPrompt($a, $b, $projectType)
     {
         $commonPrompt = "
-So sánh 2 dự án sinh viên.
+        So sánh 2 dự án sinh viên.
 
-Trả lời JSON ONLY:
-{
-    \"similarity\": number (0-100),
-    \"level\": \"low\" | \"medium\" | \"high\",
-    \"reason\": \"giải thích ngắn bằng tiếng Việt\"
-}
-";
+        Trả lời JSON ONLY:
+        {
+            \"similarity\": number (0-100),
+            \"level\": \"low\" | \"medium\" | \"high\",
+            \"reason\": \"giải thích ngắn bằng tiếng Việt\"
+        }
+        ";
 
         if ($projectType === 'AI') {
             return $commonPrompt . "
-Dự án A (AI):
-Tiêu đề: {$a->title}
-Model: {$a->model_used}
-Framework: {$a->framework}
-Ngôn ngữ: {$a->language}
-Dataset: {$a->dataset_used}
-Độ chính xác: {$a->accuracy_score}
+        Dự án A (AI):
+        Tiêu đề: {$a->title}
+        Model: {$a->model_used}
+        Framework: {$a->framework}
+        Ngôn ngữ: {$a->language}
+        Dataset: {$a->dataset_used}
+        Độ chính xác: {$a->accuracy_score}
 
-Dự án B (AI):
-Tiêu đề: {$b['title']}
-Model: {$b['model_used']}
-Framework: {$b['framework']}
-Ngôn ngữ: {$b['language']}
-Dataset: {$b['dataset_used']}
-Độ chính xác: {$b['accuracy_score']}
+        Dự án B (AI):
+        Tiêu đề: {$b['title']}
+        Model: {$b['model_used']}
+        Framework: {$b['framework']}
+        Ngôn ngữ: {$b['language']}
+        Dataset: {$b['dataset_used']}
+        Độ chính xác: {$b['accuracy_score']}
 
-So sánh dựa trên: Model, Framework, Ngôn ngữ, Dataset sử dụng.
-";
+        So sánh dựa trên: Model, Framework, Ngôn ngữ, Dataset sử dụng.
+        ";
         } elseif ($projectType === 'CNTT') {
             return $commonPrompt . "
-Dự án A (CNTT):
-Tiêu đề: {$a->title}
-Ngôn ngữ lập trình: {$a->programming_language}
-Framework: {$a->framework}
-Cơ sở dữ liệu: {$a->database_used}
+        Dự án A (CNTT):
+        Tiêu đề: {$a->title}
+        Ngôn ngữ lập trình: {$a->programming_language}
+        Framework: {$a->framework}
+        Cơ sở dữ liệu: {$a->database_used}
 
-Dự án B (CNTT):
-Tiêu đề: {$b['title']}
-Ngôn ngữ lập trình: {$b['programming_language']}
-Framework: {$b['framework']}
-Cơ sở dữ liệu: {$b['database_used']}
+        Dự án B (CNTT):
+        Tiêu đề: {$b['title']}
+        Ngôn ngữ lập trình: {$b['programming_language']}
+        Framework: {$b['framework']}
+        Cơ sở dữ liệu: {$b['database_used']}
 
-So sánh dựa trên: Ngôn ngữ lập trình, Framework, Cơ sở dữ liệu.
-";
+        So sánh dựa trên: Ngôn ngữ lập trình, Framework, Cơ sở dữ liệu.
+        ";
         } elseif ($projectType === 'Multimedia') {
             return $commonPrompt . "
-Dự án A (Multimedia):
-Tiêu đề: {$a->title}
-Công cụ mô phỏng: {$a->simulation_tool}
-Giao thức mạng: {$a->network_protocol}
-Loại hệ thống: {$a->topology_type}
-File config: {$a->config_file}
+        Dự án A (Multimedia):
+        Tiêu đề: {$a->title}
+        Công cụ mô phỏng: {$a->simulation_tool}
+        Giao thức mạng: {$a->network_protocol}
+        Loại hệ thống: {$a->topology_type}
+        File config: {$a->config_file}
 
-Dự án B (Multimedia):
-Tiêu đề: {$b['title']}
-Công cụ mô phỏng: {$b['simulation_tool']}
-Giao thức mạng: {$b['network_protocol']}
-Loại hệ thống: {$b['topology_type']}
-File config: {$b['config_file']}
+        Dự án B (Multimedia):
+        Tiêu đề: {$b['title']}
+        Công cụ mô phỏng: {$b['simulation_tool']}
+        Giao thức mạng: {$b['network_protocol']}
+        Loại hệ thống: {$b['topology_type']}
+        File config: {$b['config_file']}
 
-So sánh dựa trên: Công cụ mô phỏng, Giao thức mạng, Loại hệ thống.
-";
+        So sánh dựa trên: Công cụ mô phỏng, Giao thức mạng, Loại hệ thống.
+        ";
         } elseif ($projectType === 'Graphics') {
             return $commonPrompt . "
-Dự án A (Đồ họa):
-Tiêu đề: {$a->title}
-Loại thiết kế: {$a->design_type}
-Công cụ sử dụng: {$a->tools_used}
-Link Drive: {$a->drive_link}
-Link Behance: {$a->behance_link}
+        Dự án A (Đồ họa):
+        Tiêu đề: {$a->title}
+        Loại thiết kế: {$a->design_type}
+        Công cụ sử dụng: {$a->tools_used}
+        Link Drive: {$a->drive_link}
+        Link Behance: {$a->behance_link}
 
-Dự án B (Đồ họa):
-Tiêu đề: {$b['title']}
-Loại thiết kế: {$b['design_type']}
-Công cụ sử dụng: {$b['tools_used']}
-Link Drive: {$b['drive_link']}
-Link Behance: {$b['behance_link']}
+        Dự án B (Đồ họa):
+        Tiêu đề: {$b['title']}
+        Loại thiết kế: {$b['design_type']}
+        Công cụ sử dụng: {$b['tools_used']}
+        Link Drive: {$b['drive_link']}
+        Link Behance: {$b['behance_link']}
 
-So sánh dựa trên: Loại thiết kế, Công cụ sử dụng, Phong cách thiết kế.
-";
+        So sánh dựa trên: Loại thiết kế, Công cụ sử dụng, Phong cách thiết kế.
+        ";
         }
 
         // Default for other types
         return $commonPrompt . "
-Dự án A:
-Tiêu đề: {$a->title}
-Mô tả: {$a->description}
+        Dự án A:
+        Tiêu đề: {$a->title}
+        Mô tả: {$a->description}
 
-Dự án B:
-Tiêu đề: {$b['title']}
-Mô tả: {$b['description']}
+        Dự án B:
+        Tiêu đề: {$b['title']}
+        Mô tả: {$b['description']}
 
-So sánh độ tương đồng giữa 2 dự án này.
-";
+        So sánh độ tương đồng giữa 2 dự án này.
+        ";
     }
 
     private function formatProduct($p)

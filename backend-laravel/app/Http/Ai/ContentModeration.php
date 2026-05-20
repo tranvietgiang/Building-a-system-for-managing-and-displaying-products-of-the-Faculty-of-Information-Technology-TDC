@@ -146,68 +146,6 @@ class ContentModeration
         }
     }
 
-    private function buildPrompt(array $payload, string $role = 'student'): string
-    {
-        $json = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-
-        return <<<PROMPT
-        You are an AI content moderation system for a student scientific research platform.
-
-        User role: {$role}
-
-        ROLE RULES:
-        - student: strict moderation, block sensitive or unsafe content immediately
-        - teacher: allow more flexibility but still block NSFW, violence, illegal, stolen content
-
-        Your tasks:
-        - Analyze product image and content
-        - Check educational suitability
-        - Check NSFW / nudity / sexual content
-        - Check violence / dangerous content
-        - Check spam / meme / low quality content
-        - Check major relevance
-        - Check watermark or stolen content
-
-        Product data:
-        {$json}
-
-        IMPORTANT RULES:
-        - If role = student → stricter scoring (lower tolerance)
-        - If role = teacher → allow borderline educational content
-        - Always return valid JSON only
-        - No explanation outside JSON
-
-        Return format:
-
-        {
-        "approved": true,
-        "score": 0-100,
-        "reason": "short explanation in Vietnamese for teacher",
-        "violations": [],
-        "role": "{$role}",
-        "checks": {
-            "image_related": true,
-            "educational": true,
-            "adult_or_sensitive": false,
-            "violence_or_danger": false,
-            "spam_or_meme": false,
-            "major_match": true,
-            "watermark_or_stolen_signal": false
-        }
-        }
-
-        Reject (approved=false) if:
-        - NSFW / sexual content detected
-        - violence/gore detected
-        - stolen/watermark heavy content (for student always reject)
-        PROMPT;
-    }
-
-    private function safeJson($data): string
-    {
-        return json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-    }
-
     private function parseJson(string $text): ?array
     {
         $text = trim($text);
@@ -251,7 +189,9 @@ class ContentModeration
             return $imageUrl;
         }
 
-        return rtrim(config('app.url', ''), '/') . '/' . ltrim($imageUrl, '/');
+        $appUrl = (string) config('app.url', '');
+
+        return rtrim($appUrl, '/') . '/' . ltrim($imageUrl, '/');
     }
 
     private function isSupportedImageReference(string $imageUrl): bool
@@ -302,5 +242,73 @@ class ContentModeration
             'violations' => [$reason],
             'raw' => null,
         ];
+    }
+
+    private function buildPrompt(array $payload, string $role = 'student'): string
+    {
+        $json = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+
+        return <<<PROMPT
+        Bạn là hệ thống AI kiểm duyệt nội dung cho nền tảng nghiên cứu khoa học sinh viên.
+
+        Vai trò người dùng: {$role}
+
+        QUY TẮC THEO VAI TRÒ:
+        - student: kiểm duyệt nghiêm ngặt, chặn ngay nội dung nhạy cảm, không an toàn, 
+        spam, ảnh chế, nội dung không liên quan học thuật hoặc có dấu hiệu sao chép
+
+        - teacher: linh hoạt hơn với nội dung mang tính giáo dục hoặc minh họa học thuật, 
+        nhưng vẫn phải chặn nội dung 18+, bạo lực, bất hợp pháp,nội dung gây nguy hiểm, 
+        watermark nặng hoặc có dấu hiệu đánh cắp
+
+        Nhiệm vụ:
+        - Phân tích hình ảnh và nội dung sản phẩm
+        - Kiểm tra mức độ phù hợp với môi trường giáo dục và nghiên cứu
+        - Kiểm tra nội dung 18+ / khỏa thân / tình dục
+        - Kiểm tra nội dung bạo lực / nguy hiểm / phản cảm
+        - Kiểm tra spam / ảnh chế / nội dung chất lượng thấp
+        - Kiểm tra độ liên quan với chuyên ngành hoặc lĩnh vực học thuật
+        - Kiểm tra watermark hoặc dấu hiệu nội dung bị sao chép / đánh cắp
+        - Kiểm tra nội dung gây hiểu lầm, thông tin sai lệch hoặc phi học thuật
+        - Kiểm tra ngôn từ thô tục, xúc phạm hoặc thiếu văn minh
+        - Kiểm tra hình ảnh mờ, chất lượng thấp hoặc không liên quan sản phẩm
+        - Kiểm tra dấu hiệu quảng cáo, câu view hoặc nội dung giải trí không phù hợp
+        - Kiểm tra mức độ chuyên nghiệp và tính nghiêm túc của nội dung
+        - Kiểm tra nội dung có vi phạm pháp luật hoặc đạo đức học thuật hay không
+        - Kiểm tra nội dung có mang tính phân biệt đối xử, kích động hoặc gây tranh cãi không phù hợp
+
+        Dữ liệu sản phẩm:
+        {$json}
+
+        QUY TẮC QUAN TRỌNG:
+        - Nếu role = student → chấm điểm nghiêm ngặt hơn
+        - Nếu role = teacher → cho phép một số nội dung giáo dục ở mức ranh giới
+        - Chỉ trả về JSON hợp lệ
+        - Không giải thích ngoài JSON
+
+        Định dạng trả về:
+
+        {
+            "approved": true,
+            "score": 0-100,
+            "reason": "giải thích ngắn gọn bằng tiếng Việt",
+            "violations": [],
+            "role": "{$role}",
+            "checks": {
+                "image_related": true,
+                "educational": true,
+                "adult_or_sensitive": false,
+                "violence_or_danger": false,
+                "spam_or_meme": false,
+                "major_match": true,
+                "watermark_or_stolen_signal": false
+            }
+        }
+
+        Từ chối (approved=false) nếu:
+        - Phát hiện nội dung 18+ / tình dục
+        - Phát hiện bạo lực / máu me
+        - Có watermark nặng hoặc dấu hiệu nội dung bị đánh cắp
+        PROMPT;
     }
 }

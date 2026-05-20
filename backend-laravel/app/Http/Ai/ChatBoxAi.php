@@ -578,7 +578,7 @@ class ChatBoxAi
         $topStats = DB::table('product_statistics')
             ->join('products', 'product_statistics.product_id', '=', 'products.product_id')
             ->where('products.major_id', $majorId)
-            ->where('products.status', 'approved') // ✅
+            ->where('products.status', 'approved') //
             ->select('products.title', 'product_statistics.views', 'product_statistics.likes')
             ->orderByDesc('product_statistics.views')
             ->limit(10)
@@ -587,7 +587,7 @@ class ChatBoxAi
         $popularTags = DB::table('product_tags')
             ->join('products', 'product_tags.product_id', '=', 'products.product_id')
             ->where('products.major_id', $majorId)
-            ->where('products.status', 'approved') // ✅
+            ->where('products.status', 'approved') // 
             ->selectRaw('product_tags.tag_name, COUNT(*) as total')
             ->groupBy('product_tags.tag_name')
             ->orderByDesc('total')
@@ -606,7 +606,7 @@ class ChatBoxAi
         $categories = DB::table('categories')
             ->join('products', 'categories.cate_id', '=', 'products.cate_id')
             ->where('products.major_id', $majorId)
-            ->where('products.status', 'approved') // ✅
+            ->where('products.status', 'approved') // 
             ->selectRaw('categories.category_name, COUNT(*) as total')
             ->groupBy('categories.cate_id', 'categories.category_name')
             ->orderByDesc('total')
