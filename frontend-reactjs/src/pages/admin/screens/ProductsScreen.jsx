@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Eye, Heart, Search, Trash2 } from "lucide-react";
 import adminApi from "../../../api/admin.api";
+import { aiApi, productApi } from "../../../api";
 
 const statusOptions = [
   { value: "", label: "Tất cả trạng thái" },
@@ -17,10 +18,61 @@ const ProductsScreen = () => {
   const [perPage, setPerPage] = useState(12);
   const [pagination, setPagination] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [aiEnabled, setAiEnabled] = useState(false);
 
   const fetchProducts = async (targetPage = page) => {
     setLoading(true);
     try {
+      const keyword = filters.q.trim();
+
+      if (keyword && aiEnabled) {
+        const res = await aiApi.searchProducts(keyword);
+        let nextProducts = res.products || [];
+
+        if (filters.status) {
+          nextProducts = nextProducts.filter((product) => product.status === filters.status);
+        }
+
+        if (filters.major_id) {
+          nextProducts = nextProducts.filter(
+            (product) => String(product.major_id) === String(filters.major_id),
+          );
+        }
+
+        setProducts(nextProducts);
+        setPagination({
+          current_page: 1,
+          from: nextProducts.length ? 1 : 0,
+          last_page: 1,
+          per_page: nextProducts.length || perPage,
+          to: nextProducts.length,
+          total: nextProducts.length,
+        });
+        return;
+      }
+
+      if (keyword) {
+        const res = await productApi.searchProducts({
+          q: keyword,
+          status: filters.status,
+          major_id: filters.major_id,
+          page: targetPage,
+          per_page: perPage,
+        });
+        const paginator = res.data || {};
+
+        setProducts(paginator.data || res.products || []);
+        setPagination({
+          current_page: paginator.current_page || 1,
+          from: paginator.from || 0,
+          last_page: paginator.last_page || 1,
+          per_page: paginator.per_page || perPage,
+          to: paginator.to || 0,
+          total: paginator.total ?? res.count ?? 0,
+        });
+        return;
+      }
+
       const res = await adminApi.getProducts({
         ...filters,
         page: targetPage,
@@ -49,7 +101,7 @@ const ProductsScreen = () => {
   useEffect(() => {
     setPage(1);
     fetchProducts(1);
-  }, [filters.status, filters.major_id, perPage]);
+  }, [filters.status, filters.major_id, perPage, aiEnabled]);
 
   const handleSearch = (event) => {
     event.preventDefault();
@@ -88,7 +140,7 @@ const ProductsScreen = () => {
   return (
     <div className="space-y-5">
       <form onSubmit={handleSearch} className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-        <div className="grid gap-3 md:grid-cols-[1fr_180px_220px_auto]">
+        <div className="grid gap-3 md:grid-cols-[1fr_180px_220px_120px_auto]">
           <label className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <input
@@ -117,6 +169,24 @@ const ProductsScreen = () => {
               <option key={major.major_id} value={major.major_id}>{major.major_name}</option>
             ))}
           </select>
+          <label className="flex h-11 items-center justify-center gap-2 rounded-lg border border-slate-200 px-3 text-xs font-medium text-slate-600">
+            <span>Scout</span>
+            <button
+              type="button"
+              onClick={() => setAiEnabled((prev) => !prev)}
+              className={`relative h-6 w-11 rounded-full transition ${
+                aiEnabled ? "bg-emerald-600" : "bg-slate-300"
+              }`}
+              aria-pressed={aiEnabled}
+              title={aiEnabled ? "Tắt AI Search" : "Bật AI Search"}
+            >
+              <span
+                className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition ${
+                  aiEnabled ? "left-5" : "left-0.5"
+                }`}
+              />
+            </button>
+          </label>
           <button type="submit" className="h-11 rounded-lg bg-emerald-600 px-5 font-semibold text-white hover:bg-emerald-700">
             Tìm
           </button>

@@ -151,7 +151,7 @@ const TeacherProductDetailScreen = () => {
     try {
       const data = await checkCompareProduct();
 
-      console.log("FULL DATA", data);
+      // console.log("FULL DATA", data);
 
       if (data?.status == true) {
         navigate("/nckh-compare", {

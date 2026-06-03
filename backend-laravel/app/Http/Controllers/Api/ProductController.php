@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProductViewRequest;
+use App\Models\Product;
 use App\Services\ProductService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class ProductController extends Controller
 {
@@ -39,6 +42,119 @@ class ProductController extends Controller
         return response()->json(
             $result
         );
+    }
+
+    public function searchProducts(Request $request)
+    {
+        $request->validate([
+            'q' => ['nullable', 'string', 'max:200'],
+            'status' => ['nullable', 'in:approved,pending,rejected'],
+            'major_id' => ['nullable', 'integer'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
+        ]);
+
+        $keyword = trim((string) $request->query('q', ''));
+        $perPage = (int) $request->query('per_page', 12);
+        $perPage = max(1, min($perPage, 100));
+        $user = Auth::guard('sanctum')->user() ?? $request->user();
+        $role = $user->role ?? 'guest';
+        $majorId = $request->query('major_id');
+        $status = $request->query('status');
+
+        $query = $this->baseProductSearchQuery();
+        $scoutIds = [];
+
+        if ($keyword !== '') {
+            $scoutIds = Product::search($keyword)->keys()->map(fn ($id) => (int) $id)->all();
+
+            if (empty($scoutIds)) {
+                return response()->json([
+                    'message' => 'Tìm kiếm thường thành công.',
+                    'query' => $keyword,
+                    'mode' => 'scout',
+                    'count' => 0,
+                    'products' => [],
+                    'data' => [
+                        'data' => [],
+                        'current_page' => 1,
+                        'from' => 0,
+                        'last_page' => 1,
+                        'per_page' => $perPage,
+                        'to' => 0,
+                        'total' => 0,
+                    ],
+                ]);
+            }
+
+            $query->whereIn('products.product_id', $scoutIds);
+        }
+
+        if (in_array($role, ['student', 'teacher'], true) && $user?->major_id) {
+            $query->where('products.major_id', $user->major_id);
+        } elseif ($role !== 'admin') {
+            $query->where('products.status', 'approved');
+        }
+
+        if ($role === 'admin' && $status) {
+            $query->where('products.status', $status);
+        }
+
+        if ($role === 'admin' && $majorId) {
+            $query->where('products.major_id', $majorId);
+        }
+
+        if ($keyword !== '' && !empty($scoutIds)) {
+            $placeholders = implode(',', array_fill(0, count($scoutIds), '?'));
+            $query->orderByRaw("FIELD(products.product_id, {$placeholders})", $scoutIds);
+        } else {
+            $query->orderByDesc('products.submitted_at')
+                ->orderByDesc('products.created_at');
+        }
+
+        $paginator = $query->paginate($perPage);
+
+        return response()->json([
+            'message' => 'Tìm kiếm thường thành công.',
+            'query' => $keyword,
+            'mode' => 'scout',
+            'count' => $paginator->total(),
+            'products' => $paginator->items(),
+            'data' => $paginator,
+        ]);
+    }
+
+    private function baseProductSearchQuery()
+    {
+        return $this->applyProductSearchJoins(Product::query());
+    }
+
+    private function applyProductSearchJoins($query)
+    {
+        return $query
+            ->leftJoin('users', 'products.user_id', '=', 'users.user_id')
+            ->leftJoin('majors', 'products.major_id', '=', 'majors.major_id')
+            ->leftJoin('categories', 'products.cate_id', '=', 'categories.cate_id')
+            ->leftJoin('product_statistics', 'products.product_id', '=', 'product_statistics.product_id')
+            ->select(
+                'products.product_id',
+                'products.major_id',
+                'products.cate_id',
+                'products.title',
+                'products.description',
+                'products.thumbnail',
+                'products.status',
+                'products.github_link',
+                'products.demo_link',
+                'products.submitted_at',
+                'products.created_at',
+                'users.name as student_name',
+                'users.user_id as student_id',
+                'majors.major_name',
+                'majors.major_code',
+                'categories.category_name',
+                DB::raw('COALESCE(product_statistics.views, 0) as views'),
+                DB::raw('COALESCE(product_statistics.likes, 0) as likes')
+            );
     }
 
     public function productViewIdTeacher(ProductViewRequest $p_rq)

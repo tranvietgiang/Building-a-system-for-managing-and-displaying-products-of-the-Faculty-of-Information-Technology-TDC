@@ -65,7 +65,15 @@ class SearchAi
         $user = $this->resolveUser($request);
         $role = $user->role ?? 'guest';
         $majorId = $user->major_id ?? null;
-        $intent = $this->detectSearchIntent($message);
+        $localMajorCode = $this->detectLocalMajorCode($message);
+        $intent = $localMajorCode && $this->cleanKeywordForMajor($message, $localMajorCode) === ''
+            ? $this->normalizeIntent([
+                'keyword' => '',
+                'major_code' => $localMajorCode,
+                'sort' => 'relevance',
+                'limit' => 12,
+            ], $message)
+            : $this->mergeLocalIntent($this->detectSearchIntent($message), $message);
 
         if ($this->isRestrictedRoleWithoutMajor($role, $majorId)) {
             return response()->json([
@@ -133,7 +141,9 @@ class SearchAi
         $intentCode = strtoupper($intentMajorCode);
 
         if ($intentCode === 'GRAPHIC') {
-            return str_contains($userCode, 'GRAPHIC') || str_contains($userCode, 'GR');
+            return str_contains($userCode, 'GRAPHIC')
+                || str_contains($userCode, 'TKDH')
+                || str_contains($userCode, 'GR');
         }
 
         if ($intentCode === 'CNTT') {
@@ -141,6 +151,191 @@ class SearchAi
         }
 
         return str_contains($userCode, $intentCode);
+    }
+
+    private function mergeLocalIntent(array $intent, string $message): array
+    {
+        $localMajorCode = $this->detectLocalMajorCode($message);
+
+        if (!$localMajorCode) {
+            return $intent;
+        }
+
+        $intent['major_code'] = $intent['major_code'] ?: $localMajorCode;
+
+        $intent['keyword'] = $this->cleanKeywordForMajor(
+            (string) ($intent['keyword'] ?: $message),
+            $intent['major_code']
+        );
+
+        if (($intent['sort'] ?? 'relevance') === 'relevance') {
+            $intent['sort'] = 'relevance';
+        }
+
+        return $intent;
+    }
+
+    private function detectLocalMajorCode(string $message): ?string
+    {
+        $text = mb_strtolower($message, 'UTF-8');
+
+        $majorKeywords = [
+            'GRAPHIC' => ['graphic', 'graphics', 'design', 'designer', 'ui/ux', 'figma', 'poster', 'logo', 'branding', 'tkdh'],
+            'AI' => ['ai', 'artificial intelligence', 'machine learning', 'deep learning', 'python'],
+            'CNTT' => ['cntt', 'it', 'web', 'mobile', 'laravel', 'react', 'php'],
+            'MMT' => ['mmt', 'network', 'cybersecurity', 'security', 'cisco'],
+        ];
+
+        foreach ($majorKeywords as $majorCode => $keywords) {
+            foreach ($keywords as $keyword) {
+                if (str_contains($text, $keyword)) {
+                    return $majorCode;
+                }
+            }
+        }
+
+        $accentless = $this->removeVietnameseAccents($text);
+
+        if (
+            str_contains($accentless, 'do hoa')
+            || str_contains($accentless, 'thiet ke do hoa')
+        ) {
+            return 'GRAPHIC';
+        }
+
+        if (str_contains($accentless, 'tri tue nhan tao') || str_contains($accentless, 'hoc may')) {
+            return 'AI';
+        }
+
+        if (str_contains($accentless, 'cong nghe thong tin') || str_contains($accentless, 'phan mem')) {
+            return 'CNTT';
+        }
+
+        if (str_contains($accentless, 'mang may tinh') || str_contains($accentless, 'bao mat')) {
+            return 'MMT';
+        }
+
+        return null;
+    }
+
+    private function cleanKeywordForMajor(string $keyword, ?string $majorCode): string
+    {
+        $normalized = $this->normalizeSearchText($keyword);
+
+        if ($normalized === '') {
+            return '';
+        }
+
+        if ($majorCode) {
+            foreach ($this->majorAliases($majorCode) as $alias) {
+                $normalized = preg_replace('/\b' . preg_quote($alias, '/') . '\b/u', ' ', $normalized);
+            }
+        }
+
+        $genericPhrases = [
+            'tim kiem', 'tim', 'kiem', 'cho toi', 'cho minh', 'xem', 'lay',
+            'san pham', 'do an', 'du an', 'de tai', 'bai lam', 'bai tap',
+            'nganh hoc', 'chuyen nganh', 'nganh', 'major', 'student',
+            'products', 'product', 'projects', 'project',
+            'tat ca', 'cac', 'nhung', 've', 'thuoc', 'trong', 'cua', 'cho',
+            'phu hop', 'lien quan', 'danh sach', 'moi nhat', 'nhieu luot xem',
+            'da duyet', 'approved',
+        ];
+
+        foreach ($genericPhrases as $phrase) {
+            $normalized = preg_replace('/\b' . preg_quote($phrase, '/') . '\b/u', ' ', $normalized);
+        }
+
+        if (strtoupper((string) $majorCode) === 'GRAPHIC') {
+            $normalized = preg_replace('/\bthiet ke\b/u', ' ', $normalized);
+        }
+
+        $words = collect(preg_split('/\s+/', trim($normalized)))
+            ->filter(fn($word) => mb_strlen($word) >= 2)
+            ->values();
+
+        return $words->implode(' ');
+    }
+
+    private function normalizeSearchText(string $value): string
+    {
+        $value = $this->removeVietnameseAccents(mb_strtolower($value, 'UTF-8'));
+        $value = preg_replace('/[^a-z0-9]+/u', ' ', $value);
+
+        return trim(preg_replace('/\s+/', ' ', $value));
+    }
+
+    private function majorAliases(string $majorCode): array
+    {
+        return match (strtoupper($majorCode)) {
+            'GRAPHIC' => [
+                'thiet ke do hoa', 'do hoa', 'graphic design', 'graphics', 'graphic', 'tkdh',
+            ],
+            'CNTT' => [
+                'cong nghe thong tin', 'information technology', 'phan mem',
+                'lap trinh', 'cntt', 'it',
+            ],
+            'MMT' => [
+                'mang may tinh', 'computer networks', 'computer network',
+                'network', 'cybersecurity', 'bao mat', 'mmt',
+            ],
+            'AI' => [
+                'tri tue nhan tao', 'artificial intelligence', 'machine learning',
+                'deep learning', 'hoc may', 'ai',
+            ],
+            default => [mb_strtolower($majorCode, 'UTF-8')],
+        };
+    }
+
+    private function isMajorOnlyKeyword(string $keyword, ?string $majorCode): bool
+    {
+        if (!$majorCode || trim($keyword) === '') {
+            return false;
+        }
+
+        if ($this->detectLocalMajorCode($keyword) !== $majorCode) {
+            return false;
+        }
+
+        $normalized = $this->removeVietnameseAccents(mb_strtolower($keyword, 'UTF-8'));
+        $aliases = match (strtoupper($majorCode)) {
+            'GRAPHIC' => ['thiet ke do hoa', 'graphic design', 'do hoa', 'graphics', 'graphic', 'tkdh'],
+            'CNTT' => ['cong nghe thong tin', 'information technology', 'phan mem', 'cntt', 'it'],
+            'MMT' => ['mang may tinh', 'computer networks', 'computer network', 'network', 'bao mat', 'mmt'],
+            'AI' => ['tri tue nhan tao', 'artificial intelligence', 'machine learning', 'deep learning', 'hoc may', 'ai'],
+            default => [mb_strtolower($majorCode, 'UTF-8')],
+        };
+
+        foreach ($aliases as $alias) {
+            $normalized = str_replace($alias, ' ', $normalized);
+        }
+
+        return trim(preg_replace('/[^a-z0-9]+/', ' ', $normalized)) === '';
+    }
+
+    private function removeVietnameseAccents(string $value): string
+    {
+        $from = [
+            'à', 'á', 'ạ', 'ả', 'ã', 'â', 'ầ', 'ấ', 'ậ', 'ẩ', 'ẫ', 'ă', 'ằ', 'ắ', 'ặ', 'ẳ', 'ẵ',
+            'è', 'é', 'ẹ', 'ẻ', 'ẽ', 'ê', 'ề', 'ế', 'ệ', 'ể', 'ễ',
+            'ì', 'í', 'ị', 'ỉ', 'ĩ',
+            'ò', 'ó', 'ọ', 'ỏ', 'õ', 'ô', 'ồ', 'ố', 'ộ', 'ổ', 'ỗ', 'ơ', 'ờ', 'ớ', 'ợ', 'ở', 'ỡ',
+            'ù', 'ú', 'ụ', 'ủ', 'ũ', 'ư', 'ừ', 'ứ', 'ự', 'ử', 'ữ',
+            'ỳ', 'ý', 'ỵ', 'ỷ', 'ỹ',
+            'đ',
+        ];
+
+        $to = [
+            'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a',
+            'e', 'e', 'e', 'e', 'e', 'e', 'e', 'e', 'e', 'e', 'e',
+            'i', 'i', 'i', 'i', 'i',
+            'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o',
+            'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u',
+            'y', 'y', 'y', 'y', 'y',
+            'd',
+        ];
+
+        return str_replace($from, $to, $value);
     }
 
     private function detectSearchIntent(string $message): array
@@ -165,6 +360,36 @@ class SearchAi
         - mạng máy tính, network, cybersecurity, bảo mật => MMT
         - đồ họa, graphic, design, ui/ux, poster, logo => GRAPHIC
         PROMPT;
+
+        $systemPrompt = <<<'PROMPT'
+You classify Vietnamese/English product search queries for a student project gallery.
+Return valid JSON only. No markdown, no explanation.
+
+JSON schema:
+{
+  "keyword": "specific product/topic keyword only, or empty string",
+  "major_code": "AI|CNTT|MMT|GRAPHIC|null",
+  "category": "category name if explicitly mentioned, otherwise null",
+  "status": "approved|pending|rejected|null",
+  "sort": "relevance|newest|views|likes",
+  "limit": 12
+}
+
+Major mapping:
+- "do hoa", "đồ họa", "thiết kế đồ họa", "thiet ke do hoa", "graphic", "graphic design", "poster", "logo", "branding", "figma", "ui/ux" => GRAPHIC
+- "tri tue nhan tao", "trí tuệ nhân tạo", "AI", "artificial intelligence", "machine learning", "hoc may", "deep learning" => AI
+- "cong nghe thong tin", "công nghệ thông tin", "CNTT", "IT", "phan mem", "web", "mobile", "lap trinh" => CNTT
+- "mang may tinh", "mạng máy tính", "MMT", "network", "cybersecurity", "bao mat" => MMT
+
+Keyword rules:
+- If the user only asks for a major, set keyword to "" and set major_code.
+  Examples: "đồ họa", "san pham do hoa", "do an thiet ke do hoa" => keyword "", major_code "GRAPHIC".
+- Remove generic words from keyword: "tim", "kiem", "san pham", "do an", "du an", "de tai", "nganh".
+- Keep concrete topic/product words:
+  "logo do hoa" => keyword "logo", major_code "GRAPHIC".
+  "poster thiet ke do hoa" => keyword "poster", major_code "GRAPHIC".
+- If the user asks "moi nhat", use sort "newest"; "xem nhieu" use "views"; "yeu thich/like" use "likes".
+PROMPT;
 
         try {
             $response = Http::withHeaders([
@@ -237,6 +462,7 @@ class SearchAi
     private function normalizeIntent(array $intent, string $fallbackKeyword): array
     {
         $majorCode = strtoupper((string) ($intent['major_code'] ?? ''));
+        $majorCode = $majorCode === 'TKDH' ? 'GRAPHIC' : $majorCode;
         $majorCode = in_array($majorCode, ['AI', 'CNTT', 'MMT', 'GRAPHIC'], true) ? $majorCode : null;
 
         $status = $intent['status'] ?? null;
@@ -306,7 +532,7 @@ class SearchAi
         }
 
         if ($intent['major_code']) {
-            $query->where('majors.major_code', 'like', '%' . $intent['major_code'] . '%');
+            $query->whereIn(DB::raw('UPPER(majors.major_code)'), $this->majorCodeAliases($intent['major_code']));
         }
 
         if ($intent['category']) {
@@ -354,16 +580,61 @@ class SearchAi
             'newest' => $query->orderByDesc('products.submitted_at'),
             'views' => $query->orderByDesc('views'),
             'likes' => $query->orderByDesc('likes'),
-            default => $query->orderByDesc('views')->orderByDesc('products.submitted_at'),
+            default => $this->orderByRelevance($query, $intent),
         };
 
         $products = $query->limit($intent['limit'])->get();
 
         if ($products->isEmpty() && $intent['keyword'] !== '') {
-            return $this->fallbackSearch($intent, $role, $majorId);
+            $fallbackProducts = $this->fallbackSearch($intent, $role, $majorId);
+
+            if ($fallbackProducts->isNotEmpty()) {
+                return $fallbackProducts;
+            }
+
+            if ($intent['major_code']) {
+                $majorOnlyIntent = array_merge($intent, ['keyword' => '']);
+
+                return $this->searchProducts($majorOnlyIntent, $role, $majorId);
+            }
         }
 
         return $products;
+    }
+
+    private function majorCodeAliases(string $majorCode): array
+    {
+        return match (strtoupper($majorCode)) {
+            'GRAPHIC' => ['TKDH', 'GRAPHIC', 'GRAPHICS', 'GR'],
+            'CNTT' => ['CNTT', 'IT'],
+            'MMT' => ['MMT', 'NETWORK'],
+            'AI' => ['AI'],
+            default => [strtoupper($majorCode)],
+        };
+    }
+
+    private function orderByRelevance($query, array $intent): void
+    {
+        if ($intent['major_code']) {
+            $aliases = $this->majorCodeAliases($intent['major_code']);
+            $placeholders = implode(',', array_fill(0, count($aliases), '?'));
+            $query->orderByRaw("CASE WHEN UPPER(majors.major_code) IN ({$placeholders}) THEN 0 ELSE 1 END", $aliases);
+        }
+
+        if ($intent['keyword'] !== '') {
+            $keyword = $intent['keyword'];
+            $query->orderByRaw(
+                'CASE
+                    WHEN products.title LIKE ? THEN 0
+                    WHEN categories.category_name LIKE ? THEN 1
+                    WHEN majors.major_name LIKE ? OR majors.major_code LIKE ? THEN 2
+                    ELSE 3
+                END',
+                [$keyword . '%', '%' . $keyword . '%', '%' . $keyword . '%', '%' . $keyword . '%']
+            );
+        }
+
+        $query->orderByDesc('views')->orderByDesc('products.submitted_at');
     }
 
     private function fallbackSearch(array $intent, string $role, ?int $majorId)
@@ -394,6 +665,10 @@ class SearchAi
             $query->where('products.major_id', $majorId);
         } elseif ($role !== 'admin') {
             $query->where('products.status', 'approved');
+        }
+
+        if ($intent['major_code']) {
+            $query->whereIn(DB::raw('UPPER(majors.major_code)'), $this->majorCodeAliases($intent['major_code']));
         }
 
         $words = collect(preg_split('/\s+/', $intent['keyword']))

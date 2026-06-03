@@ -74,6 +74,7 @@ Route::prefix('v1')->group(function () {
 
 
     Route::middleware('auth:sanctum')->group(function () {
+        Route::get('/products/search', [ProductController::class, 'searchProducts']);
         Route::get('/product/{id}', [ProductController::class, 'productViewId']);
         Route::get('/products', [ProductController::class, 'productAll']);
     });
@@ -123,6 +124,7 @@ Route::prefix('v1')->group(function () {
 */
 Route::prefix('visitor')->group(function () {
     Route::get('/products', [ProductController::class, 'getProductsVisitor']);
+    Route::get('/products/search', [ProductController::class, 'searchProducts']);
     Route::get('/majors', [MajorController::class, 'getMajorAll']);
     Route::get('/product/{id}', [ProductController::class, 'getVisitorProductById']);
     Route::post('/product/{id}/view', [ProductController::class, 'incrementView']);
