@@ -21,7 +21,7 @@ export const useHandleSubmitRejection = (
         feedback,
       });
 
-      console.log("hi", res);
+      // console.log("hi", res);
 
       setShowFeedbackModal(false);
       setFeedback("");

@@ -23,8 +23,8 @@ export default function useUploadPublishedCount() {
           err.response?.status === 404 ||
           err.response?.data.uploadCount_result === false
         ) {
-          console.log(err.response?.data.message);
-          console.log(err);
+          // console.log(err.response?.data.message);
+          // console.log(err);
           setError(err.response?.data.message);
         } else {
           setError("Không tải được dữ liệu");

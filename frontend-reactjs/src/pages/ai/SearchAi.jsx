@@ -20,6 +20,7 @@ import {
 import useSearchAi from "../../hooks/ai/useSearchAi";
 import useDebounce from "../../hooks/common/useDebounce";
 import { ROLE } from "../../utils/constants";
+import useProductSearch from "../../hooks/useProduct/useProductSearch";
 
 const getStatusLabel = (status) => {
   switch (status) {
@@ -135,6 +136,7 @@ export default function SearchAi({
   const historyKey = `ai_search_history_${role}_${userKey}`;
 
   const [keyword, setKeyword] = useState("");
+  const [aiEnabled, setAiEnabled] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchHistory, setSearchHistory] = useState(() => {
     try {
@@ -145,12 +147,22 @@ export default function SearchAi({
   });
   const { searchAi, clearSearch, searchResult, searchError, loadingSearchAi } =
     useSearchAi();
+  const {
+    searchProducts,
+    clearProductSearch,
+    productSearchResult,
+    productSearchError,
+    loadingProductSearch,
+  } = useProductSearch({ visitor: role === "guest" });
   const debouncedKeyword = useDebounce(keyword, 700);
   const lastSearchRef = useRef("");
   const searchConfig = getRoleSearchConfig(role, majorName);
+  const activeResult = aiEnabled ? searchResult : productSearchResult;
+  const activeError = aiEnabled ? searchError : productSearchError;
+  const activeLoading = aiEnabled ? loadingSearchAi : loadingProductSearch;
   const products = useMemo(
-    () => (Array.isArray(searchResult?.products) ? searchResult.products : []),
-    [searchResult],
+    () => (Array.isArray(activeResult?.products) ? activeResult.products : []),
+    [activeResult],
   );
   const ITEMS_PER_PAGE = 6;
   const totalPages = Math.ceil(products.length / ITEMS_PER_PAGE);
@@ -179,10 +191,13 @@ export default function SearchAi({
 
   const runSearch = async (value) => {
     const nextKeyword = String(value || "").trim();
-    if (!nextKeyword || lastSearchRef.current === nextKeyword) return;
+    const searchKey = `${aiEnabled ? "ai" : "normal"}:${nextKeyword}`;
+    if (!nextKeyword || lastSearchRef.current === searchKey) return;
 
-    lastSearchRef.current = nextKeyword;
-    const result = await searchAi(nextKeyword);
+    lastSearchRef.current = searchKey;
+    const result = aiEnabled
+      ? await searchAi(nextKeyword)
+      : await searchProducts({ q: nextKeyword, per_page: 30 });
     setCurrentPage(1);
     if (result) saveSearchHistory(nextKeyword);
   };
@@ -197,6 +212,7 @@ export default function SearchAi({
     lastSearchRef.current = "";
     setCurrentPage(1);
     clearSearch();
+    clearProductSearch();
   };
 
   const handleSuggestionClick = async (suggestion) => {
@@ -229,14 +245,45 @@ export default function SearchAi({
       return;
     }
 
-    if (nextKeyword.length < 2 || lastSearchRef.current === nextKeyword) return;
+    const searchKey = `${aiEnabled ? "ai" : "normal"}:${nextKeyword}`;
+    if (nextKeyword.length < 2 || lastSearchRef.current === searchKey) return;
 
-    lastSearchRef.current = nextKeyword;
-    searchAi(nextKeyword).then((result) => {
+    lastSearchRef.current = searchKey;
+    const request = aiEnabled
+      ? searchAi(nextKeyword)
+      : searchProducts({ q: nextKeyword, per_page: 30 });
+
+    request.then((result) => {
       setCurrentPage(1);
       if (result) saveSearchHistory(nextKeyword);
     });
-  }, [debouncedKeyword, clearSearch, searchAi, saveSearchHistory]);
+  }, [
+    aiEnabled,
+    debouncedKeyword,
+    clearSearch,
+    searchAi,
+    searchProducts,
+    saveSearchHistory,
+  ]);
+
+  useEffect(() => {
+    lastSearchRef.current = "";
+    clearSearch();
+    clearProductSearch();
+
+    const nextKeyword = keyword.trim();
+    if (nextKeyword.length < 2) return;
+
+    const request = aiEnabled
+      ? searchAi(nextKeyword)
+      : searchProducts({ q: nextKeyword, per_page: 30 });
+
+    lastSearchRef.current = `${aiEnabled ? "ai" : "normal"}:${nextKeyword}`;
+    request.then((result) => {
+      setCurrentPage(1);
+      if (result) saveSearchHistory(nextKeyword);
+    });
+  }, [aiEnabled]);
 
   const Wrapper = embedded ? "section" : "main";
 
@@ -247,8 +294,8 @@ export default function SearchAi({
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <div className="mb-2 inline-flex items-center gap-2 rounded-md border border-sky-100 bg-sky-50 px-2.5 py-1 text-xs font-medium text-sky-700">
-                <Bot size={14} />
-                AI Search
+                {aiEnabled ? <Bot size={14} /> : <Search size={14} />}
+                {aiEnabled ? "AI Search" : "Scout Search"}
               </div>
               <h1 className="text-2xl font-semibold text-slate-900">
                 {searchConfig.title}
@@ -259,6 +306,27 @@ export default function SearchAi({
             </div>
 
             <form onSubmit={handleSubmit} className="w-full lg:max-w-xl">
+              <div className="mb-2 flex justify-end">
+                <label className="inline-flex items-center gap-2 text-xs font-medium text-slate-600">
+                  <span>Scout</span>
+                  <button
+                    type="button"
+                    onClick={() => setAiEnabled((prev) => !prev)}
+                    className={`relative h-6 w-11 rounded-full transition ${
+                      aiEnabled ? "bg-sky-600" : "bg-slate-300"
+                    }`}
+                    aria-pressed={aiEnabled}
+                    title={aiEnabled ? "Tắt AI Search" : "Bật AI Search"}
+                  >
+                    <span
+                      className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition ${
+                        aiEnabled ? "left-5" : "left-0.5"
+                      }`}
+                    />
+                  </button>
+                  <span>AI</span>
+                </label>
+              </div>
               <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white p-2 shadow-sm">
                 <Search className="ml-2 h-5 w-5 shrink-0 text-slate-400" />
                 <input
@@ -279,13 +347,15 @@ export default function SearchAi({
                 )}
                 <button
                   type="submit"
-                  disabled={loadingSearchAi || !keyword.trim()}
+                  disabled={activeLoading || !keyword.trim()}
                   className="inline-flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {loadingSearchAi ? (
+                  {activeLoading ? (
                     <Loader2 size={16} className="animate-spin" />
-                  ) : (
+                  ) : aiEnabled ? (
                     <Sparkles size={16} />
+                  ) : (
+                    <Search size={16} />
                   )}
                   Tìm
                 </button>
@@ -327,44 +397,45 @@ export default function SearchAi({
       </div>
 
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {searchError && (
+        {activeError && (
           <div className="mb-6 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-            {searchError}
+            {activeError}
           </div>
         )}
 
-        {searchResult && (
+        {activeResult && (
           <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-sm font-medium text-slate-800">
-                Tìm thấy {searchResult.count ?? products.length} kết quả
+                Tìm thấy {activeResult.count ?? products.length} kết quả
               </p>
               <p className="text-xs text-slate-500">
-                Từ khóa AI hiểu: {searchResult.intent?.keyword || keyword}
+                {aiEnabled
+                  ? `Từ khóa AI hiểu: ${activeResult.intent?.keyword || keyword}`
+                  : `Tìm thường bằng Scout: ${keyword}`}
               </p>
             </div>
-            {searchResult.intent?.major_code && (
+            {aiEnabled && activeResult.intent?.major_code && (
               <span className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600">
-                Ngành: {searchResult.intent.major_code}
+                Ngành: {activeResult.intent.major_code}
               </span>
             )}
           </div>
         )}
 
-        {!searchResult && !loadingSearchAi && !embedded && (
+        {!activeResult && !activeLoading && !embedded && (
           <div className="rounded-lg border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
             <Search className="mx-auto h-10 w-10 text-slate-300" />
             <h2 className="mt-3 text-base font-semibold text-slate-800">
               Sẵn sàng tìm kiếm
             </h2>
             <p className="mx-auto mt-1 max-w-md text-sm text-slate-500">
-              AI sẽ phân tích câu hỏi rồi gửi dữ liệu theo Laravel API
-              `/api/ai/search`.
+              Mặc định dùng Scout. Bật AI nếu muốn hệ thống hiểu câu hỏi tự nhiên.
             </p>
           </div>
         )}
 
-        {loadingSearchAi && (
+        {activeLoading && (
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
             {Array.from({ length: 3 }).map((_, index) => (
               <div
@@ -375,7 +446,7 @@ export default function SearchAi({
           </div>
         )}
 
-        {searchResult && !loadingSearchAi && products.length === 0 && (
+        {activeResult && !activeLoading && products.length === 0 && (
           <div className="rounded-lg border border-slate-200 bg-white px-6 py-12 text-center">
             <h2 className="text-base font-semibold text-slate-800">
               Không tìm thấy đồ án phù hợp
@@ -386,7 +457,7 @@ export default function SearchAi({
           </div>
         )}
 
-        {products.length > 0 && !loadingSearchAi && (
+        {products.length > 0 && !activeLoading && (
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
             {paginatedProducts.map((product, idx) => (
               <article
@@ -493,7 +564,7 @@ export default function SearchAi({
           </div>
         )}
 
-        {totalPages > 1 && !loadingSearchAi && (
+        {totalPages > 1 && !activeLoading && (
           <div className="flex justify-center items-center gap-2 mt-8 flex-wrap">
             <button
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}

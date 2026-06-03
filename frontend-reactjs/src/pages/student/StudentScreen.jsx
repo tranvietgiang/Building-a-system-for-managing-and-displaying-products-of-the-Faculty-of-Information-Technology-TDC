@@ -35,7 +35,7 @@ const StudentScreen = () => {
   // console.log(user);
 
   const productData = products?.data;
-  console.log("productData", productData);
+  // console.log("productData", productData);
 
   const theme = getMajorTheme(majorName);
 
