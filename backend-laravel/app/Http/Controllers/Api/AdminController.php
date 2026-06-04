@@ -56,6 +56,25 @@ class AdminController extends Controller
             ->limit(8)
             ->get();
 
+        $startMonth = now()->startOfMonth()->subMonths(5);
+        $productsByMonth = Product::query()
+            ->selectRaw("DATE_FORMAT(COALESCE(submitted_at, created_at), '%Y-%m') as month_key")
+            ->selectRaw('COUNT(*) as total')
+            ->whereRaw('COALESCE(submitted_at, DATE(created_at)) >= ?', [$startMonth->toDateString()])
+            ->groupBy('month_key')
+            ->pluck('total', 'month_key');
+
+        $monthlyProducts = collect(range(5, 0))->map(function ($monthsAgo) use ($productsByMonth) {
+            $date = now()->startOfMonth()->subMonths($monthsAgo);
+            $key = $date->format('Y-m');
+
+            return [
+                'month' => $key,
+                'label' => 'T' . $date->format('n'),
+                'total' => (int) ($productsByMonth[$key] ?? 0),
+            ];
+        })->values();
+
         $totals = [
             'users' => User::count(),
             'students' => (int) ($usersByRole['student'] ?? 0),
@@ -76,6 +95,7 @@ class AdminController extends Controller
             'data' => [
                 'totals' => $totals,
                 'majors' => $majors,
+                'monthly_products' => $monthlyProducts,
                 'recent_products' => $recentProducts,
                 'ai_insights' => $aiInsights,
             ],

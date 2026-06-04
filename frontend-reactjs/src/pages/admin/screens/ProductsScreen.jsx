@@ -19,9 +19,11 @@ const ProductsScreen = () => {
   const [pagination, setPagination] = useState(null);
   const [loading, setLoading] = useState(true);
   const [aiEnabled, setAiEnabled] = useState(false);
+  const [error, setError] = useState("");
 
   const fetchProducts = async (targetPage = page) => {
     setLoading(true);
+    setError("");
     try {
       const keyword = filters.q.trim();
 
@@ -89,6 +91,14 @@ const ProductsScreen = () => {
         to: paginator.to || 0,
         total: paginator.total || 0,
       });
+    } catch (err) {
+      console.error("Lỗi khi tìm kiếm sản phẩm admin:", err);
+      setError(
+        err?.response?.data?.message ||
+          err?.response?.data?.error ||
+          err?.message ||
+          "Không thể tải danh sách sản phẩm.",
+      );
     } finally {
       setLoading(false);
     }
@@ -170,7 +180,7 @@ const ProductsScreen = () => {
             ))}
           </select>
           <label className="flex h-11 items-center justify-center gap-2 rounded-lg border border-slate-200 px-3 text-xs font-medium text-slate-600">
-            <span>Scout</span>
+            <span>Thường</span>
             <button
               type="button"
               onClick={() => setAiEnabled((prev) => !prev)}
@@ -213,6 +223,12 @@ const ProductsScreen = () => {
           </label>
         </div>
       </form>
+
+      {error && (
+        <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          {error}
+        </div>
+      )}
 
       <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
         <div className="overflow-x-auto">

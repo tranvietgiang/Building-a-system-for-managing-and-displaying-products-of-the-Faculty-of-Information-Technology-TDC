@@ -1,6 +1,12 @@
 import { useCallback, useState } from "react";
 import { productApi } from "../../api";
 
+const getErrorMessage = (err) =>
+  err?.response?.data?.message ||
+  err?.response?.data?.error ||
+  err?.message ||
+  "Không thể tìm kiếm lúc này.";
+
 export default function useProductSearch({ visitor = false } = {}) {
   const [loadingProductSearch, setLoadingProductSearch] = useState(false);
   const [productSearchResult, setProductSearchResult] = useState(null);
@@ -28,9 +34,7 @@ export default function useProductSearch({ visitor = false } = {}) {
         return res;
       } catch (err) {
         console.error("Lỗi khi tìm kiếm thường:", err);
-        setProductSearchError(
-          err?.response?.data?.message || "Không thể tìm kiếm lúc này.",
-        );
+        setProductSearchError(getErrorMessage(err));
         setProductSearchResult(null);
         return null;
       } finally {

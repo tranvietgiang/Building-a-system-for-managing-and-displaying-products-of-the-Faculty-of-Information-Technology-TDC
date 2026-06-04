@@ -1,6 +1,12 @@
 import { useCallback, useState } from "react";
 import { aiApi } from "../../api";
 
+const getErrorMessage = (err) =>
+  err?.response?.data?.message ||
+  err?.response?.data?.error ||
+  err?.message ||
+  "Không thể tìm kiếm lúc này.";
+
 export default function useSearchAi() {
   const [loadingSearchAi, setLoadingSearchAi] = useState(false);
   const [searchResult, setSearchResult] = useState(null);
@@ -24,9 +30,7 @@ export default function useSearchAi() {
       return res;
     } catch (err) {
       console.error("Lỗi khi tìm kiếm bằng AI:", err);
-      setSearchError(
-        err?.response?.data?.message || "Không thể tìm kiếm lúc này.",
-      );
+      setSearchError(getErrorMessage(err));
       setSearchResult(null);
       return null;
     } finally {

@@ -19,12 +19,151 @@ const StatCard = ({ title, value, icon: Icon, tone }) => (
         <p className="text-sm font-medium text-slate-500">{title}</p>
         <p className="mt-2 text-3xl font-bold text-slate-900">{value ?? 0}</p>
       </div>
-      <div className={`flex h-12 w-12 items-center justify-center rounded-lg ${tone}`}>
+      <div
+        className={`flex h-12 w-12 items-center justify-center rounded-lg ${tone}`}
+      >
         <Icon size={24} />
       </div>
     </div>
   </div>
 );
+
+const chartColors = [
+  "#0f766e",
+  "#2563eb",
+  "#f59e0b",
+  "#e11d48",
+  "#7c3aed",
+  "#64748b",
+];
+
+const ProductsByMajorChart = ({ majors = [] }) => {
+  const chartData = majors
+    .filter((item) => Number(item.products_count) > 0)
+    .slice(0, 6);
+  const total = chartData.reduce(
+    (sum, item) => sum + Number(item.products_count || 0),
+    0,
+  );
+  const radius = 42;
+  const circumference = 2 * Math.PI * radius;
+  let offset = 0;
+
+  return (
+    <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <h3 className="text-base font-bold text-slate-900">
+        Sản phẩm theo chuyên ngành
+      </h3>
+      <div className="mt-4 grid items-center gap-4 sm:grid-cols-[160px_1fr]">
+        <div className="relative mx-auto h-36 w-36">
+          <svg viewBox="0 0 120 120" className="h-full w-full -rotate-90">
+            <circle
+              cx="60"
+              cy="60"
+              r={radius}
+              fill="none"
+              stroke="#e2e8f0"
+              strokeWidth="18"
+            />
+            {total > 0 &&
+              chartData.map((item, index) => {
+                const value = Number(item.products_count || 0);
+                const dash = (value / total) * circumference;
+                const segment = (
+                  <circle
+                    key={item.major_id || item.major_code || item.major_name}
+                    cx="60"
+                    cy="60"
+                    r={radius}
+                    fill="none"
+                    stroke={chartColors[index % chartColors.length]}
+                    strokeWidth="18"
+                    strokeDasharray={`${dash} ${circumference - dash}`}
+                    strokeDashoffset={-offset}
+                  />
+                );
+                offset += dash;
+                return segment;
+              })}
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+            <span className="text-2xl font-bold text-slate-900">{total}</span>
+            <span className="text-xs font-medium text-slate-500">sản phẩm</span>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          {(chartData.length
+            ? chartData
+            : [{ major_name: "Chưa có dữ liệu", products_count: 0 }]
+          ).map((item, index) => (
+            <div
+              key={item.major_id || item.major_name}
+              className="flex items-center justify-between gap-3 text-sm"
+            >
+              <div className="flex min-w-0 items-center gap-2">
+                <span
+                  className="h-3 w-3 shrink-0 rounded-sm"
+                  style={{
+                    backgroundColor: chartData.length
+                      ? chartColors[index % chartColors.length]
+                      : "#cbd5e1",
+                  }}
+                />
+                <span className="truncate text-slate-600">
+                  {item.major_name}
+                </span>
+              </div>
+              <span className="font-bold text-slate-900">
+                {item.products_count}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ProductsByMonthChart = ({ months = [] }) => {
+  const maxValue = Math.max(
+    ...months.map((item) => Number(item.total || 0)),
+    1,
+  );
+
+  return (
+    <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+      <h3 className="text-base font-bold text-slate-900">
+        Sản phẩm theo tháng
+      </h3>
+      <div className="mt-4 flex h-52 items-end gap-3 border-l border-b border-slate-200 px-3 pb-7 pt-3">
+        {months.map((item) => {
+          const value = Number(item.total || 0);
+          const height = Math.max((value / maxValue) * 100, value > 0 ? 12 : 4);
+
+          return (
+            <div
+              key={item.month || item.label}
+              className="relative flex h-full flex-1 items-end justify-center"
+            >
+              <div
+                className="w-full max-w-10 rounded-t bg-slate-300 transition-all hover:bg-teal-600"
+                style={{ height: `${height}%` }}
+                title={`${item.label}: ${value} sản phẩm`}
+              />
+              <span className="absolute -bottom-6 text-xs font-semibold text-slate-500">
+                {item.label}
+              </span>
+              <span className="absolute -top-1 text-xs font-bold text-slate-700">
+                {value}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
 
 const DashboardScreen = () => {
   const [dashboard, setDashboard] = useState(null);
@@ -44,11 +183,16 @@ const DashboardScreen = () => {
   }, []);
 
   if (loading) {
-    return <div className="rounded-lg bg-white p-6 text-slate-500">Đang tải dashboard...</div>;
+    return (
+      <div className="rounded-lg bg-white p-6 text-slate-500">
+        Đang tải dashboard...
+      </div>
+    );
   }
 
   const totals = dashboard?.totals || {};
   const aiInsights = dashboard?.ai_insights;
+  const monthlyProducts = dashboard?.monthly_products || [];
   const priorityClass = {
     high: "bg-rose-50 text-rose-700 border-rose-200",
     medium: "bg-amber-50 text-amber-700 border-amber-200",
@@ -58,10 +202,35 @@ const DashboardScreen = () => {
   return (
     <div className="space-y-6">
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard title="Tổng người dùng" value={totals.users} icon={Users} tone="bg-cyan-50 text-cyan-700" />
-        <StatCard title="Tổng sản phẩm" value={totals.products} icon={PackageCheck} tone="bg-emerald-50 text-emerald-700" />
-        <StatCard title="Đang chờ duyệt" value={totals.pending_products} icon={Clock3} tone="bg-amber-50 text-amber-700" />
-        <StatCard title="Chuyên ngành" value={totals.majors} icon={GraduationCap} tone="bg-violet-50 text-violet-700" />
+        <StatCard
+          title="Tổng người dùng"
+          value={totals.users}
+          icon={Users}
+          tone="bg-cyan-50 text-cyan-700"
+        />
+        <StatCard
+          title="Tổng sản phẩm"
+          value={totals.products}
+          icon={PackageCheck}
+          tone="bg-emerald-50 text-emerald-700"
+        />
+        <StatCard
+          title="Đang chờ duyệt"
+          value={totals.pending_products}
+          icon={Clock3}
+          tone="bg-amber-50 text-amber-700"
+        />
+        <StatCard
+          title="Chuyên ngành"
+          value={totals.majors}
+          icon={GraduationCap}
+          tone="bg-violet-50 text-violet-700"
+        />
+      </section>
+
+      <section className="grid gap-6 xl:grid-cols-2">
+        <ProductsByMajorChart majors={dashboard?.majors || []} />
+        <ProductsByMonthChart months={monthlyProducts} />
       </section>
 
       {aiInsights && (
@@ -85,7 +254,9 @@ const DashboardScreen = () => {
                 </p>
               </div>
             </div>
-            <span className={`w-fit rounded-full border px-3 py-1 text-xs font-bold uppercase ${priorityClass[aiInsights.priority] || priorityClass.low}`}>
+            <span
+              className={`w-fit rounded-full border px-3 py-1 text-xs font-bold uppercase ${priorityClass[aiInsights.priority] || priorityClass.low}`}
+            >
               {aiInsights.priority || "low"}
             </span>
           </div>
@@ -129,15 +300,35 @@ const DashboardScreen = () => {
           <h3 className="text-lg font-bold">Tình trạng sản phẩm</h3>
           <div className="mt-5 space-y-3">
             {[
-              { label: "Đã duyệt", value: totals.approved_products, icon: CheckCircle2, className: "text-emerald-700 bg-emerald-50" },
-              { label: "Chờ duyệt", value: totals.pending_products, icon: Clock3, className: "text-amber-700 bg-amber-50" },
-              { label: "Từ chối", value: totals.rejected_products, icon: XCircle, className: "text-rose-700 bg-rose-50" },
+              {
+                label: "Đã duyệt",
+                value: totals.approved_products,
+                icon: CheckCircle2,
+                className: "text-emerald-700 bg-emerald-50",
+              },
+              {
+                label: "Chờ duyệt",
+                value: totals.pending_products,
+                icon: Clock3,
+                className: "text-amber-700 bg-amber-50",
+              },
+              {
+                label: "Từ chối",
+                value: totals.rejected_products,
+                icon: XCircle,
+                className: "text-rose-700 bg-rose-50",
+              },
             ].map((item) => {
               const Icon = item.icon;
               return (
-                <div key={item.label} className="flex items-center justify-between rounded-lg border border-slate-100 p-3">
+                <div
+                  key={item.label}
+                  className="flex items-center justify-between rounded-lg border border-slate-100 p-3"
+                >
                   <div className="flex items-center gap-3">
-                    <span className={`flex h-9 w-9 items-center justify-center rounded-lg ${item.className}`}>
+                    <span
+                      className={`flex h-9 w-9 items-center justify-center rounded-lg ${item.className}`}
+                    >
                       <Icon size={18} />
                     </span>
                     <span className="font-semibold">{item.label}</span>
@@ -165,8 +356,12 @@ const DashboardScreen = () => {
                 {(dashboard?.recent_products || []).map((product) => (
                   <tr key={product.product_id}>
                     <td className="py-3 pr-4 font-semibold">{product.title}</td>
-                    <td className="py-3 pr-4 text-slate-600">{product.student_name || "Chưa rõ"}</td>
-                    <td className="py-3 pr-4 text-slate-600">{product.major_name || "Chưa phân ngành"}</td>
+                    <td className="py-3 pr-4 text-slate-600">
+                      {product.student_name || "Chưa rõ"}
+                    </td>
+                    <td className="py-3 pr-4 text-slate-600">
+                      {product.major_name || "Chưa phân ngành"}
+                    </td>
                     <td className="py-3">
                       <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
                         {product.status}
