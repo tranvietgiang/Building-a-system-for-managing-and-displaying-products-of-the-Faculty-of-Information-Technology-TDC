@@ -56,7 +56,8 @@ class UploadRepository extends BaseRepository
                 'github_link' => $data['github_link'] ?? null,
                 'demo_link' => $data['demo_link'] ?? null,
                 'approved_by' => null,
-                'submitted_at' => Carbon::now()
+                'submitted_at' => Carbon::now(),
+                'approved_at' => Carbon::now(),
             ]);
 
             if (!isset($data['major_code'])) {
