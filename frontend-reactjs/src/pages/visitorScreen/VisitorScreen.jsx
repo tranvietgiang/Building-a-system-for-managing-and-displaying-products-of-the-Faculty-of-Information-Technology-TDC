@@ -538,7 +538,7 @@ export default function VisitorScreen() {
             </select>
 
             <label className="flex h-11 items-center justify-center gap-2 rounded-md bg-gray-50 px-3 text-xs font-medium text-gray-600">
-              <span>Scout</span>
+              <span>Thường</span>
               <button
                 type="button"
                 onClick={() => setAiEnabled((prev) => !prev)}
@@ -579,7 +579,7 @@ export default function VisitorScreen() {
           {activeSearchResult && (
             <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-sm text-gray-600">
               <p>
-                {aiEnabled ? "AI" : "Scout"} tìm thấy{" "}
+                {aiEnabled ? "AI" : "Tìm thường"} tìm thấy{" "}
                 <span className="font-semibold text-[#003087]">
                   {activeSearchResult.count ?? filteredProducts.length}
                 </span>{" "}
@@ -647,7 +647,7 @@ export default function VisitorScreen() {
             {activeSearchLoading
               ? aiEnabled
                 ? "AI đang tìm kiếm..."
-                : "Scout đang tìm kiếm..."
+                : "Đang tìm thường..."
               : "Đang tải..."}
           </p>
         ) : errorVisitor ? (

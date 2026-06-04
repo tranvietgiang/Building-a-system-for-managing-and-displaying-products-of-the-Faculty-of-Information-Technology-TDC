@@ -295,7 +295,7 @@ export default function SearchAi({
             <div>
               <div className="mb-2 inline-flex items-center gap-2 rounded-md border border-sky-100 bg-sky-50 px-2.5 py-1 text-xs font-medium text-sky-700">
                 {aiEnabled ? <Bot size={14} /> : <Search size={14} />}
-                {aiEnabled ? "AI Search" : "Scout Search"}
+                {aiEnabled ? "AI Search" : "Tìm kiếm thường"}
               </div>
               <h1 className="text-2xl font-semibold text-slate-900">
                 {searchConfig.title}
@@ -308,7 +308,7 @@ export default function SearchAi({
             <form onSubmit={handleSubmit} className="w-full lg:max-w-xl">
               <div className="mb-2 flex justify-end">
                 <label className="inline-flex items-center gap-2 text-xs font-medium text-slate-600">
-                  <span>Scout</span>
+                  <span>Thường</span>
                   <button
                     type="button"
                     onClick={() => setAiEnabled((prev) => !prev)}
@@ -412,7 +412,7 @@ export default function SearchAi({
               <p className="text-xs text-slate-500">
                 {aiEnabled
                   ? `Từ khóa AI hiểu: ${activeResult.intent?.keyword || keyword}`
-                  : `Tìm thường bằng Scout: ${keyword}`}
+                  : `Tìm thường: ${keyword}`}
               </p>
             </div>
             {aiEnabled && activeResult.intent?.major_code && (
@@ -430,7 +430,7 @@ export default function SearchAi({
               Sẵn sàng tìm kiếm
             </h2>
             <p className="mx-auto mt-1 max-w-md text-sm text-slate-500">
-              Mặc định dùng Scout. Bật AI nếu muốn hệ thống hiểu câu hỏi tự nhiên.
+              Mặc định dùng tìm kiếm thường. Bật AI nếu muốn hệ thống hiểu câu hỏi tự nhiên.
             </p>
           </div>
         )}
