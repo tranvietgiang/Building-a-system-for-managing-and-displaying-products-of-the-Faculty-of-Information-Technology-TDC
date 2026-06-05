@@ -1,0 +1,235 @@
+HUONG DAN SU DUNG WEBSITE THEO VAI TRO
+
+Website dung de trung bay, quan ly va duyet san pham/do an sinh vien cua khoa Cong nghe thong tin TDC.
+He thong co 4 vai tro chinh: Visitor, Student, Teacher va Admin.
+
+
+1. VISITOR - Khach tham quan
+
+Visitor la nguoi chua dang nhap he thong.
+
+Chuc nang chinh:
+- Xem trang trung bay san pham sinh vien.
+- Xem danh sach san pham da duoc cong khai/da duyet.
+- Loc san pham theo chuyen nganh.
+- Sap xep san pham theo moi nhat, xem nhieu nhat hoac yeu thich nhat.
+- Tim kiem san pham bang tim kiem thuong hoac AI Search.
+- Xem chi tiet san pham.
+- Tang luot xem khi mo chi tiet san pham.
+- Tha yeu thich/like san pham.
+- Su dung ChatBox AI de hoi dap thong tin co ban.
+- Chuyen den trang dang nhap khi can dung tai khoan.
+
+Cach su dung:
+1. Truy cap trang /nckh-visitor.
+2. Dung o tim kiem de nhap ten san pham, cong nghe, chuyen nganh hoac tu khoa lien quan.
+3. Chon chuyen nganh neu muon loc ket qua.
+4. Chon kieu sap xep: moi nhat, xem nhieu nhat hoac yeu thich nhat.
+5. Bat AI neu muon tim kiem thong minh theo ngu canh.
+6. Bam "Xem chi tiet" de xem thong tin day du cua san pham.
+
+
+2. STUDENT - Sinh vien
+
+Student la nguoi dung co tai khoan sinh vien, dung de quan ly san pham/do an cua minh.
+
+Chuc nang chinh:
+- Dang nhap vao he thong.
+- Xem trang chu sinh vien.
+- Xem thong tin ca nhan, chuyen nganh va thong ke san pham.
+- Xem danh sach san pham cua ban than.
+- Loc san pham theo trang thai: tat ca, cho duyet, da duyet, bi tu choi.
+- Tim kiem san pham bang tim kiem thuong hoac AI.
+- Xem chi tiet san pham cua minh.
+- Dang tai san pham moi.
+- Chinh sua san pham da dang.
+- Xoa san pham cua minh.
+- Xem trang thai duyet cua san pham.
+- Su dung ChatBox AI de hoi dap hoac ho tro tim kiem y tuong/thong tin.
+- Cap nhat ho so ca nhan va doi mat khau.
+
+Cach dang san pham:
+1. Dang nhap bang tai khoan sinh vien.
+2. Vao trang /nckh-student.
+3. Bam nut dang san pham hoac truy cap /upload.
+4. Nhap thong tin co ban cua san pham: tieu de, mo ta, chuyen nganh, danh muc.
+5. Nhap thong tin rieng theo chuyen nganh neu co, vi du: CNTT, AI, Mang may tinh, Thiet ke do hoa.
+6. Them anh dai dien, hinh anh minh hoa, file, link GitHub hoac link demo neu co.
+7. Gui san pham len he thong.
+8. San pham se o trang thai "cho duyet" cho den khi giao vien/admin xu ly.
+
+Cach chinh sua san pham:
+1. Vao danh sach san pham cua minh.
+2. Chon san pham can sua.
+3. Bam sua/chinh sua.
+4. Cap nhat noi dung can thay doi.
+5. Luu lai va cho duyet neu he thong yeu cau.
+
+Cach xoa san pham:
+1. Vao danh sach san pham cua minh.
+2. Chon nut xoa tren san pham can xoa.
+3. Xac nhan xoa.
+
+
+3. TEACHER - Giang vien
+
+Teacher la nguoi dung co quyen xem va duyet san pham cua sinh vien theo pham vi duoc phan cong.
+
+Chuc nang chinh:
+- Dang nhap vao he thong.
+- Xem dashboard giang vien.
+- Xem thong tin ca nhan, email va chuyen nganh phu trach.
+- Xem thong ke san pham: tong san pham, cho duyet, da duyet, bi tu choi.
+- Xem danh sach san pham cho duyet.
+- Xem danh sach san pham da duyet.
+- Xem danh sach san pham bi tu choi.
+- Loc san pham theo trang thai.
+- Xem chi tiet san pham sinh vien.
+- Mo anh san pham de xem lon.
+- Kiem tra link GitHub va link demo neu san pham co cung cap.
+- Duyet san pham.
+- Tu choi san pham va gui ly do/nhan xet.
+- Tim kiem san pham bang AI Search.
+- So sanh san pham bang chuc nang AI Compare.
+- Su dung ChatBox AI de ho tro tim kiem va danh gia thong tin.
+- Cap nhat ho so ca nhan va doi mat khau.
+
+Cach duyet san pham:
+1. Dang nhap bang tai khoan giang vien.
+2. Vao trang /nckh-teacher.
+3. Chon tab "Cho duyet".
+4. Bam "Xem chi tiet" tren san pham can kiem tra.
+5. Doc thong tin, mo hinh anh, file, link GitHub hoac demo neu co.
+6. Neu san pham hop le, bam duyet.
+7. Neu san pham chua dat, bam tu choi va nhap ly do de sinh vien biet can sua gi.
+
+Cach xem san pham theo trang thai:
+1. Vao trang giang vien.
+2. Bam vao thong ke hoac tab: Cho duyet, Da duyet, Tu choi.
+3. He thong hien thi danh sach san pham tuong ung.
+
+
+4. ADMIN - Quan tri vien
+
+Admin la nguoi co quyen quan tri toan bo he thong.
+
+Chuc nang chinh:
+- Dang nhap vao trang quan tri.
+- Xem Dashboard tong quan.
+- Xem thong ke tong nguoi dung, tong san pham, san pham cho duyet, so chuyen nganh.
+- Xem bieu do san pham theo chuyen nganh.
+- Xem bieu do san pham theo thang.
+- Xem tinh trang san pham: da duyet, cho duyet, tu choi.
+- Xem danh sach san pham moi nhat.
+- Xem phan tich/gợi y tu AI neu he thong co du lieu.
+- Quan ly nguoi dung.
+- Quan ly san pham.
+- Quan ly chuyen nganh.
+- Xem danh muc.
+- Truy cap phan cai dat he thong.
+- Dang xuat khoi he thong.
+
+4.1. Quan ly nguoi dung
+
+Chuc nang:
+- Xem danh sach nguoi dung.
+- Tim kiem theo ma nguoi dung, ten hoac email.
+- Loc nguoi dung theo vai tro: student, teacher, admin.
+- Loc nguoi dung theo chuyen nganh.
+- Them nguoi dung moi.
+- Sua thong tin nguoi dung.
+- Doi vai tro nguoi dung.
+- Gan chuyen nganh va lop cho nguoi dung.
+- Xoa nguoi dung.
+
+Cach them nguoi dung:
+1. Vao /nckh-admin.
+2. Chon menu "Nguoi dung".
+3. Nhap ma nguoi dung, ho ten, email, mat khau.
+4. Chon vai tro: student, teacher hoac admin.
+5. Chon chuyen nganh va lop neu can.
+6. Bam "Them".
+
+Cach sua nguoi dung:
+1. Trong danh sach nguoi dung, bam nut sua.
+2. Cap nhat thong tin can thay doi.
+3. Neu khong doi mat khau thi de trong o mat khau.
+4. Bam "Luu".
+
+4.2. Quan ly san pham
+
+Chuc nang:
+- Xem danh sach tat ca san pham.
+- Tim san pham theo ten.
+- Loc san pham theo trang thai: cho duyet, da duyet, tu choi.
+- Loc san pham theo chuyen nganh.
+- Bat/tat AI Search de tim kiem thong minh.
+- Xem so luot xem va luot thich cua san pham.
+- Doi trang thai san pham.
+- Xoa san pham.
+- Chon so luong san pham hien thi moi trang.
+- Chuyen trang trong danh sach san pham.
+
+Cach doi trang thai san pham:
+1. Vao menu "San pham".
+2. Tim san pham can xu ly.
+3. Tai cot trang thai, chon pending, approved hoac rejected.
+4. He thong cap nhat trang thai san pham.
+
+4.3. Quan ly chuyen nganh
+
+Chuc nang:
+- Xem danh sach chuyen nganh.
+- Them chuyen nganh moi.
+- Sua ten chuyen nganh, ma chuyen nganh va mo ta.
+- Xoa chuyen nganh.
+- Xem so luong san pham theo tung chuyen nganh.
+
+Cach them chuyen nganh:
+1. Vao menu "Chuyen nganh".
+2. Nhap ten chuyen nganh.
+3. Nhap ma chuyen nganh.
+4. Nhap mo ta neu co.
+5. Bam "Them".
+
+Cach sua/xoa chuyen nganh:
+1. Vao danh sach chuyen nganh.
+2. Bam sua de cap nhat thong tin.
+3. Bam xoa neu muon xoa chuyen nganh.
+4. Xac nhan thao tac khi he thong hoi.
+
+
+5. CAC TRANG/DUONG DAN CHINH
+
+- /login: trang dang nhap.
+- /nckh-visitor: trang danh cho khach tham quan.
+- /visitor-detail: trang chi tiet san pham cho visitor.
+- /nckh-student: trang chu sinh vien.
+- /upload: trang dang san pham moi.
+- /edit-product: trang chinh sua san pham.
+- /detail: trang chi tiet san pham cho sinh vien.
+- /nckh-teacher: trang chu giang vien.
+- /detail-teacher: trang chi tiet san pham cho giang vien.
+- /nckh-compare: trang so sanh san pham bang AI cho giang vien.
+- /nckh-admin: trang quan tri he thong.
+- /nckh-profile: trang ho so ca nhan.
+
+
+6. GHI CHU VE QUYEN TRUY CAP
+
+- Visitor khong can dang nhap, chi xem va tuong tac voi san pham cong khai.
+- Student phai dang nhap moi duoc dang, sua, xoa va xem san pham cua minh.
+- Teacher phai dang nhap moi duoc xem danh sach can duyet va duyet/tu choi san pham.
+- Admin phai dang nhap moi duoc quan ly nguoi dung, san pham, chuyen nganh va thong ke he thong.
+- Neu truy cap sai vai tro, he thong se chan quyen hoac dua ve trang khong tim thay/khong duoc phep.
+
+
+7. QUY TRINH HOAT DONG TONG QUAT
+
+1. Admin tao tai khoan cho student, teacher va admin khac neu can.
+2. Student dang nhap va dang san pham/do an.
+3. San pham moi duoc dua vao trang thai cho duyet.
+4. Teacher xem chi tiet san pham va duyet hoac tu choi.
+5. San pham da duyet duoc hien thi cho Visitor xem tren trang trung bay.
+6. Visitor co the tim kiem, xem chi tiet, tang luot xem va thich san pham.
+7. Admin theo doi thong ke, quan ly du lieu va xu ly khi can.
