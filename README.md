@@ -260,5 +260,5 @@ Không sử dụng cho mục đích thương mại.
 ---
 
 <div align="center">
-  Made with ❤️ by Khoa CNTT – TDC
+  Made with ❤️ by Tran Viet Giang
 </div>
