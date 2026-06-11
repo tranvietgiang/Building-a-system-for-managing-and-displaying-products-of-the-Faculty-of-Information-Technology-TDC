@@ -5,6 +5,7 @@ import UserScreen from "./screens/UserManager/UsersScreen";
 import ProductScreen from "./screens/ProductsScreen";
 import MajorScreen from "./screens/MajorsScreen";
 import SettingScreen from "./screens/SettingsScreen";
+import SupportScreen from "./screens/SupportScreen";
 
 const AdminScreen = () => {
   const [activeSection, setActiveSection] = useState("dashboard");
@@ -25,6 +26,10 @@ const AdminScreen = () => {
     majors: {
       title: "Quản lý chuyên ngành",
       component: <MajorScreen />,
+    },
+    support: {
+      title: "Support",
+      component: <SupportScreen />,
     },
     settings: {
       title: "Cài đặt hệ thống",

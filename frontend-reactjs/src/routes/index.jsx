@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "../pages/auth/Login";
+import ForgotPassword from "../pages/auth/forget";
 import GuestRoute from "./guest.route";
 import RoleRoutes from "./protected.routes";
 import VisitorScreen from "../pages/visitorScreen/VisitorScreen";
@@ -17,6 +18,14 @@ function AppRoutes() {
           element={
             <GuestRoute>
               <Login />
+            </GuestRoute>
+          }
+        />
+        <Route
+          path="/forgot"
+          element={
+            <GuestRoute>
+              <ForgotPassword />
             </GuestRoute>
           }
         />

@@ -36,6 +36,13 @@ const adminApi = {
   deleteMajor: (majorId) => axiosClient.delete(`/admin/majors/${majorId}`),
 
   getCategories: () => axiosClient.get("/admin/categories"),
+
+  getSupportRequests: (params = {}) =>
+    axiosClient.get(`/admin/support/requests${buildQuery(params)}`),
+  lookupPasswordRecoveryUser: (payload) =>
+    axiosClient.post("/admin/support/password-recovery/lookup", payload),
+  sendPasswordRecovery: (payload) =>
+    axiosClient.post("/admin/support/password-recovery/send", payload),
 };
 
 export default adminApi;
