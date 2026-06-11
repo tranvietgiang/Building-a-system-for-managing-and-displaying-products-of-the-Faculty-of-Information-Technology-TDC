@@ -462,7 +462,8 @@ class ProductRepository extends BaseRepository
                 'c.category_name as type',
 
                 's.views',
-                's.likes'
+                's.likes',
+                's.shares'
             )
             ->get()
             ->map(fn($p) => [
@@ -487,6 +488,7 @@ class ProductRepository extends BaseRepository
 
                 'views' => (int) ($p->views ?? 0),
                 'likes' => (int) ($p->likes ?? 0),
+                'shares' => (int) ($p->shares ?? 0),
 
                 //gv duyệt
                 'advisor' => $p->advisor ?? null,
@@ -514,7 +516,8 @@ class ProductRepository extends BaseRepository
                 'gv.name as advisor',
                 'c.category_name as type',
                 's.views',
-                's.likes'
+                's.likes',
+                's.shares'
             )
             ->first();
 
@@ -663,6 +666,7 @@ class ProductRepository extends BaseRepository
 
             'views' => (int) ($product->views ?? 0),
             'likes' => (int) ($product->likes ?? 0),
+            'shares' => (int) ($product->shares ?? 0),
 
             'advisor' => $product->advisor,
 
@@ -702,12 +706,13 @@ class ProductRepository extends BaseRepository
 
         $statistics = DB::table('product_statistics')
             ->where('product_id', $productId)
-            ->select('views', 'likes')
+            ->select('views', 'likes', 'shares')
             ->first();
 
         return [
             'views' => (int) ($statistics->views ?? 0),
             'likes' => (int) ($statistics->likes ?? 0),
+            'shares' => (int) ($statistics->shares ?? 0),
         ];
     }
 
@@ -731,12 +736,43 @@ class ProductRepository extends BaseRepository
 
         $statistics = DB::table('product_statistics')
             ->where('product_id', $productId)
-            ->select('views', 'likes')
+            ->select('views', 'likes', 'shares')
             ->first();
 
         return [
             'views' => (int) ($statistics->views ?? 0),
             'likes' => (int) ($statistics->likes ?? 0),
+            'shares' => (int) ($statistics->shares ?? 0),
+        ];
+    }
+
+    public function incrementShare(int $productId): array
+    {
+        if (!DB::table('product_statistics')->where('product_id', $productId)->exists()) {
+            DB::table('product_statistics')->insert([
+                'product_id' => $productId,
+                'views' => 0,
+                'likes' => 0,
+                'downloads' => 0,
+                'shares' => 0,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        DB::table('product_statistics')
+            ->where('product_id', $productId)
+            ->increment('shares');
+
+        $statistics = DB::table('product_statistics')
+            ->where('product_id', $productId)
+            ->select('views', 'likes', 'shares')
+            ->first();
+
+        return [
+            'views' => (int) ($statistics->views ?? 0),
+            'likes' => (int) ($statistics->likes ?? 0),
+            'shares' => (int) ($statistics->shares ?? 0),
         ];
     }
 

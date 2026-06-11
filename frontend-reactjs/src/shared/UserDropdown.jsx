@@ -39,6 +39,11 @@ function UserDropdown() {
     navigate("/settings");
   };
 
+  const handleViewAllProducts = () => {
+    setShowDropdown(false);
+    navigate("/nckh-visitor");
+  };
+
   return (
     <div className="relative" ref={dropdownRef}>
       <div
@@ -49,7 +54,7 @@ function UserDropdown() {
       </div>
 
       {showDropdown && (
-        <div className="absolute right-full top-10 mr-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 z-20">
+        <div className="absolute right-full top-10 mr-2 w-60 bg-white rounded-lg shadow-xl border border-gray-200 z-20">
           {" "}
           <div className="p-3 border-b border-gray-100">
             <p className="text-sm font-semibold text-gray-900">
@@ -104,6 +109,32 @@ function UserDropdown() {
                 />
               </svg>
               Cài đặt
+            </button>
+
+            <button
+              onClick={handleViewAllProducts}
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 7a2 2 0 012-2h5l2 2h7a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 13h8"
+                />
+              </svg>
+              Xem sản phẩm toàn ngành
             </button>
 
             <hr className="my-2 border-gray-100" />

@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { productApi } from "../../api";
 import { toast } from "react-toastify";
 export default function useVisitorProduct(id) {
-  const [productVisitorDetail, setProductAll] = useState([]);
-  const [loadingVisitorDetail, setLoading] = useState(false);
+  const [productVisitorDetail, setProductAll] = useState(null);
+  const [loadingVisitorDetail, setLoading] = useState(Boolean(id));
   const [errorVisitorDetail, setError] = useState(null);
 
   useEffect(() => {
@@ -15,7 +15,7 @@ export default function useVisitorProduct(id) {
         setLoading(true);
         const res = await productApi.getVisitorProductById(id);
         toast.success("Tải dữ chi tiết thành công", { toastId });
-        setProductAll(res || []);
+        setProductAll(res || null);
       } catch (error) {
         console.error(error);
         setError(error);

@@ -122,14 +122,15 @@ Route::prefix('v1')->group(function () {
 | Visitor ROUTES
 |--------------------------------------------------------------------------
 */
-Route::prefix('visitor')->group(function () {
-    Route::get('/products', [ProductController::class, 'getProductsVisitor']);
-    Route::get('/products/search', [ProductController::class, 'searchProducts']);
-    Route::get('/majors', [MajorController::class, 'getMajorAll']);
-    Route::get('/product/{id}', [ProductController::class, 'getVisitorProductById']);
-    Route::post('/product/{id}/view', [ProductController::class, 'incrementView']);
-    Route::post('/product/{id}/like', [ProductController::class, 'incrementLike']);
-});
+    Route::prefix('visitor')->group(function () {
+        Route::get('/products', [ProductController::class, 'getProductsVisitor']);
+        Route::get('/products/search', [ProductController::class, 'searchProducts']);
+        Route::get('/majors', [MajorController::class, 'getMajorAll']);
+        Route::get('/product/{id}', [ProductController::class, 'getVisitorProductById']);
+        Route::post('/product/{id}/view', [ProductController::class, 'incrementView']);
+        Route::post('/product/{id}/like', [ProductController::class, 'incrementLike']);
+        Route::post('/product/{id}/share', [ProductController::class, 'incrementShare']);
+    });
 
     /*
 |--------------------------------------------------------------------------

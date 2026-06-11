@@ -1,7 +1,7 @@
 import React, { useMemo, lazy, Suspense } from "react";
 import useVisitorProduct from "../../hooks/useProduct/useVisitorDetail";
 import { detectMajorKey } from "../../utils/detectMajorKey";
-import { useLocation } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import useMajorName from "../../hooks/common/useMajorName";
 import { getMajorTheme } from "../../utils/uploadProductScreen/uploadRegistry";
 import NotFoundScreen from "../../pages/notFoundScreen/NotFoundScreen";
@@ -22,7 +22,8 @@ const GraphicDetailScreen = lazy(
 
 export default function VisitorDetailScreen() {
   const location = useLocation();
-  const id = location.state?.productId;
+  const params = useParams();
+  const id = params.id || location.state?.productId;
 
   const { productVisitorDetail, loadingVisitorDetail, errorVisitorDetail } =
     useVisitorProduct(id);

@@ -78,6 +78,15 @@ class ProductService extends BaseRepository
         return $this->productRepository->incrementLike($productId);
     }
 
+    public function incrementShare(int $productId): ?array
+    {
+        if (!$this->productRepository->productExists($productId)) {
+            return null;
+        }
+
+        return $this->productRepository->incrementShare($productId);
+    }
+
     public function getMatchingAiProducts($productId): array
     {
         if (!$this->productRepository->productExists($productId)) {

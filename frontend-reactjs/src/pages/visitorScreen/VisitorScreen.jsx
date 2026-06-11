@@ -8,7 +8,7 @@ import React, {
 } from "react";
 
 import { Icons } from "../../components/common/Icon";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import useMajorAll from "../../hooks/common/useMajorAll";
 import useVisitorProduct from "../../hooks/useProduct/useVisitorProduct";
 import ChatBoxAi from "../../pages/chatBoxAi/ChatBoxAi";
@@ -271,7 +271,9 @@ export default function VisitorScreen() {
 
   const activeSearchResult = aiEnabled ? searchResult : productSearchResult;
   const activeSearchError = aiEnabled ? searchError : productSearchError;
-  const activeSearchLoading = aiEnabled ? loadingSearchAi : loadingProductSearch;
+  const activeSearchLoading = aiEnabled
+    ? loadingSearchAi
+    : loadingProductSearch;
 
   const handleViewDetail = useCallback(
     async (id) => {
@@ -283,29 +285,32 @@ export default function VisitorScreen() {
         console.error(error);
       }
 
-      navigate("/visitor-detail", { state: { productId: id } });
+      navigate(`/visitor-detail/${id}`, { state: { productId: id } });
     },
     [navigate],
   );
 
-  const handleLike = useCallback(async (id) => {
-    if (!id || likedProducts[id]) return;
+  const handleLike = useCallback(
+    async (id) => {
+      if (!id || likedProducts[id]) return;
 
-    setLikedProducts((prev) => ({
-      ...prev,
-      [id]: true,
-    }));
-
-    try {
-      await productApi.incrementLike(id);
-    } catch (error) {
-      console.error(error);
       setLikedProducts((prev) => ({
         ...prev,
-        [id]: false,
+        [id]: true,
       }));
-    }
-  }, [likedProducts]);
+
+      try {
+        await productApi.incrementLike(id);
+      } catch (error) {
+        console.error(error);
+        setLikedProducts((prev) => ({
+          ...prev,
+          [id]: false,
+        }));
+      }
+    },
+    [likedProducts],
+  );
 
   const filteredProducts = useMemo(() => {
     const base = productsSource;
@@ -399,16 +404,16 @@ export default function VisitorScreen() {
                 "Trang chủ",
                 "Sản phẩm",
                 "Ngành học",
-                "Giới thiệu",
+                "Hướng dẫn",
                 "Liên hệ",
               ].map((item) => (
-                <a
+                <Link
                   key={item}
-                  href="#"
+                  to={item === "Hướng dẫn" ? "/huong-dan" : "/nckh-visitor"}
                   className="text-gray-600 hover:text-[#003087] font-medium transition-colors text-sm"
                 >
                   {item}
-                </a>
+                </Link>
               ))}
             </nav>
 
@@ -418,10 +423,6 @@ export default function VisitorScreen() {
                 className="px-5 py-2 text-[#003087] border border-[#003087] rounded-md font-medium text-sm hover:bg-[#003087] hover:text-white transition-all"
               >
                 Đăng nhập
-              </button>
-
-              <button className="px-5 py-2 bg-[#C8102E] text-white rounded-full font-semibold text-sm shadow-lg shadow-red-500/25 hover:shadow-red-500/40 hover:scale-105 transition-all duration-200">
-                Khám phá ngay
               </button>
             </div>
           </div>
@@ -452,9 +453,14 @@ export default function VisitorScreen() {
                   Xem tất cả sản phẩm
                 </button>
 
-                <button className="px-6 py-2.5 border border-white text-white rounded-md font-semibold text-sm hover:bg-white/10 transition-all">
+                <a
+                  href="https://fit.tdc.edu.vn/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-6 py-2.5 border border-white text-white rounded-md font-semibold text-sm hover:bg-white/10 transition-all"
+                >
                   Tìm hiểu thêm
-                </button>
+                </a>
               </div>
             </div>
 
