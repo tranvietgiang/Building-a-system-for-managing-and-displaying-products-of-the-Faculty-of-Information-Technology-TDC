@@ -357,6 +357,19 @@ class ProductController extends Controller
         return response()->json($result);
     }
 
+    public function incrementShare(int $id)
+    {
+        $result = $this->productService->incrementShare($id);
+
+        if (!$result) {
+            return response()->json([
+                'message' => 'Khong tim thay san pham.',
+            ], 404);
+        }
+
+        return response()->json($result);
+    }
+
     public function getMatchingAiProducts(int $id)
     {
         $result = $this->productService->getMatchingAiProducts($id);

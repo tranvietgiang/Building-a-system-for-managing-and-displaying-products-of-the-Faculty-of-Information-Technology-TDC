@@ -30,6 +30,7 @@ const productApi = {
   getVisitorProductById: (id) => axiosClient.get(`/visitor/product/${id}`),
   incrementView: (id) => axiosClient.post(`/visitor/product/${id}/view`),
   incrementLike: (id) => axiosClient.post(`/visitor/product/${id}/like`),
+  incrementShare: (id) => axiosClient.post(`/visitor/product/${id}/share`),
 };
 
 export default productApi;

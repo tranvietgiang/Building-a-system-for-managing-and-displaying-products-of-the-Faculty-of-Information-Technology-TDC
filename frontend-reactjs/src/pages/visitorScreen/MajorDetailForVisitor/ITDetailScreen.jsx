@@ -15,6 +15,7 @@ const ITDetailScreen = ({
   const [activeTab, setActiveTab] = useState("overview");
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(productVisitorDetail?.likes || 0);
+  const [shareCount, setShareCount] = useState(productVisitorDetail?.shares || 0);
   const { openViewer, ImageViewerModal } = useImageViewer();
 
   const majorDetail = productVisitorDetail?.major_detail || {};
@@ -34,6 +35,35 @@ const ITDetailScreen = ({
       console.error(error);
       setIsLiked(false);
       setLikeCount((prev) => Math.max(0, prev - 1));
+    }
+  };
+
+  const handleShare = async () => {
+    const productId = productVisitorDetail?.id;
+    if (!productId) return;
+
+    const shareUrl = `${window.location.origin}/visitor-detail/${productId}`;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: productVisitorDetail?.title,
+          text: productVisitorDetail?.description,
+          url: shareUrl,
+        });
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+      }
+
+      setShareCount((prev) => prev + 1);
+      const res = await productApi.incrementShare(productId);
+      if (typeof res?.shares === "number") {
+        setShareCount(res.shares);
+      }
+    } catch (error) {
+      if (error?.name !== "AbortError") {
+        console.error(error);
+      }
     }
   };
 
@@ -121,6 +151,13 @@ const ITDetailScreen = ({
                   <Icons.Heart className="w-4 h-4" />
                 )}
                 <span>{likeCount?.toLocaleString()} yêu thích</span>
+              </button>
+              <button
+                onClick={handleShare}
+                className="flex items-center gap-2 transition-transform hover:scale-110"
+              >
+                <Icons.Share className="w-4 h-4" />
+                <span>{shareCount?.toLocaleString()} chia sẻ</span>
               </button>
               <div className="flex items-center gap-2">
                 📅 {productVisitorDetail?.year}

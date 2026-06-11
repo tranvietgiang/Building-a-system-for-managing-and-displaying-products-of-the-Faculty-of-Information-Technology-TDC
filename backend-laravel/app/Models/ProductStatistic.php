@@ -13,5 +13,7 @@ class ProductStatistic extends Model
         'product_id',
         'views',
         'likes',
+        'downloads',
+        'shares',
     ];
 }

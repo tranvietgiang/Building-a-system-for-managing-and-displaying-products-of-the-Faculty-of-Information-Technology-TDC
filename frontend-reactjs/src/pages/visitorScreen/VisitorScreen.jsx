@@ -283,7 +283,7 @@ export default function VisitorScreen() {
         console.error(error);
       }
 
-      navigate("/visitor-detail", { state: { productId: id } });
+      navigate(`/visitor-detail/${id}`, { state: { productId: id } });
     },
     [navigate],
   );
