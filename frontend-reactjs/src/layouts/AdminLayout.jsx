@@ -2,6 +2,7 @@ import { useContext } from "react";
 import {
   BarChart3,
   BookOpen,
+  Eye,
   GraduationCap,
   LogOut,
   Menu,
@@ -9,6 +10,7 @@ import {
   Settings,
   Users,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
 
 const menuItems = [
@@ -21,6 +23,7 @@ const menuItems = [
 
 const AdminLayout = ({ activeSection, setActiveSection, title, children }) => {
   const { user, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
@@ -89,6 +92,24 @@ const AdminLayout = ({ activeSection, setActiveSection, title, children }) => {
                   {user?.role || "admin"}
                 </p>
               </div>
+              <button
+                type="button"
+                onClick={() => navigate("/nckh-visitor")}
+                className="hidden items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-100 md:flex"
+                title="Xem sản phẩm toàn ngành"
+              >
+                <Eye size={17} />
+                <span>Xem sản phẩm toàn ngành</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate("/nckh-visitor")}
+                className="flex h-10 w-10 items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-100 md:hidden"
+                title="Xem sản phẩm toàn ngành"
+                aria-label="Xem sản phẩm toàn ngành"
+              >
+                <Eye size={18} />
+              </button>
               <button
                 type="button"
                 onClick={logout}
