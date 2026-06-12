@@ -125,6 +125,7 @@ Chuc nang chinh:
 - Quan ly nguoi dung.
 - Quan ly san pham.
 - Quan ly chuyen nganh.
+- Xu ly yeu cau ho tro/quen mat khau trong muc Support.
 - Xem danh muc.
 - Truy cap phan cai dat he thong.
 - Dang xuat khoi he thong.
@@ -198,10 +199,44 @@ Cach sua/xoa chuyen nganh:
 3. Bam xoa neu muon xoa chuyen nganh.
 4. Xac nhan thao tac khi he thong hoi.
 
+4.4. Support - Xu ly yeu cau quen mat khau
+
+Chuc nang:
+- Xem danh sach yeu cau khoi phuc mat khau tu nguoi dung.
+- Danh sach duoc sap xep theo thu tu gui truoc xu ly truoc.
+- Xem email, ma tai khoan, ho ten va thoi gian gui yeu cau.
+- Tra cuu tai khoan bang email, MSSV hoac MSGV.
+- Cap mat khau tam thoi cho nguoi dung.
+- Gui email khoi phuc mat khau cho nguoi dung.
+- Tu dong chuyen yeu cau sang trang thai da xu ly sau khi gui email thanh cong.
+
+Cach nguoi dung gui yeu cau quen mat khau:
+1. Tai trang dang nhap, bam "Quen mat khau?" hoac truy cap /forgot.
+2. Nhap email, MSSV hoac MSGV.
+3. Bam "Gui yeu cau khoi phuc".
+4. He thong luu yeu cau vao bang support voi trang thai pending.
+
+Cach admin xu ly yeu cau:
+1. Dang nhap bang tai khoan admin.
+2. Vao /nckh-admin.
+3. Chon menu "Support".
+4. Xem bang "Support request queue".
+5. Xu ly yeu cau theo thu tu tu tren xuong duoi, vi yeu cau gui truoc se nam truoc.
+6. Bam "Process" tren yeu cau can xu ly.
+7. He thong tao mat khau tam thoi, cap nhat mat khau cua tai khoan va gui email cho nguoi dung.
+8. Sau khi xu ly xong, yeu cau duoc chuyen sang trang thai processed va khong con nam trong danh sach pending.
+
+Ghi chu:
+- Neu nguoi dung nhap ma tai khoan nhu 23211TT2984, he thong se tim email dang luu theo ma tai khoan do.
+- Neu nguoi dung nhap email, he thong se tim tai khoan theo email do.
+- Sau khi nhan email, nguoi dung dang nhap bang mat khau tam thoi, sau do vao trang ho so/du an de doi lai mat khau moi.
+- Email duoc gui theo cau hinh mail hien co cua Laravel.
+
 
 5. CAC TRANG/DUONG DAN CHINH
 
 - /login: trang dang nhap.
+- /forgot: trang gui yeu cau khoi phuc mat khau.
 - /nckh-visitor: trang danh cho khach tham quan.
 - /visitor-detail: trang chi tiet san pham cho visitor.
 - /nckh-student: trang chu sinh vien.
@@ -221,6 +256,7 @@ Cach sua/xoa chuyen nganh:
 - Student phai dang nhap moi duoc dang, sua, xoa va xem san pham cua minh.
 - Teacher phai dang nhap moi duoc xem danh sach can duyet va duyet/tu choi san pham.
 - Admin phai dang nhap moi duoc quan ly nguoi dung, san pham, chuyen nganh va thong ke he thong.
+- Admin phai dang nhap moi duoc xem va xu ly yeu cau Support.
 - Neu truy cap sai vai tro, he thong se chan quyen hoac dua ve trang khong tim thay/khong duoc phep.
 
 
@@ -232,4 +268,6 @@ Cach sua/xoa chuyen nganh:
 4. Teacher xem chi tiet san pham va duyet hoac tu choi.
 5. San pham da duyet duoc hien thi cho Visitor xem tren trang trung bay.
 6. Visitor co the tim kiem, xem chi tiet, tang luot xem va thich san pham.
-7. Admin theo doi thong ke, quan ly du lieu va xu ly khi can.
+7. Neu nguoi dung quen mat khau, nguoi dung gui yeu cau tai /forgot.
+8. Admin vao Support de xu ly yeu cau quen mat khau theo thu tu gui truoc xu ly truoc.
+9. Admin theo doi thong ke, quan ly du lieu va xu ly khi can.

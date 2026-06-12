@@ -8,13 +8,15 @@ import React, {
 } from "react";
 
 import { Icons } from "../../components/common/Icon";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import useMajorAll from "../../hooks/common/useMajorAll";
 import useVisitorProduct from "../../hooks/useProduct/useVisitorProduct";
 import ChatBoxAi from "../../pages/chatBoxAi/ChatBoxAi";
 import useSearchAi from "../../hooks/ai/useSearchAi";
 import useDebounce from "../../hooks/common/useDebounce";
 import useProductSearch from "../../hooks/useProduct/useProductSearch";
+import useScrollControls from "../../hooks/common/useScrollControls";
+import ScrollButtons from "../../components/common/ScrollButtons";
 import { productApi } from "../../api";
 const HeartIcon = ({ filled = false }) => (
   <svg
@@ -131,6 +133,9 @@ export default function VisitorScreen() {
   const ITEMS_PER_PAGE = 9;
 
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const majorParam = searchParams.get("major");
+  const { handleTop, handleBottom } = useScrollControls();
 
   const { majorAll, loadingMajorAll } = useMajorAll();
   const { productVisitor, loadingVisitor, errorVisitor } = useVisitorProduct();
@@ -143,6 +148,37 @@ export default function VisitorScreen() {
     productSearchError,
     loadingProductSearch,
   } = useProductSearch({ visitor: true });
+
+  useEffect(() => {
+    if (!majorParam) {
+      setSelectedMajor("all");
+      return;
+    }
+
+    setSelectedMajor(majorParam);
+    setCurrentPage(1);
+    window.setTimeout(() => {
+      document.getElementById("san-pham")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 100);
+  }, [majorParam]);
+
+  const handleSelectMajor = useCallback(
+    (majorId) => {
+      setSelectedMajor(majorId);
+      setCurrentPage(1);
+
+      if (majorId === "all") {
+        setSearchParams({});
+        return;
+      }
+
+      setSearchParams({ major: String(majorId) });
+    },
+    [setSearchParams],
+  );
 
   const debouncedSearchTerm = useDebounce(searchTerm, 700);
   const lastSearchRef = useRef("");
@@ -312,6 +348,7 @@ export default function VisitorScreen() {
     [likedProducts],
   );
 
+
   const filteredProducts = useMemo(() => {
     const base = productsSource;
 
@@ -400,21 +437,38 @@ export default function VisitorScreen() {
             </div>
 
             <nav className="hidden md:flex items-center gap-6">
-              {[
-                "Trang chủ",
-                "Sản phẩm",
-                "Ngành học",
-                "Hướng dẫn",
-                "Liên hệ",
-              ].map((item) => (
-                <Link
-                  key={item}
-                  to={item === "Hướng dẫn" ? "/huong-dan" : "/nckh-visitor"}
-                  className="text-gray-600 hover:text-[#003087] font-medium transition-colors text-sm"
-                >
-                  {item}
-                </Link>
-              ))}
+              <button
+                type="button"
+                onClick={() => handleTop("/nckh-visitor")}
+                className="text-sm font-medium text-gray-600 transition-colors hover:text-[#003087]"
+              >
+                Trang chủ
+              </button>
+              <button
+                type="button"
+                onClick={() => handleBottom("/nckh-visitor", "san-pham")}
+                className="text-sm font-medium text-gray-600 transition-colors hover:text-[#003087]"
+              >
+                Sản phẩm
+              </button>
+              <Link
+                to="/nganh-hoc"
+                className="text-sm font-medium text-gray-600 transition-colors hover:text-[#003087]"
+              >
+                Ngành học
+              </Link>
+              <Link
+                to="/huong-dan"
+                className="text-sm font-medium text-gray-600 transition-colors hover:text-[#003087]"
+              >
+                Hướng dẫn
+              </Link>
+              <Link
+                to="/lien-he"
+                className="text-sm font-medium text-gray-600 transition-colors hover:text-[#003087]"
+              >
+                Liên hệ
+              </Link>
             </nav>
 
             <div className="flex items-center gap-3">
@@ -449,7 +503,11 @@ export default function VisitorScreen() {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
-                <button className="px-6 py-2.5 bg-white text-[#003087] rounded-md font-semibold text-sm hover:bg-gray-100 transition-all">
+                <button
+                  type="button"
+                  onClick={() => handleBottom("/nckh-visitor", "san-pham")}
+                  className="px-6 py-2.5 bg-white text-[#003087] rounded-md font-semibold text-sm hover:bg-gray-100 transition-all"
+                >
                   Xem tất cả sản phẩm
                 </button>
 
@@ -513,8 +571,7 @@ export default function VisitorScreen() {
               className="px-4 py-2.5 bg-gray-50 rounded-md outline-none text-gray-600 text-sm border-0 cursor-pointer"
               value={selectedMajor}
               onChange={(e) => {
-                setSelectedMajor(e.target.value);
-                setCurrentPage(1);
+                handleSelectMajor(e.target.value);
               }}
               disabled={loadingMajorAll}
             >
@@ -616,10 +673,13 @@ export default function VisitorScreen() {
         </section>
 
         {/* MAJOR FILTER */}
-        <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 border-b border-gray-200">
+        <section
+          id="san-pham"
+          className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 border-b border-gray-200 scroll-mt-24"
+        >
           <div className="flex flex-wrap justify-center gap-1">
             <button
-              onClick={() => setSelectedMajor("all")}
+              onClick={() => handleSelectMajor("all")}
               className={selectedMajor === "all" ? activeClass : normalClass}
             >
               📌 Tất cả
@@ -633,7 +693,7 @@ export default function VisitorScreen() {
               majorAll?.map((major) => (
                 <button
                   key={major.major_id}
-                  onClick={() => setSelectedMajor(major.major_id)}
+                  onClick={() => handleSelectMajor(major.major_id)}
                   className={
                     String(selectedMajor) === String(major.major_id)
                       ? activeClass
@@ -807,9 +867,11 @@ export default function VisitorScreen() {
             )}
           </section>
         )}
+
       </main>
 
       <ChatBoxAi user={null} />
+      <ScrollButtons />
 
       {/* FOOTER */}
       <footer className="bg-[#003087] text-white pt-10 pb-6">

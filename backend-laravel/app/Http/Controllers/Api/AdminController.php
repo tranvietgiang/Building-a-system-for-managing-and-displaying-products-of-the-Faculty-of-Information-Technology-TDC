@@ -6,12 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Major;
 use App\Models\Product;
+use App\Models\Support;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class AdminController extends Controller
@@ -340,6 +343,139 @@ class AdminController extends Controller
             'success' => true,
             'message' => 'Xoa nguoi dung thanh cong.',
         ]);
+    }
+
+    public function lookupPasswordRecoveryUser(Request $request)
+    {
+        $validated = $request->validate([
+            'identifier' => ['required', 'string', 'max:255'],
+        ]);
+
+        $user = $this->findPasswordRecoveryUser($validated['identifier']);
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Khong tim thay tai khoan phu hop.',
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'user_id' => $user->user_id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'class' => $user->class,
+            ],
+        ]);
+    }
+
+    public function supportRequests(Request $request)
+    {
+        $status = $request->query('status', 'pending');
+
+        $requests = Support::query()
+            ->when($status !== 'all', fn ($builder) => $builder->where('status', $status))
+            ->orderBy('created_at')
+            ->orderBy('support_id')
+            ->limit(100)
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $requests,
+        ]);
+    }
+
+    public function markSupportProcessed(Request $request, Support $support)
+    {
+        $support->update([
+            'status' => 'processed',
+            'processed_by' => $request->user()?->user_id,
+            'processed_at' => now(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Support request processed.',
+            'data' => $support,
+        ]);
+    }
+
+    public function sendPasswordRecovery(Request $request)
+    {
+        $validated = $request->validate([
+            'identifier' => ['required', 'string', 'max:255'],
+            'temporary_password' => ['nullable', 'string', 'min:6', 'max:100'],
+            'support_id' => ['nullable', 'integer', 'exists:support,support_id'],
+        ]);
+
+        $support = null;
+        if (!empty($validated['support_id'])) {
+            $support = Support::find($validated['support_id']);
+        }
+
+        $user = $this->findPasswordRecoveryUser($validated['identifier']);
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Khong tim thay tai khoan phu hop.',
+            ], 404);
+        }
+
+        $temporaryPassword = $validated['temporary_password'] ?? Str::password(10, true, true, false, false);
+        $user->password = Hash::make($temporaryPassword);
+        $user->save();
+
+        $frontendUrl = $request->headers->get('origin') ?: config('app.url');
+        $loginUrl = rtrim((string) $frontendUrl, '/') . '/login';
+        $subject = 'Thong tin khoi phuc mat khau TDC';
+        $body = view('emails.password-recovery', [
+            'user' => $user,
+            'temporaryPassword' => $temporaryPassword,
+            'loginUrl' => $loginUrl,
+        ])->render();
+
+        Mail::html($body, function ($message) use ($user, $subject) {
+            $message
+                ->from(config('mail.from.address'), config('mail.from.name'))
+                ->to($user->email, $user->name)
+                ->subject($subject);
+        });
+
+        if ($support) {
+            $support->update([
+                'user_id' => $user->user_id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'status' => 'processed',
+                'processed_by' => $request->user()?->user_id,
+                'processed_at' => now(),
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Da cap mat khau moi va gui email khoi phuc.',
+            'data' => [
+                'user_id' => $user->user_id,
+                'name' => $user->name,
+                'email' => $user->email,
+            ],
+        ]);
+    }
+
+    private function findPasswordRecoveryUser(string $identifier): ?User
+    {
+        $identifier = trim($identifier);
+
+        return User::query()
+            ->where('email', $identifier)
+            ->orWhere('user_id', $identifier)
+            ->first();
     }
 
     public function products(Request $request)

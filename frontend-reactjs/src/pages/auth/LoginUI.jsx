@@ -335,13 +335,13 @@ export const LoginUI = ({
                     Ghi nhớ đăng nhập
                   </span>
                 </label>
-                <a
+                <button
+                  type="button"
                   onClick={() => navigate("/forgot")}
-                  href=""
                   className="text-sm text-[#C8102E] hover:underline"
                 >
                   Quên mật khẩu?
-                </a>
+                </button>
               </div>
 
               {/* Login Button */}

@@ -14,6 +14,8 @@ import {
   UserCheck,
 } from "lucide-react";
 import logoTdc from "../../assets/logo-tdc-orginal.webp";
+import useScrollControls from "../../hooks/common/useScrollControls";
+import ScrollButtons from "../../components/common/ScrollButtons";
 
 const steps = [
   {
@@ -83,6 +85,7 @@ const statuses = [
 
 export default function GuideScreen() {
   const navigate = useNavigate();
+  const { handleTop, handleBottom } = useScrollControls();
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900">
@@ -101,17 +104,37 @@ export default function GuideScreen() {
           </Link>
 
           <nav className="hidden items-center gap-6 md:flex">
-            <Link
-              to="/nckh-visitor"
+            <button
+              type="button"
+              onClick={() => handleTop("/nckh-visitor")}
               className="text-sm font-medium text-slate-600 transition hover:text-[#003087]"
             >
               Trang chủ
+            </button>
+            <button
+              type="button"
+              onClick={() => handleBottom("/nckh-visitor", "san-pham")}
+              className="text-sm font-medium text-slate-600 transition hover:text-[#003087]"
+            >
+              Sản phẩm
+            </button>
+            <Link
+              to="/nganh-hoc"
+              className="text-sm font-medium text-slate-600 transition hover:text-[#003087]"
+            >
+              Ngành học
             </Link>
             <Link
               to="/huong-dan"
               className="text-sm font-semibold text-[#003087]"
             >
               Hướng dẫn
+            </Link>
+            <Link
+              to="/lien-he"
+              className="text-sm font-medium text-slate-600 transition hover:text-[#003087]"
+            >
+              Liên hệ
             </Link>
           </nav>
 
@@ -148,7 +171,7 @@ export default function GuideScreen() {
                   <ArrowRight size={17} />
                 </button>
                 <button
-                  onClick={() => navigate("/nckh-visitor")}
+                  onClick={() => handleBottom("/nckh-visitor", "san-pham")}
                   className="inline-flex items-center justify-center gap-2 rounded-md border border-white/70 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10"
                 >
                   Xem sản phẩm toàn ngành
@@ -271,6 +294,7 @@ export default function GuideScreen() {
       <footer className="bg-[#003087] py-6 text-center text-xs text-blue-100">
         © 2025 Trường Cao Đẳng Công Nghệ Thủ Đức (TDC)
       </footer>
+      <ScrollButtons />
     </div>
   );
 }

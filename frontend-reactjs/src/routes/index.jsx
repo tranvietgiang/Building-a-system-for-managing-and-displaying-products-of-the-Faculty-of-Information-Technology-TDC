@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "../pages/auth/Login";
+import ForgotPassword from "../pages/auth/forget";
 import GuestRoute from "./guest.route";
 import RoleRoutes from "./protected.routes";
 import VisitorScreen from "../pages/visitorScreen/VisitorScreen";
@@ -7,6 +8,8 @@ import VisitorDetailScreen from "../pages/visitorScreen/VisitorDetailScreen";
 import NotFoundPage from "../pages/notFoundScreen/NotFoundScreen";
 import Profile from "../layouts/ProfileLayout";
 import GuideScreen from "../pages/guideScreen/GuideScreen";
+import ContactScreen from "../pages/contactScreen/ContactScreen";
+import MajorScreen from "../pages/majorScreen/MajorScreen";
 
 function AppRoutes() {
   return (
@@ -20,9 +23,19 @@ function AppRoutes() {
             </GuestRoute>
           }
         />
+        <Route
+          path="/forgot"
+          element={
+            <GuestRoute>
+              <ForgotPassword />
+            </GuestRoute>
+          }
+        />
 
         <Route path="/nckh-visitor" element={<VisitorScreen />} />
+        <Route path="/nganh-hoc" element={<MajorScreen />} />
         <Route path="/huong-dan" element={<GuideScreen />} />
+        <Route path="/lien-he" element={<ContactScreen />} />
 
         <Route path="/visitor-detail" element={<VisitorDetailScreen />} />
         <Route path="/visitor-detail/:id" element={<VisitorDetailScreen />} />
