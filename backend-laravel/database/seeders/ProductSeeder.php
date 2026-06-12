@@ -14,6 +14,13 @@ use App\Models\User;
 
 class ProductSeeder extends Seeder
 {
+    private const PRODUCT_FREE_TEST_USERS = [
+        '00000TT2984',
+        '11111TT2984',
+        '22222TT2984',
+        '33333TT2984',
+    ];
+
     public function run(): void
     {
         $this->seedAI();
@@ -650,6 +657,7 @@ class ProductSeeder extends Seeder
     {
         $student = User::where('role', 'student')
             ->where('major_id', $majorId)
+            ->whereNotIn('user_id', self::PRODUCT_FREE_TEST_USERS)
             ->inRandomOrder()
             ->first();
 
@@ -658,7 +666,9 @@ class ProductSeeder extends Seeder
             ->first();
 
         if (!$student) {
-            $student = User::where('role', 'student')->first();
+            $student = User::where('role', 'student')
+                ->whereNotIn('user_id', self::PRODUCT_FREE_TEST_USERS)
+                ->first();
         }
 
         if (!$teacher) {
