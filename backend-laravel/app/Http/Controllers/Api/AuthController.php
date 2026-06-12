@@ -82,4 +82,35 @@ class AuthController extends Controller
             ],
         ], 201);
     }
+
+    public function submitContact(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'subject' => ['required', 'string', 'max:255'],
+            'message' => ['required', 'string', 'max:2000'],
+        ]);
+
+        $support = Support::create([
+            'identifier' => $validated['email'],
+            'name' => trim($validated['name']),
+            'email' => trim($validated['email']),
+            'phone' => $validated['phone'] ?? null,
+            'subject' => trim($validated['subject']),
+            'message' => trim($validated['message']),
+            'type' => 'contact',
+            'status' => 'pending',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Contact request submitted.',
+            'data' => [
+                'support_id' => $support->support_id,
+                'status' => $support->status,
+            ],
+        ], 201);
+    }
 }

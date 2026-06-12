@@ -5,6 +5,7 @@ const authApi = {
   logout: () => axiosClient.post("/logout"),
   submitPasswordRecovery: (data) =>
     axiosClient.post("/support/password-recovery", data),
+  submitContact: (data) => axiosClient.post("/support/contact", data),
   // me: () => axiosClient.get("/me"),
 };
 

@@ -14,7 +14,10 @@ return new class extends Migration
             $table->string('user_id', 15)->nullable();
             $table->string('name')->nullable();
             $table->string('email')->nullable();
-            $table->enum('type', ['password_recovery'])->default('password_recovery');
+            $table->string('phone')->nullable();
+            $table->string('subject')->nullable();
+            $table->text('message')->nullable();
+            $table->enum('type', ['password_recovery', 'contact'])->default('password_recovery');
             $table->enum('status', ['pending', 'processed'])->default('pending');
             $table->string('processed_by', 15)->nullable();
             $table->timestamp('processed_at')->nullable();

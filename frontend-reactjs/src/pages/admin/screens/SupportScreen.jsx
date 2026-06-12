@@ -18,6 +18,8 @@ const SupportScreen = () => {
   const [loadingSend, setLoadingSend] = useState(false);
   const [loadingRequests, setLoadingRequests] = useState(false);
   const [processingId, setProcessingId] = useState(null);
+  const [passwordRequestId, setPasswordRequestId] = useState(null);
+  const [requestPasswords, setRequestPasswords] = useState({});
   const [requests, setRequests] = useState([]);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -64,7 +66,7 @@ const SupportScreen = () => {
     }
   };
 
-  const sendRecovery = async (request = null) => {
+  const sendRecovery = async (request = null, passwordOverride = "") => {
     const targetIdentifier = request?.identifier || identifier.trim();
     if (!targetIdentifier) return;
 
@@ -77,8 +79,9 @@ const SupportScreen = () => {
       if (request?.support_id) {
         payload.support_id = request.support_id;
       }
-      if (!request && temporaryPassword.trim()) {
-        payload.temporary_password = temporaryPassword.trim();
+      const newPassword = passwordOverride.trim() || temporaryPassword.trim();
+      if (newPassword) {
+        payload.temporary_password = newPassword;
       }
 
       const res = await adminApi.sendPasswordRecovery(payload);
@@ -87,11 +90,43 @@ const SupportScreen = () => {
         "Da cap mat khau moi va gui email khoi phuc cho nguoi dung.",
       );
       setTemporaryPassword("");
+      if (request?.support_id) {
+        setPasswordRequestId(null);
+        setRequestPasswords((prev) => {
+          const next = { ...prev };
+          delete next[request.support_id];
+          return next;
+        });
+      }
       fetchRequests();
     } catch (err) {
       setError(err.response?.data?.message || "Khong the gui email luc nay.");
     } finally {
       setLoadingSend(false);
+      setProcessingId(null);
+    }
+  };
+
+  const updateRequestPassword = (supportId, value) => {
+    setRequestPasswords((prev) => ({
+      ...prev,
+      [supportId]: value,
+    }));
+  };
+
+  const markProcessed = async (request) => {
+    if (!request?.support_id) return;
+
+    clearStatus();
+    setProcessingId(request.support_id);
+
+    try {
+      await adminApi.markSupportProcessed(request.support_id);
+      setMessage("Da danh dau yeu cau lien he la da xu ly.");
+      fetchRequests();
+    } catch (err) {
+      setError(err.response?.data?.message || "Khong the cap nhat yeu cau.");
+    } finally {
       setProcessingId(null);
     }
   };
@@ -265,13 +300,15 @@ const SupportScreen = () => {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[860px] text-left text-sm">
+          <table className="w-full min-w-[1080px] text-left text-sm">
             <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase text-slate-500">
               <tr>
                 <th className="px-4 py-3">#</th>
                 <th className="px-4 py-3">Submitted</th>
+                <th className="px-4 py-3">Type</th>
                 <th className="px-4 py-3">Identifier</th>
                 <th className="px-4 py-3">Email</th>
+                <th className="px-4 py-3">Subject</th>
                 <th className="px-4 py-3">Name</th>
                 <th className="px-4 py-3 text-right">Action</th>
               </tr>
@@ -279,13 +316,13 @@ const SupportScreen = () => {
             <tbody className="divide-y divide-slate-100">
               {loadingRequests ? (
                 <tr>
-                  <td className="px-4 py-8 text-center text-slate-500" colSpan="6">
+                  <td className="px-4 py-8 text-center text-slate-500" colSpan="8">
                     Loading requests...
                   </td>
                 </tr>
               ) : requests.length === 0 ? (
                 <tr>
-                  <td className="px-4 py-8 text-center text-slate-500" colSpan="6">
+                  <td className="px-4 py-8 text-center text-slate-500" colSpan="8">
                     No pending support requests.
                   </td>
                 </tr>
@@ -298,29 +335,117 @@ const SupportScreen = () => {
                     <td className="px-4 py-3 text-slate-600">
                       {new Date(request.created_at).toLocaleString()}
                     </td>
+                    <td className="px-4 py-3">
+                      <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700">
+                        {request.type === "contact" ? "Contact" : "Password"}
+                      </span>
+                    </td>
                     <td className="px-4 py-3 font-semibold text-slate-900">
                       {request.identifier}
                     </td>
                     <td className="px-4 py-3 text-emerald-700">
                       {request.email || "Not matched yet"}
                     </td>
+                    <td className="max-w-[280px] px-4 py-3 text-slate-600">
+                      <p className="font-semibold text-slate-800">
+                        {request.subject || "-"}
+                      </p>
+                      {request.message && (
+                        <p className="mt-1 line-clamp-2 text-xs leading-5 text-slate-500">
+                          {request.message}
+                        </p>
+                      )}
+                    </td>
                     <td className="px-4 py-3 text-slate-600">
                       {request.name || "-"}
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <button
-                        type="button"
-                        onClick={() => sendRecovery(request)}
-                        disabled={loadingSend}
-                        className="inline-flex h-9 items-center gap-2 rounded-lg bg-emerald-600 px-3 font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        {processingId === request.support_id ? (
-                          <Loader2 size={16} className="animate-spin" />
-                        ) : (
-                          <Mail size={16} />
-                        )}
-                        Process
-                      </button>
+                      {request.type === "contact" ? (
+                        <button
+                          type="button"
+                          onClick={() => markProcessed(request)}
+                          disabled={processingId === request.support_id}
+                          className="inline-flex h-9 items-center gap-2 rounded-lg bg-slate-700 px-3 font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {processingId === request.support_id ? (
+                            <Loader2 size={16} className="animate-spin" />
+                          ) : (
+                            <CheckCircle2 size={16} />
+                          )}
+                          Done
+                        </button>
+                      ) : (
+                        <div className="flex flex-col items-end gap-2">
+                          <div className="flex flex-wrap justify-end gap-2">
+                            <button
+                              type="button"
+                              onClick={() => sendRecovery(request)}
+                              disabled={loadingSend}
+                              className="inline-flex h-9 items-center gap-2 rounded-lg bg-emerald-600 px-3 font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              {processingId === request.support_id &&
+                              passwordRequestId !== request.support_id ? (
+                                <Loader2 size={16} className="animate-spin" />
+                              ) : (
+                                <Mail size={16} />
+                              )}
+                              Process
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setPasswordRequestId((current) =>
+                                  current === request.support_id
+                                    ? null
+                                    : request.support_id,
+                                )
+                              }
+                              className="inline-flex h-9 items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 font-semibold text-amber-700 transition hover:bg-amber-100"
+                            >
+                              <KeyRound size={16} />
+                              Mật khẩu mới
+                            </button>
+                          </div>
+
+                          {passwordRequestId === request.support_id && (
+                            <div className="flex w-[260px] max-w-full gap-2">
+                              <input
+                                type="text"
+                                value={requestPasswords[request.support_id] || ""}
+                                onChange={(event) =>
+                                  updateRequestPassword(
+                                    request.support_id,
+                                    event.target.value,
+                                  )
+                                }
+                                placeholder="Nhập mật khẩu mới"
+                                className="h-9 min-w-0 flex-1 rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-amber-500"
+                                maxLength={100}
+                              />
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  sendRecovery(
+                                    request,
+                                    requestPasswords[request.support_id] || "",
+                                  )
+                                }
+                                disabled={
+                                  loadingSend ||
+                                  !requestPasswords[request.support_id]?.trim()
+                                }
+                                className="h-9 rounded-lg bg-amber-600 px-3 text-sm font-semibold text-white transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-60"
+                              >
+                                {processingId === request.support_id ? (
+                                  <Loader2 size={16} className="animate-spin" />
+                                ) : (
+                                  "Cập nhật"
+                                )}
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))

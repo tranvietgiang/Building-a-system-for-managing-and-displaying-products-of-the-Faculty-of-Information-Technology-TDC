@@ -389,6 +389,21 @@ class AdminController extends Controller
         ]);
     }
 
+    public function markSupportProcessed(Request $request, Support $support)
+    {
+        $support->update([
+            'status' => 'processed',
+            'processed_by' => $request->user()?->user_id,
+            'processed_at' => now(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Support request processed.',
+            'data' => $support,
+        ]);
+    }
+
     public function sendPasswordRecovery(Request $request)
     {
         $validated = $request->validate([
@@ -426,7 +441,7 @@ class AdminController extends Controller
 
         Mail::html($body, function ($message) use ($user, $subject) {
             $message
-                ->from('giangit0336833@gmail.com', 'TDC Admin')
+                ->from(config('mail.from.address'), config('mail.from.name'))
                 ->to($user->email, $user->name)
                 ->subject($subject);
         });

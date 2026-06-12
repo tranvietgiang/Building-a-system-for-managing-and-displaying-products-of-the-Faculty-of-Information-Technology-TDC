@@ -39,6 +39,8 @@ const adminApi = {
 
   getSupportRequests: (params = {}) =>
     axiosClient.get(`/admin/support/requests${buildQuery(params)}`),
+  markSupportProcessed: (supportId) =>
+    axiosClient.patch(`/admin/support/requests/${supportId}/processed`),
   lookupPasswordRecoveryUser: (payload) =>
     axiosClient.post("/admin/support/password-recovery/lookup", payload),
   sendPasswordRecovery: (payload) =>

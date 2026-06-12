@@ -36,6 +36,8 @@ Route::prefix('v1')->group(function () {
         ->middleware('throttle:5,1');
     Route::post('/support/password-recovery', [AuthController::class, 'submitPasswordRecovery'])
         ->middleware('throttle:5,1');
+    Route::post('/support/contact', [AuthController::class, 'submitContact'])
+        ->middleware('throttle:5,1');
 
     Route::get('/me', [AuthController::class, 'me'])->middleware('auth:sanctum');
     // đăng xuất
@@ -158,6 +160,7 @@ Route::prefix('v1')->group(function () {
         Route::delete('/users/{userId}', [AdminController::class, 'destroyUser']);
 
         Route::get('/support/requests', [AdminController::class, 'supportRequests']);
+        Route::patch('/support/requests/{support}/processed', [AdminController::class, 'markSupportProcessed']);
         Route::post('/support/password-recovery/lookup', [AdminController::class, 'lookupPasswordRecoveryUser']);
         Route::post('/support/password-recovery/send', [AdminController::class, 'sendPasswordRecovery']);
 
