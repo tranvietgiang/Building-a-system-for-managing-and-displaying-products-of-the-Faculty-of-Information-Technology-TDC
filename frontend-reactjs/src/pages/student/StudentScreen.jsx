@@ -195,7 +195,7 @@ const StudentScreen = () => {
                 "Bắt đầu bằng cách đăng sản phẩm đầu tiên của bạn."}
             </p>
             <button
-              onClick={() => navigate("/upload-product")}
+              onClick={() => navigate("/upload")}
               className={`mt-4 px-4 py-2 ${theme.buttonBg} text-white rounded-lg transition`}
             >
               + Đăng sản phẩm
