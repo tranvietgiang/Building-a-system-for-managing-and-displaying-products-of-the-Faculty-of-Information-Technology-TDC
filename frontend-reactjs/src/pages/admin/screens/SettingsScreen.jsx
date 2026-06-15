@@ -22,13 +22,15 @@ const settingItems = [
   {
     key: "ai_chatbox_enabled",
     title: "AI Chatbox",
-    description: "Allow visitors and users to send questions to the AI chat assistant.",
+    description:
+      "Allow visitors and users to send questions to the AI chat assistant.",
     icon: Bot,
   },
   {
     key: "ai_product_check_enabled",
     title: "Product AI Check",
-    description: "Run AI moderation and duplicate-style checks when products are posted or reviewed.",
+    description:
+      "Run AI moderation and duplicate-style checks when products are posted or reviewed.",
     icon: ShieldCheck,
   },
   {
@@ -40,13 +42,15 @@ const settingItems = [
   {
     key: "product_search_enabled",
     title: "Product Search",
-    description: "Allow regular product search across student, visitor, and admin screens.",
+    description:
+      "Allow regular product search across student, visitor, and admin screens.",
     icon: Search,
   },
   {
     key: "ai_dashboard_insights_enabled",
     title: "Dashboard AI Insights",
-    description: "Allow the admin dashboard to request AI summary and recommendations.",
+    description:
+      "Allow the admin dashboard to request AI summary and recommendations.",
     icon: Gauge,
   },
 ];
@@ -120,15 +124,16 @@ const SettingsScreen = () => {
               System Controls
             </div>
             <h2 className="mt-3 text-xl font-bold text-slate-900">
-              Cost and feature switches
+              Tùy chỉnh chi phí và tính năng
             </h2>
             <p className="mt-1 max-w-2xl text-sm text-slate-500">
-              Turn high-traffic AI and search features on or off without deploying code.
+              Bật hoặc tắt các tính năng tìm kiếm và AI có lưu lượng truy cập
+              cao mà không cần lập trình.
             </p>
           </div>
           <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-            <span className="font-semibold text-slate-900">{enabledCount}</span> /{" "}
-            {settingItems.length} enabled
+            <span className="font-semibold text-slate-900">{enabledCount}</span>{" "}
+            / {settingItems.length} enabled
           </div>
         </div>
       </div>
@@ -186,13 +191,20 @@ const SettingsScreen = () => {
                       enabled ? "left-6" : "left-1"
                     }`}
                   >
-                    {saving && <Loader2 size={12} className="animate-spin text-slate-500" />}
+                    {saving && (
+                      <Loader2
+                        size={12}
+                        className="animate-spin text-slate-500"
+                      />
+                    )}
                   </span>
                 </button>
               </div>
 
               <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs font-medium">
-                <span className={enabled ? "text-emerald-700" : "text-slate-500"}>
+                <span
+                  className={enabled ? "text-emerald-700" : "text-slate-500"}
+                >
                   {enabled ? "Enabled" : "Disabled"}
                 </span>
                 <span className="text-slate-400">
