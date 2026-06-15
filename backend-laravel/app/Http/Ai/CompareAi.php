@@ -6,16 +6,24 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use App\Repositories\ProductRepository;
+use App\Services\SystemSettingService;
 
 class CompareAi
 {
     public function __construct(
-        protected ProductRepository $productRepository
+        protected ProductRepository $productRepository,
+        protected SystemSettingService $settings
     ) {}
 
     public function compareProduct(int $productId)
     {
         try {
+            if (!$this->settings->enabled(SystemSettingService::AI_PRODUCT_CHECK)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'AI product checking is currently disabled by the administrator.',
+                ], 503);
+            }
 
             if (!$this->productRepository->productExists($productId)) {
                 return response()->json([

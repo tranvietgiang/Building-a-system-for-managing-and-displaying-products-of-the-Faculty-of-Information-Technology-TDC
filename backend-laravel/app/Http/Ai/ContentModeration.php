@@ -8,11 +8,20 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Http\UploadedFile;
+use App\Services\SystemSettingService;
 
 class ContentModeration
 {
+    public function __construct(
+        protected SystemSettingService $settings
+    ) {}
+
     public function moderateProduct(Product $product, array $frontendContext = []): array
     {
+        if (!$this->settings->enabled(SystemSettingService::AI_PRODUCT_CHECK)) {
+            return $this->skipped('AI product checking disabled');
+        }
+
         $apiKey = env('OPENAI_API_KEY');
 
         if (!$apiKey) {
@@ -149,6 +158,10 @@ class ContentModeration
 
     public function moderateUploadedImage(UploadedFile $image, array $frontendContext = []): array
     {
+        if (!$this->settings->enabled(SystemSettingService::AI_PRODUCT_CHECK)) {
+            return $this->skipped('AI product checking disabled');
+        }
+
         $apiKey = env('OPENAI_API_KEY');
 
         if (!$apiKey) {
@@ -355,6 +368,17 @@ class ContentModeration
             'reason' => $reason,
             'violations' => [$reason],
             'raw' => null,
+        ];
+    }
+
+    private function skipped(string $reason): array
+    {
+        return [
+            'approved' => true,
+            'reason' => $reason,
+            'violations' => [],
+            'raw' => null,
+            'skipped' => true,
         ];
     }
 

@@ -21,6 +21,7 @@ import useSearchAi from "../../hooks/ai/useSearchAi";
 import useDebounce from "../../hooks/common/useDebounce";
 import { ROLE } from "../../utils/constants";
 import useProductSearch from "../../hooks/useProduct/useProductSearch";
+import { systemSettingsApi } from "../../api";
 
 const getStatusLabel = (status) => {
   switch (status) {
@@ -137,6 +138,10 @@ export default function SearchAi({
 
   const [keyword, setKeyword] = useState("");
   const [aiEnabled, setAiEnabled] = useState(false);
+  const [systemSettings, setSystemSettings] = useState({
+    ai_search_enabled: true,
+    product_search_enabled: true,
+  });
   const [currentPage, setCurrentPage] = useState(1);
   const [searchHistory, setSearchHistory] = useState(() => {
     try {
@@ -157,6 +162,8 @@ export default function SearchAi({
   const debouncedKeyword = useDebounce(keyword, 700);
   const lastSearchRef = useRef("");
   const searchConfig = getRoleSearchConfig(role, majorName);
+  const canUseAiSearch = systemSettings.ai_search_enabled !== false;
+  const canUseProductSearch = systemSettings.product_search_enabled !== false;
   const activeResult = aiEnabled ? searchResult : productSearchResult;
   const activeError = aiEnabled ? searchError : productSearchError;
   const activeLoading = aiEnabled ? loadingSearchAi : loadingProductSearch;
@@ -191,6 +198,8 @@ export default function SearchAi({
 
   const runSearch = async (value) => {
     const nextKeyword = String(value || "").trim();
+    if (aiEnabled && !canUseAiSearch) return;
+    if (!aiEnabled && !canUseProductSearch) return;
     const searchKey = `${aiEnabled ? "ai" : "normal"}:${nextKeyword}`;
     if (!nextKeyword || lastSearchRef.current === searchKey) return;
 
@@ -235,6 +244,32 @@ export default function SearchAi({
   };
 
   useEffect(() => {
+    let alive = true;
+
+    systemSettingsApi
+      .getPublicSettings()
+      .then((res) => {
+        if (!alive) return;
+
+        const nextSettings = {
+          ai_search_enabled: res.data?.ai_search_enabled !== false,
+          product_search_enabled: res.data?.product_search_enabled !== false,
+        };
+
+        setSystemSettings(nextSettings);
+
+        if (!nextSettings.ai_search_enabled) {
+          setAiEnabled(false);
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  useEffect(() => {
     const nextKeyword = debouncedKeyword.trim();
 
     if (!nextKeyword) {
@@ -247,6 +282,8 @@ export default function SearchAi({
 
     const searchKey = `${aiEnabled ? "ai" : "normal"}:${nextKeyword}`;
     if (nextKeyword.length < 2 || lastSearchRef.current === searchKey) return;
+    if (aiEnabled && !canUseAiSearch) return;
+    if (!aiEnabled && !canUseProductSearch) return;
 
     lastSearchRef.current = searchKey;
     const request = aiEnabled
@@ -264,6 +301,8 @@ export default function SearchAi({
     searchAi,
     searchProducts,
     saveSearchHistory,
+    canUseAiSearch,
+    canUseProductSearch,
   ]);
 
   useEffect(() => {
@@ -273,6 +312,8 @@ export default function SearchAi({
 
     const nextKeyword = keyword.trim();
     if (nextKeyword.length < 2) return;
+    if (aiEnabled && !canUseAiSearch) return;
+    if (!aiEnabled && !canUseProductSearch) return;
 
     const request = aiEnabled
       ? searchAi(nextKeyword)
@@ -283,7 +324,7 @@ export default function SearchAi({
       setCurrentPage(1);
       if (result) saveSearchHistory(nextKeyword);
     });
-  }, [aiEnabled]);
+  }, [aiEnabled, canUseAiSearch, canUseProductSearch]);
 
   const Wrapper = embedded ? "section" : "main";
 
@@ -311,12 +352,19 @@ export default function SearchAi({
                   <span>Thường</span>
                   <button
                     type="button"
-                    onClick={() => setAiEnabled((prev) => !prev)}
+                    onClick={() => canUseAiSearch && setAiEnabled((prev) => !prev)}
+                    disabled={!canUseAiSearch}
                     className={`relative h-6 w-11 rounded-full transition ${
                       aiEnabled ? "bg-sky-600" : "bg-slate-300"
-                    }`}
+                    } disabled:cursor-not-allowed disabled:opacity-60`}
                     aria-pressed={aiEnabled}
-                    title={aiEnabled ? "Tắt AI Search" : "Bật AI Search"}
+                    title={
+                      !canUseAiSearch
+                        ? "AI Search is disabled"
+                        : aiEnabled
+                          ? "Tắt AI Search"
+                          : "Bật AI Search"
+                    }
                   >
                     <span
                       className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition ${
@@ -347,7 +395,12 @@ export default function SearchAi({
                 )}
                 <button
                   type="submit"
-                  disabled={activeLoading || !keyword.trim()}
+                  disabled={
+                    activeLoading ||
+                    !keyword.trim() ||
+                    (aiEnabled && !canUseAiSearch) ||
+                    (!aiEnabled && !canUseProductSearch)
+                  }
                   className="inline-flex items-center gap-2 rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {activeLoading ? (
@@ -400,6 +453,14 @@ export default function SearchAi({
         {activeError && (
           <div className="mb-6 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
             {activeError}
+          </div>
+        )}
+
+        {(!canUseProductSearch || !canUseAiSearch) && (
+          <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+            {!canUseProductSearch
+              ? "Product search is currently disabled by the administrator."
+              : "AI Search is currently disabled by the administrator."}
           </div>
         )}
 

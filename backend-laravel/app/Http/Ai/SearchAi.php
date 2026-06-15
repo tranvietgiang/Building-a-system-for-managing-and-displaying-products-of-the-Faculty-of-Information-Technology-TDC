@@ -7,11 +7,24 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use App\Services\SystemSettingService;
 
 class SearchAi
 {
+    public function __construct(
+        protected SystemSettingService $settings
+    ) {}
+
     public function searchAi(Request $request)
     {
+        if (!$this->settings->enabled(SystemSettingService::AI_SEARCH)) {
+            return response()->json([
+                'message' => 'AI search is currently disabled by the administrator.',
+                'products' => [],
+                'count' => 0,
+            ], 503);
+        }
+
         // Validate input
         $request->validate([
             'message' => 'nullable|string|max:200',

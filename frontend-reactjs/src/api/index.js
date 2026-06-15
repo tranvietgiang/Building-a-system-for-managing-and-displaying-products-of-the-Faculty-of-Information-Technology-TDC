@@ -6,6 +6,7 @@ import teacherApi from "./teacher.api";
 import uploadApi from "./upload.api";
 import categoryApi from "./category.api";
 import aiApi from "./ai.api";
+import systemSettingsApi from "./systemSettings.api";
 export {
   authApi,
   majorApi,
@@ -14,4 +15,5 @@ export {
   uploadApi,
   categoryApi,
   aiApi,
+  systemSettingsApi,
 };
