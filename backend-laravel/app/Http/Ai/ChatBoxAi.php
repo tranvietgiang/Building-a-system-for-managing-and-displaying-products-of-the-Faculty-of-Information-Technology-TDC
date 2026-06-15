@@ -7,10 +7,14 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use App\Http\Common\NormalizeMajorCode;
 use Illuminate\Support\Facades\Auth;
+use App\Services\SystemSettingService;
 
 class ChatBoxAi
 {
-    public function __construct(protected NormalizeMajorCode $normalizeMajorCode) {}
+    public function __construct(
+        protected NormalizeMajorCode $normalizeMajorCode,
+        protected SystemSettingService $settings
+    ) {}
 
     private function isRelevantQuestion(string $message): bool
     {
@@ -304,6 +308,13 @@ class ChatBoxAi
 
     public function chat(Request $request)
     {
+        if (!$this->settings->enabled(SystemSettingService::AI_CHATBOX)) {
+            return response()->json([
+                'reply' => 'AI chatbox is currently disabled by the administrator.',
+                'products' => [],
+            ], 503);
+        }
+
         // Validate input
         $request->validate([
             'message' => 'nullable|string|max:1000',

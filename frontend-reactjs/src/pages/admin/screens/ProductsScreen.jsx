@@ -19,6 +19,10 @@ const ProductsScreen = () => {
   const [pagination, setPagination] = useState(null);
   const [loading, setLoading] = useState(true);
   const [aiEnabled, setAiEnabled] = useState(false);
+  const [systemSettings, setSystemSettings] = useState({
+    ai_search_enabled: true,
+    product_search_enabled: true,
+  });
   const [error, setError] = useState("");
 
   const fetchProducts = async (targetPage = page) => {
@@ -26,6 +30,22 @@ const ProductsScreen = () => {
     setError("");
     try {
       const keyword = filters.q.trim();
+      const canUseAiSearch = systemSettings.ai_search_enabled !== false;
+      const canUseProductSearch = systemSettings.product_search_enabled !== false;
+
+      if (keyword && aiEnabled && !canUseAiSearch) {
+        setProducts([]);
+        setPagination(null);
+        setError("AI Search is currently disabled by the administrator.");
+        return;
+      }
+
+      if (keyword && !aiEnabled && !canUseProductSearch) {
+        setProducts([]);
+        setPagination(null);
+        setError("Product search is currently disabled by the administrator.");
+        return;
+      }
 
       if (keyword && aiEnabled) {
         const res = await aiApi.searchProducts(keyword);
@@ -106,6 +126,21 @@ const ProductsScreen = () => {
 
   useEffect(() => {
     adminApi.getMajors().then((res) => setMajors(res.data || []));
+    adminApi
+      .getSystemSettings()
+      .then((res) => {
+        const nextSettings = {
+          ai_search_enabled: res.data?.ai_search_enabled !== false,
+          product_search_enabled: res.data?.product_search_enabled !== false,
+        };
+
+        setSystemSettings(nextSettings);
+
+        if (!nextSettings.ai_search_enabled) {
+          setAiEnabled(false);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -183,12 +218,22 @@ const ProductsScreen = () => {
             <span>Thường</span>
             <button
               type="button"
-              onClick={() => setAiEnabled((prev) => !prev)}
+              onClick={() =>
+                systemSettings.ai_search_enabled !== false &&
+                setAiEnabled((prev) => !prev)
+              }
+              disabled={systemSettings.ai_search_enabled === false}
               className={`relative h-6 w-11 rounded-full transition ${
                 aiEnabled ? "bg-emerald-600" : "bg-slate-300"
-              }`}
+              } disabled:cursor-not-allowed disabled:opacity-60`}
               aria-pressed={aiEnabled}
-              title={aiEnabled ? "Tắt AI Search" : "Bật AI Search"}
+              title={
+                systemSettings.ai_search_enabled === false
+                  ? "AI Search is disabled"
+                  : aiEnabled
+                    ? "Tắt AI Search"
+                    : "Bật AI Search"
+              }
             >
               <span
                 className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition ${

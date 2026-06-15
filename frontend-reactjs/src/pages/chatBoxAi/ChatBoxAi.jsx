@@ -3,11 +3,13 @@ import "./ChatBoxAi.css";
 import useChatBoxAi from "../../hooks/ai/useChatBoxAi";
 import { useNavigate } from "react-router-dom";
 import { ROLE } from "../../utils/constants";
+import { systemSettingsApi } from "../../api";
 export default function ChatBoxAi({ user }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
+  const [chatEnabled, setChatEnabled] = useState(true);
 
   const navigate = useNavigate();
   const { sendMessage, loadingAi } = useChatBoxAi();
@@ -19,6 +21,25 @@ export default function ChatBoxAi({ user }) {
 
   const STORAGE_KEY = userId ? `chat_${userId}` : null;
   const EXP_TIME = 10 * 60 * 1000;
+
+  useEffect(() => {
+    let alive = true;
+
+    systemSettingsApi
+      .getPublicSettings()
+      .then((res) => {
+        if (alive) {
+          setChatEnabled(res.data?.ai_chatbox_enabled !== false);
+        }
+      })
+      .catch(() => {
+        if (alive) setChatEnabled(true);
+      });
+
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   // =========================
   // LOAD MESSAGES KHI MỞ CHAT
@@ -166,6 +187,7 @@ export default function ChatBoxAi({ user }) {
 
   // Guest không hiển thị chatbox
   if (!userId) return null;
+  if (!chatEnabled) return null;
 
   return (
     <>

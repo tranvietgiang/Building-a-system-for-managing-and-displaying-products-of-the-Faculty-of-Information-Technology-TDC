@@ -16,6 +16,10 @@ const buildQuery = (params = {}) => {
 const adminApi = {
   getDashboard: () => axiosClient.get("/admin/dashboard"),
 
+  getSystemSettings: () => axiosClient.get("/admin/system-settings"),
+  updateSystemSettings: (payload) =>
+    axiosClient.patch("/admin/system-settings", payload),
+
   getUsers: (params) => axiosClient.get(`/admin/users${buildQuery(params)}`),
   createUser: (payload) => axiosClient.post("/admin/users", payload),
   updateUser: (userId, payload) =>

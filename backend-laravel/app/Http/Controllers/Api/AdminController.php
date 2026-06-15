@@ -16,9 +16,14 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use App\Services\SystemSettingService;
 
 class AdminController extends Controller
 {
+    public function __construct(
+        protected SystemSettingService $settings
+    ) {}
+
     public function dashboard()
     {
         $productsByStatus = Product::query()
@@ -109,7 +114,7 @@ class AdminController extends Controller
     {
         $fallback = $this->buildFallbackDashboardInsights($totals, $majors);
 
-        if (!env('OPENAI_API_KEY')) {
+        if (!env('OPENAI_API_KEY') || !$this->settings->enabled(SystemSettingService::AI_DASHBOARD_INSIGHTS)) {
             return $fallback;
         }
 
@@ -484,6 +489,22 @@ class AdminController extends Controller
         $query = trim((string) $request->query('q', ''));
         $status = $request->query('status');
         $majorId = $request->query('major_id');
+
+        if ($query !== '' && !$this->settings->enabled(SystemSettingService::PRODUCT_SEARCH)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Product search is currently disabled by the administrator.',
+                'data' => [
+                    'data' => [],
+                    'current_page' => 1,
+                    'from' => 0,
+                    'last_page' => 1,
+                    'per_page' => $perPage,
+                    'to' => 0,
+                    'total' => 0,
+                ],
+            ], 503);
+        }
 
         $products = Product::query()
             ->leftJoin('users', 'products.user_id', '=', 'users.user_id')

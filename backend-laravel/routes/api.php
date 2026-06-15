@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\TeacherController;
 use App\Http\Controllers\Api\UploadController;
 use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\SystemSettingController;
 use App\Http\Ai\ChatBoxAi;
 use App\Http\Ai\SearchAi;
 use App\Http\Ai\CompareAi;
@@ -121,6 +122,8 @@ Route::prefix('v1')->group(function () {
 */
     Route::get('/category/all', [CategoryController::class, 'getAllCategories']);
 
+    Route::get('/system-settings', [SystemSettingController::class, 'index']);
+
     /*
 |--------------------------------------------------------------------------
 | Visitor ROUTES
@@ -153,6 +156,8 @@ Route::prefix('v1')->group(function () {
 */
     Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard']);
+        Route::get('/system-settings', [SystemSettingController::class, 'index']);
+        Route::patch('/system-settings', [SystemSettingController::class, 'update']);
 
         Route::get('/users', [AdminController::class, 'users']);
         Route::post('/users', [AdminController::class, 'storeUser']);

@@ -9,12 +9,14 @@ use App\Services\ProductService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Services\SystemSettingService;
 
 class ProductController extends Controller
 {
 
     public function __construct(
-        protected ProductService $productService
+        protected ProductService $productService,
+        protected SystemSettingService $settings
     ) {}
 
     public function productViewId(int $id)
@@ -46,6 +48,23 @@ class ProductController extends Controller
 
     public function searchProducts(Request $request)
     {
+        if (!$this->settings->enabled(SystemSettingService::PRODUCT_SEARCH)) {
+            return response()->json([
+                'message' => 'Product search is currently disabled by the administrator.',
+                'count' => 0,
+                'products' => [],
+                'data' => [
+                    'data' => [],
+                    'current_page' => 1,
+                    'from' => 0,
+                    'last_page' => 1,
+                    'per_page' => (int) $request->query('per_page', 12),
+                    'to' => 0,
+                    'total' => 0,
+                ],
+            ], 503);
+        }
+
         $request->validate([
             'q' => ['nullable', 'string', 'max:200'],
             'status' => ['nullable', 'in:approved,pending,rejected'],
