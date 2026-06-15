@@ -21,36 +21,36 @@ const DEFAULT_SETTINGS = {
 const settingItems = [
   {
     key: "ai_chatbox_enabled",
-    title: "AI Chatbox",
+    title: "Hộp chat AI",
     description:
-      "Allow visitors and users to send questions to the AI chat assistant.",
+      "Cho phép khách truy cập và người dùng gửi câu hỏi đến trợ lý chat AI.",
     icon: Bot,
   },
   {
     key: "ai_product_check_enabled",
-    title: "Product AI Check",
+    title: "Kiểm tra sản phẩm bằng AI",
     description:
-      "Run AI moderation and duplicate-style checks when products are posted or reviewed.",
+      "Chạy kiểm duyệt AI và kiểm tra kiểu trùng lặp khi sản phẩm được đăng hoặc xét duyệt.",
     icon: ShieldCheck,
   },
   {
     key: "ai_search_enabled",
-    title: "AI Search",
-    description: "Allow semantic product search that can call OpenAI.",
+    title: "Tìm kiếm AI",
+    description: "Cho phép tìm kiếm sản phẩm theo ngữ nghĩa có thể gọi OpenAI.",
     icon: Sparkles,
   },
   {
     key: "product_search_enabled",
-    title: "Product Search",
+    title: "Tìm kiếm sản phẩm",
     description:
-      "Allow regular product search across student, visitor, and admin screens.",
+      "Cho phép tìm kiếm sản phẩm thông thường trên màn hình sinh viên, khách truy cập và quản trị viên.",
     icon: Search,
   },
   {
     key: "ai_dashboard_insights_enabled",
-    title: "Dashboard AI Insights",
+    title: "Thông tin AI trên bảng điều khiển",
     description:
-      "Allow the admin dashboard to request AI summary and recommendations.",
+      "Cho phép bảng điều khiển quản trị yêu cầu AI tóm tắt và đề xuất.",
     icon: Gauge,
   },
 ];
@@ -80,7 +80,7 @@ const SettingsScreen = () => {
       } catch (err) {
         console.error("Could not load system settings:", err);
         if (alive) {
-          setError("Could not load system settings.");
+          setError("Không thể tải cài đặt hệ thống.");
         }
       } finally {
         if (alive) setLoading(false);
@@ -108,7 +108,7 @@ const SettingsScreen = () => {
     } catch (err) {
       console.error("Could not update system setting:", err);
       setSettings(previous);
-      setError("Could not update setting. Please try again.");
+      setError("Không thể cập nhật cài đặt. Vui lòng thử lại.");
     } finally {
       setSavingKey("");
     }
@@ -121,7 +121,7 @@ const SettingsScreen = () => {
           <div>
             <div className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-600">
               <ToggleLeft size={14} />
-              System Controls
+              Điều khiển hệ thống
             </div>
             <h2 className="mt-3 text-xl font-bold text-slate-900">
               Tùy chỉnh chi phí và tính năng
@@ -133,7 +133,7 @@ const SettingsScreen = () => {
           </div>
           <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
             <span className="font-semibold text-slate-900">{enabledCount}</span>{" "}
-            / {settingItems.length} enabled
+            / {settingItems.length} đang bật
           </div>
         </div>
       </div>
@@ -184,7 +184,7 @@ const SettingsScreen = () => {
                     enabled ? "bg-emerald-600" : "bg-slate-300"
                   } disabled:cursor-not-allowed disabled:opacity-60`}
                   aria-pressed={enabled}
-                  title={enabled ? "Disable" : "Enable"}
+                  title={enabled ? "Tắt" : "Bật"}
                 >
                   <span
                     className={`absolute top-1 flex h-5 w-5 items-center justify-center rounded-full bg-white shadow transition ${
@@ -205,10 +205,10 @@ const SettingsScreen = () => {
                 <span
                   className={enabled ? "text-emerald-700" : "text-slate-500"}
                 >
-                  {enabled ? "Enabled" : "Disabled"}
+                  {enabled ? "Đang bật" : "Đã tắt"}
                 </span>
                 <span className="text-slate-400">
-                  {enabled ? "Requests allowed" : "Requests blocked"}
+                  {enabled ? "Cho phép yêu cầu" : "Chặn yêu cầu"}
                 </span>
               </div>
             </div>
