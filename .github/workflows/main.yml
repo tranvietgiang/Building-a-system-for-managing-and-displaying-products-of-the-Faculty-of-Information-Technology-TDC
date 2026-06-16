@@ -179,7 +179,7 @@ jobs:
           SESSION_LIFETIME=120
           SESSION_ENCRYPT=false
           SESSION_PATH=/
-          SESSION_DOMAIN=.tvg.adtech.pro.vn
+          SESSION_DOMAIN=tvg.adtech.pro.vn
           SESSION_SECURE_COOKIE=true
           SESSION_HTTP_ONLY=true
           SESSION_SAME_SITE=lax
