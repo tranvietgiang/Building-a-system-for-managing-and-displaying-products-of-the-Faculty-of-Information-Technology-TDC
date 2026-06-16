@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\common;
+namespace App\Http\Common;
 
 class NormalizeMajorCode
 {
