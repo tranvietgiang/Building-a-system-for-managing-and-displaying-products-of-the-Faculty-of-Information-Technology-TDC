@@ -269,8 +269,8 @@ class AdminController extends Controller
                         ->orWhere('users.email', 'like', "%{$query}%");
                 });
             })
-            ->when($role, fn ($builder) => $builder->where('users.role', $role))
-            ->when($majorId, fn ($builder) => $builder->where('users.major_id', $majorId))
+            ->when($role, fn($builder) => $builder->where('users.role', $role))
+            ->when($majorId, fn($builder) => $builder->where('users.major_id', $majorId))
             ->orderByDesc('users.created_at')
             ->paginate($perPage);
 
@@ -382,7 +382,7 @@ class AdminController extends Controller
         $status = $request->query('status', 'pending');
 
         $requests = Support::query()
-            ->when($status !== 'all', fn ($builder) => $builder->where('status', $status))
+            ->when($status !== 'all', fn($builder) => $builder->where('status', $status))
             ->orderBy('created_at')
             ->orderBy('support_id')
             ->limit(100)
@@ -493,7 +493,7 @@ class AdminController extends Controller
         if ($query !== '' && !$this->settings->enabled(SystemSettingService::PRODUCT_SEARCH)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Tính năng tìm kiếm sản phẩm hiện đang bị quản trị viên tắt.',
+                'message' => 'Tính năng tìm kiếm sản phẩm bằng ai hiện đang bị quản trị viên tắt.',
                 'data' => [
                     'data' => [],
                     'current_page' => 1,
@@ -519,9 +519,9 @@ class AdminController extends Controller
                 DB::raw('COALESCE(product_statistics.views, 0) as views'),
                 DB::raw('COALESCE(product_statistics.likes, 0) as likes')
             )
-            ->when($query, fn ($builder) => $builder->where('products.title', 'like', "%{$query}%"))
-            ->when($status, fn ($builder) => $builder->where('products.status', $status))
-            ->when($majorId, fn ($builder) => $builder->where('products.major_id', $majorId))
+            ->when($query, fn($builder) => $builder->where('products.title', 'like', "%{$query}%"))
+            ->when($status, fn($builder) => $builder->where('products.status', $status))
+            ->when($majorId, fn($builder) => $builder->where('products.major_id', $majorId))
             ->orderByDesc('products.created_at')
             ->paginate($perPage);
 

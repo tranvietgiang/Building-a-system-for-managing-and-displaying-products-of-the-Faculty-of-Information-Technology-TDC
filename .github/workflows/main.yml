@@ -219,6 +219,17 @@ jobs:
           rsync -az --delete \
             --exclude=".env" \
             --exclude=".env.*" \
+            --exclude=".editorconfig" \
+            --exclude=".gitattributes" \
+            --exclude=".gitignore" \
+            --exclude=".phpunit.result.cache" \
+            --exclude="Dockerfile" \
+            --exclude="README.md" \
+            --exclude="package.json" \
+            --exclude="package-lock.json" \
+            --exclude="phpunit.xml" \
+            --exclude="tests/" \
+            --exclude="vite.config.js" \
             --exclude="vendor/" \
             --exclude="node_modules/" \
             --exclude="storage/" \
@@ -239,7 +250,6 @@ jobs:
             mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views storage/logs bootstrap/cache
             composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
             grep -q "https://tvg.adtech.pro.vn" config/cors.php || sed -i "/http:\/\/192\.168\.33\.11:5173/a\        'https://tvg.adtech.pro.vn'," config/cors.php
-            php artisan migrate --force
             php artisan storage:link || true
             php artisan config:clear
             php artisan config:cache
