@@ -5,6 +5,7 @@ namespace App\Http\Ai;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use App\Http\Common\NormalizeMajorCode;
 use Illuminate\Support\Facades\Auth;
 use App\Services\SystemSettingService;
@@ -442,6 +443,11 @@ class ChatBoxAi
 
         /* ── 5. PARSE RESPONSE ───────────────────────────────────── */
         if ($response->failed()) {
+            Log::error('AI chatbox OpenAI request failed', [
+                'status' => $response->status(),
+                'body' => $response->json() ?? $response->body(),
+            ]);
+
             return response()->json(['reply' => 'Không thể kết nối AI lúc này, vui lòng thử lại.'], 502);
         }
 
