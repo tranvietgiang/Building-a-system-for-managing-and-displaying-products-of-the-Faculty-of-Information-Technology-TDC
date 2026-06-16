@@ -3,6 +3,7 @@ name: Deploy
 on:
   push:
     branches:
+      - main
       - master
   workflow_dispatch:
 
@@ -237,7 +238,9 @@ jobs:
             cd "${{ secrets.BACKEND_PATH }}"
             mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views storage/logs bootstrap/cache
             composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+            grep -q "https://tvg.adtech.pro.vn" config/cors.php || sed -i "/http:\/\/192\.168\.33\.11:5173/a\        'https://tvg.adtech.pro.vn'," config/cors.php
             php artisan migrate --force
             php artisan storage:link || true
+            php artisan config:clear
             php artisan config:cache
             php artisan view:cache
