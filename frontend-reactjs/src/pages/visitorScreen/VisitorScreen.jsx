@@ -403,12 +403,38 @@ export default function VisitorScreen() {
     return filteredProducts.slice(start, start + ITEMS_PER_PAGE);
   }, [filteredProducts, currentPage]);
 
-  const stats = [
-    { value: "128", label: "Sản phẩm tiêu biểu" },
-    { value: "342", label: "Sinh viên tham gia" },
-    { value: "45", label: "Giảng viên hướng dẫn" },
-    { value: "24", label: "Giải thưởng đạt được" },
-  ];
+  const stats = useMemo(() => {
+    const products = productVisitor ?? [];
+    const students = new Set();
+    const advisors = new Set();
+    const totalViews = products.reduce((sum, product) => {
+      const studentKey =
+        product.studentId ||
+        product.student_id ||
+        product.user_id ||
+        product.student;
+      const advisorKey =
+        product.advisor ||
+        product.advisor_id ||
+        product.teacher_id ||
+        product.approved_by;
+
+      if (studentKey) students.add(String(studentKey));
+      if (advisorKey) advisors.add(String(advisorKey));
+
+      return sum + Number(product.views || 0);
+    }, 0);
+
+    return [
+      { value: products.length, label: "Sản phẩm tiêu biểu" },
+      { value: students.size, label: "Sinh viên tham gia" },
+      { value: advisors.size, label: "Giảng viên hướng dẫn" },
+      { value: totalViews, label: "Lượt xem sản phẩm" },
+    ].map((stat) => ({
+      ...stat,
+      value: Number(stat.value || 0).toLocaleString("vi-VN"),
+    }));
+  }, [productVisitor]);
 
   const activeClass =
     "px-4 py-2 font-medium text-sm text-[#003087] border-b-2 border-[#003087]";
