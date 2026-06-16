@@ -86,9 +86,7 @@ const SupportScreen = () => {
 
       const res = await adminApi.sendPasswordRecovery(payload);
       setUser(res.data);
-      setMessage(
-        "Da cap mat khau moi va gui email khoi phuc cho nguoi dung.",
-      );
+      setMessage("Da cap mat khau moi va gui email khoi phuc cho nguoi dung.");
       setTemporaryPassword("");
       if (request?.support_id) {
         setPasswordRequestId(null);
@@ -140,10 +138,10 @@ const SupportScreen = () => {
               <KeyRound size={22} />
             </div>
             <div>
-              <h3 className="text-lg font-bold">Password recovery</h3>
+              <h3 className="text-lg font-bold">Khôi phục mật khẩu</h3>
               <p className="mt-1 text-sm leading-6 text-slate-600">
-                Nhap email hoac ma tai khoan, vi du 23211TT2984, de hien email
-                va gui mat khau tam thoi.
+                Nhập email hoặc mã tài khoản, ví dụ 23211TT2984, để hiển thị
+                email và gửi mật khẩu tạm thời.
               </p>
             </div>
           </div>
@@ -236,10 +234,10 @@ const SupportScreen = () => {
               <ShieldCheck size={22} />
             </div>
             <div>
-              <h3 className="text-lg font-bold">Request detail</h3>
+              <h3 className="text-lg font-bold">Yêu cầu chi tiết</h3>
               <p className="mt-1 text-sm leading-6 text-slate-600">
-                Email hien thi o day la email dang luu trong tai khoan nguoi
-                dung.
+                Email hiển thị ở đây là email đang lưu trong tài khoản người
+                dùng.
               </p>
             </div>
           </div>
@@ -249,7 +247,9 @@ const SupportScreen = () => {
               <dl className="divide-y divide-slate-100 text-sm">
                 <div className="grid gap-1 px-4 py-3 sm:grid-cols-[150px_1fr]">
                   <dt className="font-semibold text-slate-500">Ma tai khoan</dt>
-                  <dd className="font-semibold text-slate-900">{user.user_id}</dd>
+                  <dd className="font-semibold text-slate-900">
+                    {user.user_id}
+                  </dd>
                 </div>
                 <div className="grid gap-1 px-4 py-3 sm:grid-cols-[150px_1fr]">
                   <dt className="font-semibold text-slate-500">Ho ten</dt>
@@ -257,21 +257,23 @@ const SupportScreen = () => {
                 </div>
                 <div className="grid gap-1 px-4 py-3 sm:grid-cols-[150px_1fr]">
                   <dt className="font-semibold text-slate-500">Email</dt>
-                  <dd className="font-semibold text-emerald-700">{user.email}</dd>
+                  <dd className="font-semibold text-emerald-700">
+                    {user.email}
+                  </dd>
                 </div>
                 <div className="grid gap-1 px-4 py-3 sm:grid-cols-[150px_1fr]">
-                  <dt className="font-semibold text-slate-500">Vai tro</dt>
+                  <dt className="font-semibold text-slate-500">Vai trò</dt>
                   <dd className="text-slate-700">{user.role}</dd>
                 </div>
                 <div className="grid gap-1 px-4 py-3 sm:grid-cols-[150px_1fr]">
-                  <dt className="font-semibold text-slate-500">Lop</dt>
+                  <dt className="font-semibold text-slate-500">Lớp</dt>
                   <dd className="text-slate-700">{user.class || "-"}</dd>
                 </div>
               </dl>
             </div>
           ) : (
             <div className="mt-5 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center text-sm text-slate-500">
-              Chua co tai khoan nao duoc tra cuu.
+              Chưa có tài khoản nào được tra cứu.
             </div>
           )}
         </section>
@@ -316,13 +318,19 @@ const SupportScreen = () => {
             <tbody className="divide-y divide-slate-100">
               {loadingRequests ? (
                 <tr>
-                  <td className="px-4 py-8 text-center text-slate-500" colSpan="8">
+                  <td
+                    className="px-4 py-8 text-center text-slate-500"
+                    colSpan="8"
+                  >
                     Loading requests...
                   </td>
                 </tr>
               ) : requests.length === 0 ? (
                 <tr>
-                  <td className="px-4 py-8 text-center text-slate-500" colSpan="8">
+                  <td
+                    className="px-4 py-8 text-center text-slate-500"
+                    colSpan="8"
+                  >
                     No pending support requests.
                   </td>
                 </tr>
@@ -411,7 +419,9 @@ const SupportScreen = () => {
                             <div className="flex w-[260px] max-w-full gap-2">
                               <input
                                 type="text"
-                                value={requestPasswords[request.support_id] || ""}
+                                value={
+                                  requestPasswords[request.support_id] || ""
+                                }
                                 onChange={(event) =>
                                   updateRequestPassword(
                                     request.support_id,
