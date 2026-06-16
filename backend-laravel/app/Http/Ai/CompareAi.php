@@ -21,7 +21,7 @@ class CompareAi
             if (!$this->settings->enabled(SystemSettingService::AI_PRODUCT_CHECK)) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'AI product checking is currently disabled by the administrator.',
+                    'message' => 'Tính năng kiểm tra sản phẩm bằng AI hiện đang bị quản trị viên tắt.',
                 ], 503);
             }
 
