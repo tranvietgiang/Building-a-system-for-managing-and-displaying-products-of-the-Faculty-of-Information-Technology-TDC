@@ -36,14 +36,14 @@ const ProductsScreen = () => {
       if (keyword && aiEnabled && !canUseAiSearch) {
         setProducts([]);
         setPagination(null);
-        setError("AI Search is currently disabled by the administrator.");
+        setError("Tính năng tìm kiếm bằng AI hiện đang bị quản trị viên tắt.");
         return;
       }
 
       if (keyword && !aiEnabled && !canUseProductSearch) {
         setProducts([]);
         setPagination(null);
-        setError("Product search is currently disabled by the administrator.");
+        setError("Tính năng tìm kiếm sản phẩm hiện đang bị quản trị viên tắt.");
         return;
       }
 

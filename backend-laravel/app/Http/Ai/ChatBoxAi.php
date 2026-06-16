@@ -310,7 +310,7 @@ class ChatBoxAi
     {
         if (!$this->settings->enabled(SystemSettingService::AI_CHATBOX)) {
             return response()->json([
-                'reply' => 'AI chatbox is currently disabled by the administrator.',
+                'reply' => 'Chatbot AI hiện đang bị quản trị viên tắt.',
                 'products' => [],
             ], 503);
         }

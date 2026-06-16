@@ -459,8 +459,8 @@ export default function SearchAi({
         {(!canUseProductSearch || !canUseAiSearch) && (
           <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
             {!canUseProductSearch
-              ? "Product search is currently disabled by the administrator."
-              : "AI Search is currently disabled by the administrator."}
+              ? "Tính năng tìm kiếm sản phẩm hiện đang bị quản trị viên tắt."
+              : "Tính năng tìm kiếm bằng AI hiện đang bị quản trị viên tắt."}
           </div>
         )}
 

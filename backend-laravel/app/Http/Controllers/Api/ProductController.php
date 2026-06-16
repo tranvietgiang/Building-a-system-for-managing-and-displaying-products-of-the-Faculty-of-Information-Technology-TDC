@@ -50,7 +50,7 @@ class ProductController extends Controller
     {
         if (!$this->settings->enabled(SystemSettingService::PRODUCT_SEARCH)) {
             return response()->json([
-                'message' => 'Product search is currently disabled by the administrator.',
+                'message' => 'Tính năng tìm kiếm sản phẩm hiện đang bị quản trị viên tắt.',
                 'count' => 0,
                 'products' => [],
                 'data' => [

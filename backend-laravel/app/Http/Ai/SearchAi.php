@@ -19,7 +19,7 @@ class SearchAi
     {
         if (!$this->settings->enabled(SystemSettingService::AI_SEARCH)) {
             return response()->json([
-                'message' => 'AI search is currently disabled by the administrator.',
+                'message' => 'Tính năng tìm kiếm bằng AI hiện đang bị quản trị viên tắt.',
                 'products' => [],
                 'count' => 0,
             ], 503);
