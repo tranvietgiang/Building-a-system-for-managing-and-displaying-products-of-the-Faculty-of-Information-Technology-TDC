@@ -12,7 +12,7 @@ import { getStatusColor } from "../../components/common/getStatusColor";
 import { getStatusText } from "../../components/common/getStatusText";
 import { formatDate } from "../../utils/formatDate";
 import { STATUS } from "../../utils/constants";
-import ChatBoxAi from "../ChatBoxAi/ChatBoxAi";
+import ChatBoxAi from "../chatBoxAi/ChatBoxAi";
 import SearchAi from "../ai/SearchAi";
 // ========== Extracted components ==========
 
