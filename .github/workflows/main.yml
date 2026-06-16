@@ -7,8 +7,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  test-backend:
-    name: Test Backend
+  build-backend:
+    name: Build Backend
     runs-on: ubuntu-latest
 
     defaults:
@@ -89,7 +89,7 @@ jobs:
     name: Deploy To Hosting
     runs-on: ubuntu-latest
     needs:
-      - test-backend
+      - build-backend
       - build-frontend
 
     steps:

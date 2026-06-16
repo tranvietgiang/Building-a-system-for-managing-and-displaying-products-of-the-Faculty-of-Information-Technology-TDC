@@ -11,7 +11,7 @@ import StudentHeader from "../../components/student/StudentHeader";
 import ProductCard from "../../components/student/ProductCard";
 import { STATUS } from "../../utils/constants";
 import { getMajorTheme } from "../../utils/uploadProductScreen/uploadRegistry";
-import ChatBoxAi from "../../pages/ChatBoxAi/ChatBoxAi";
+import ChatBoxAi from "../../pages/chatBoxAi/ChatBoxAi";
 import SearchAi from "../ai/SearchAi";
 import { confirmToast } from "../../components/common/ConfirmToast";
 import { toast } from "react-toastify";
