@@ -70,6 +70,14 @@ class ProductController extends Controller
             'status' => ['nullable', 'in:approved,pending,rejected'],
             'major_id' => ['nullable', 'integer'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
+        ], [
+            'q.string' => 'Nội dung tìm kiếm không hợp lệ.',
+            'q.max' => 'Nội dung tìm kiếm không được vượt quá 200 ký tự.',
+            'status.in' => 'Trạng thái tìm kiếm không hợp lệ.',
+            'major_id.integer' => 'Ngành học không hợp lệ.',
+            'per_page.integer' => 'Số lượng sản phẩm mỗi trang không hợp lệ.',
+            'per_page.min' => 'Số lượng sản phẩm mỗi trang phải lớn hơn 0.',
+            'per_page.max' => 'Số lượng sản phẩm mỗi trang không được vượt quá 100.',
         ]);
 
         $keyword = trim((string) $request->query('q', ''));

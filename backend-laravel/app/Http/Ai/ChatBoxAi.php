@@ -319,6 +319,9 @@ class ChatBoxAi
         // Validate input
         $request->validate([
             'message' => 'nullable|string|max:1000',
+        ], [
+            'message.string' => 'Tin nhắn không hợp lệ.',
+            'message.max' => 'Tin nhắn không được vượt quá 1000 ký tự.',
         ]);
 
         $user    = $this->resolveUser($request);
@@ -342,7 +345,7 @@ class ChatBoxAi
         }
 
         // Check minimum length
-        if (strlen($message) < 3) {
+        if (mb_strlen($message, 'UTF-8') < 3) {
             return response()->json(['reply' => 'Câu hỏi phải ít nhất 3 ký tự.'], 422);
         }
 
