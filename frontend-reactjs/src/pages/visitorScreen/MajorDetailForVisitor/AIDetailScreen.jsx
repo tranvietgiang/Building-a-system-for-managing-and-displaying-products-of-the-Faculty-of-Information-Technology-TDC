@@ -237,17 +237,17 @@ const AIDetailScreen = ({
 
             {/* Thumbnails Gallery */}
             {productVisitorDetail?.images?.length > 0 && (
-              <div className="flex gap-3 overflow-x-auto pb-2">
-                {productVisitorDetail.images.map((img, idx) => (
+              <div className="group flex h-28 gap-3 overflow-hidden md:h-36">
+                {productVisitorDetail.images.slice(0, 4).map((img, idx) => (
                   <button
                     key={idx}
                     onClick={() => openViewer(img.image_url)}
-                    className="w-24 h-24 rounded-xl overflow-hidden border-2 border-gray-200 hover:border-purple-400 transition-all duration-200 flex-shrink-0 hover:scale-105"
+                    className="min-w-0 flex-1 overflow-hidden rounded-xl border-2 border-gray-200 transition-all duration-500 ease-out hover:flex-[3] hover:border-purple-400 focus:flex-[3] focus:border-purple-400 focus:outline-none"
                   >
                     <img
                       src={img.image_url}
                       alt=""
-                      className="w-full h-full object-cover"
+                      className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
                     />
                   </button>
                 ))}
