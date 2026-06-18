@@ -3,6 +3,8 @@ import { Eye, Heart, Search, Trash2 } from "lucide-react";
 import adminApi from "../../../api/admin.api";
 import { aiApi, productApi } from "../../../api";
 
+const MAX_SEARCH_KEYWORD_LENGTH = 500;
+
 const statusOptions = [
   { value: "", label: "Tất cả trạng thái" },
   { value: "pending", label: "Chờ duyệt" },
@@ -31,7 +33,17 @@ const ProductsScreen = () => {
     try {
       const keyword = filters.q.trim();
       const canUseAiSearch = systemSettings.ai_search_enabled !== false;
-      const canUseProductSearch = systemSettings.product_search_enabled !== false;
+      const canUseProductSearch =
+        systemSettings.product_search_enabled !== false;
+
+      if (keyword.length > MAX_SEARCH_KEYWORD_LENGTH) {
+        setProducts([]);
+        setPagination(null);
+        setError(
+          `Noi dung tim kiem khong duoc vuot qua ${MAX_SEARCH_KEYWORD_LENGTH} ky tu.`,
+        );
+        return;
+      }
 
       if (keyword && aiEnabled && !canUseAiSearch) {
         setProducts([]);
@@ -52,7 +64,9 @@ const ProductsScreen = () => {
         let nextProducts = res.products || [];
 
         if (filters.status) {
-          nextProducts = nextProducts.filter((product) => product.status === filters.status);
+          nextProducts = nextProducts.filter(
+            (product) => product.status === filters.status,
+          );
         }
 
         if (filters.major_id) {
@@ -184,34 +198,51 @@ const ProductsScreen = () => {
 
   return (
     <div className="space-y-5">
-      <form onSubmit={handleSearch} className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+      <form
+        onSubmit={handleSearch}
+        className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
+      >
         <div className="grid gap-3 md:grid-cols-[1fr_180px_220px_120px_auto]">
           <label className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+              size={18}
+            />
             <input
               value={filters.q}
-              onChange={(event) => setFilters((prev) => ({ ...prev, q: event.target.value }))}
+              onChange={(event) =>
+                setFilters((prev) => ({ ...prev, q: event.target.value }))
+              }
               placeholder="Tìm theo tên sản phẩm..."
+              maxLength={MAX_SEARCH_KEYWORD_LENGTH}
               className="h-11 w-full rounded-lg border border-slate-200 pl-10 pr-3 outline-none focus:border-emerald-500"
             />
           </label>
           <select
             value={filters.status}
-            onChange={(event) => setFilters((prev) => ({ ...prev, status: event.target.value }))}
+            onChange={(event) =>
+              setFilters((prev) => ({ ...prev, status: event.target.value }))
+            }
             className="h-11 rounded-lg border border-slate-200 px-3 outline-none focus:border-emerald-500"
           >
             {statusOptions.map((option) => (
-              <option key={option.value} value={option.value}>{option.label}</option>
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
             ))}
           </select>
           <select
             value={filters.major_id}
-            onChange={(event) => setFilters((prev) => ({ ...prev, major_id: event.target.value }))}
+            onChange={(event) =>
+              setFilters((prev) => ({ ...prev, major_id: event.target.value }))
+            }
             className="h-11 rounded-lg border border-slate-200 px-3 outline-none focus:border-emerald-500"
           >
             <option value="">Tất cả chuyên ngành</option>
             {majors.map((major) => (
-              <option key={major.major_id} value={major.major_id}>{major.major_name}</option>
+              <option key={major.major_id} value={major.major_id}>
+                {major.major_name}
+              </option>
             ))}
           </select>
           <label className="flex h-11 items-center justify-center gap-2 rounded-lg border border-slate-200 px-3 text-xs font-medium text-slate-600">
@@ -242,7 +273,10 @@ const ProductsScreen = () => {
               />
             </button>
           </label>
-          <button type="submit" className="h-11 rounded-lg bg-emerald-600 px-5 font-semibold text-white hover:bg-emerald-700">
+          <button
+            type="submit"
+            className="h-11 rounded-lg bg-emerald-600 px-5 font-semibold text-white hover:bg-emerald-700"
+          >
             Tìm
           </button>
         </div>
@@ -291,29 +325,61 @@ const ProductsScreen = () => {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {loading ? (
-                <tr><td className="px-4 py-8 text-center text-slate-500" colSpan="7">Đang tải...</td></tr>
+                <tr>
+                  <td
+                    className="px-4 py-8 text-center text-slate-500"
+                    colSpan="7"
+                  >
+                    Đang tải...
+                  </td>
+                </tr>
               ) : products.length === 0 ? (
-                <tr><td className="px-4 py-8 text-center text-slate-500" colSpan="7">Chưa có sản phẩm phù hợp.</td></tr>
+                <tr>
+                  <td
+                    className="px-4 py-8 text-center text-slate-500"
+                    colSpan="7"
+                  >
+                    Chưa có sản phẩm phù hợp.
+                  </td>
+                </tr>
               ) : (
                 products.map((product) => (
                   <tr key={product.product_id} className="align-top">
                     <td className="px-4 py-3">
-                      <p className="font-semibold text-slate-900">{product.title}</p>
-                      <p className="mt-1 line-clamp-2 max-w-sm text-xs text-slate-500">{product.description}</p>
+                      <p className="font-semibold text-slate-900">
+                        {product.title}
+                      </p>
+                      <p className="mt-1 line-clamp-2 max-w-sm text-xs text-slate-500">
+                        {product.description}
+                      </p>
                     </td>
-                    <td className="px-4 py-3 text-slate-600">{product.student_name || product.user_id}</td>
-                    <td className="px-4 py-3 text-slate-600">{product.major_name}</td>
-                    <td className="px-4 py-3 text-slate-600">{product.category_name}</td>
+                    <td className="px-4 py-3 text-slate-600">
+                      {product.student_name || product.user_id}
+                    </td>
+                    <td className="px-4 py-3 text-slate-600">
+                      {product.major_name}
+                    </td>
+                    <td className="px-4 py-3 text-slate-600">
+                      {product.category_name}
+                    </td>
                     <td className="px-4 py-3">
                       <div className="flex gap-3 text-slate-500">
-                        <span className="flex items-center gap-1"><Eye size={15} />{product.views}</span>
-                        <span className="flex items-center gap-1"><Heart size={15} />{product.likes}</span>
+                        <span className="flex items-center gap-1">
+                          <Eye size={15} />
+                          {product.views}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Heart size={15} />
+                          {product.likes}
+                        </span>
                       </div>
                     </td>
                     <td className="px-4 py-3">
                       <select
                         value={product.status}
-                        onChange={(event) => changeStatus(product.product_id, event.target.value)}
+                        onChange={(event) =>
+                          changeStatus(product.product_id, event.target.value)
+                        }
                         className="h-9 rounded-lg border border-slate-200 px-2 text-sm outline-none focus:border-emerald-500"
                       >
                         <option value="pending">Chờ duyệt</option>
@@ -369,7 +435,9 @@ const ProductsScreen = () => {
               <button
                 type="button"
                 onClick={() => goToPage(pagination.current_page + 1)}
-                disabled={pagination.current_page >= pagination.last_page || loading}
+                disabled={
+                  pagination.current_page >= pagination.last_page || loading
+                }
                 className="h-9 rounded-lg border border-slate-200 px-3 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Sau

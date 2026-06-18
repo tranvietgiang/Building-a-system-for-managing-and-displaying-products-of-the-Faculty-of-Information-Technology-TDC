@@ -1,6 +1,8 @@
 import { useCallback, useState } from "react";
 import { productApi } from "../../api";
 
+const MAX_SEARCH_KEYWORD_LENGTH = 500;
+
 const getErrorMessage = (err) =>
   err?.response?.data?.message ||
   err?.response?.data?.error ||
@@ -18,6 +20,14 @@ export default function useProductSearch({ visitor = false } = {}) {
 
       if (!keyword) {
         setProductSearchError("Vui lòng nhập nội dung tìm kiếm.");
+        setProductSearchResult(null);
+        return null;
+      }
+
+      if (keyword.length > MAX_SEARCH_KEYWORD_LENGTH) {
+        setProductSearchError(
+          `Noi dung tim kiem khong duoc vuot qua ${MAX_SEARCH_KEYWORD_LENGTH} ky tu.`,
+        );
         setProductSearchResult(null);
         return null;
       }

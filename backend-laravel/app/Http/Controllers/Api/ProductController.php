@@ -66,13 +66,13 @@ class ProductController extends Controller
         }
 
         $request->validate([
-            'q' => ['nullable', 'string', 'max:200'],
+            'q' => ['nullable', 'string', 'max:300'],
             'status' => ['nullable', 'in:approved,pending,rejected'],
             'major_id' => ['nullable', 'integer'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
         ], [
             'q.string' => 'Nội dung tìm kiếm không hợp lệ.',
-            'q.max' => 'Nội dung tìm kiếm không được vượt quá 200 ký tự.',
+            'q.max' => 'Nội dung tìm kiếm không được vượt quá 300 ký tự.',
             'status.in' => 'Trạng thái tìm kiếm không hợp lệ.',
             'major_id.integer' => 'Ngành học không hợp lệ.',
             'per_page.integer' => 'Số lượng sản phẩm mỗi trang không hợp lệ.',
