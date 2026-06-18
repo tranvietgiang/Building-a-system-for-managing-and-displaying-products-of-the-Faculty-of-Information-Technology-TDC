@@ -16,7 +16,9 @@ const GraphicDetailScreen = ({
   const [isLiked, setIsLiked] = useState(false);
   // ✅ Khởi tạo trực tiếp, không cần useEffect
   const [likeCount, setLikeCount] = useState(productVisitorDetail?.likes || 0);
-  const [shareCount, setShareCount] = useState(productVisitorDetail?.shares || 0);
+  const [shareCount, setShareCount] = useState(
+    productVisitorDetail?.shares || 0,
+  );
   const { openViewer, ImageViewerModal } = useImageViewer();
 
   const majorDetail = productVisitorDetail?.major_detail || {};
@@ -217,19 +219,19 @@ const GraphicDetailScreen = ({
               </div>
             </div>
 
-            {/* Thumbnails Gallery - Grid Layout */}
+            {/* Thumbnails Gallery */}
             {productVisitorDetail?.images?.length > 0 && (
-              <div className="grid grid-cols-4 gap-3">
-                {productVisitorDetail.images.map((img, idx) => (
+              <div className="group flex h-28 gap-3 overflow-hidden md:h-36">
+                {productVisitorDetail.images.slice(0, 4).map((img, idx) => (
                   <button
                     key={idx}
                     onClick={() => openViewer(img.image_url)}
-                    className="aspect-square rounded-xl overflow-hidden border-2 border-gray-200 hover:border-pink-400 transition-all duration-200 hover:scale-105"
+                    className="min-w-0 flex-1 overflow-hidden rounded-xl border-2 border-gray-200 transition-all duration-500 ease-out hover:flex-[3] hover:border-pink-400 focus:flex-[3] focus:border-pink-400 focus:outline-none"
                   >
                     <img
                       src={img.image_url}
                       alt=""
-                      className="w-full h-full object-cover"
+                      className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
                     />
                   </button>
                 ))}
