@@ -188,6 +188,9 @@ export default function VisitorScreen() {
 
   const debouncedSearchTerm = useDebounce(searchTerm, 700);
   const lastSearchRef = useRef("");
+  const productCardObserverRef = useRef(null);
+  const productCardRefs = useRef(new Map());
+  const [visibleProductIds, setVisibleProductIds] = useState(() => new Set());
 
   const currentUser = useMemo(() => {
     try {
@@ -407,6 +410,61 @@ export default function VisitorScreen() {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
     return filteredProducts.slice(start, start + ITEMS_PER_PAGE);
   }, [filteredProducts, currentPage]);
+
+  useEffect(() => {
+    productCardObserverRef.current?.disconnect();
+
+    productCardObserverRef.current = new IntersectionObserver(
+      (entries, observer) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+
+          const productId = entry.target.dataset.productId;
+          if (productId) {
+            setVisibleProductIds((prev) => {
+              const next = new Set(prev);
+              next.add(productId);
+              return next;
+            });
+          }
+
+          observer.unobserve(entry.target);
+        });
+      },
+      {
+        threshold: 0.16,
+        rootMargin: "0px 0px -70px 0px",
+      },
+    );
+
+    productCardRefs.current.forEach((node) => {
+      productCardObserverRef.current?.observe(node);
+    });
+
+    return () => {
+      productCardObserverRef.current?.disconnect();
+    };
+  }, [paginatedProducts]);
+
+  const registerProductCard = useCallback((id) => {
+    const key = String(id);
+
+    return (node) => {
+      const currentNode = productCardRefs.current.get(key);
+      if (currentNode) {
+        productCardObserverRef.current?.unobserve(currentNode);
+      }
+
+      if (!node) {
+        productCardRefs.current.delete(key);
+        return;
+      }
+
+      node.dataset.productId = key;
+      productCardRefs.current.set(key, node);
+      productCardObserverRef.current?.observe(node);
+    };
+  }, []);
 
   const stats = useMemo(() => {
     const products = productVisitor ?? [];
@@ -759,10 +817,16 @@ export default function VisitorScreen() {
         ) : (
           <section className="container mx-auto px-4 sm:px-6 lg:px-8 pb-16">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {paginatedProducts.map((product) => (
+              {paginatedProducts.map((product, index) => (
                 <div
                   key={product.id}
-                  className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100"
+                  ref={registerProductCard(product.id)}
+                  className={`group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-700 border border-gray-100 ${
+                    visibleProductIds.has(String(product.id))
+                      ? "translate-y-0 rotate-0 opacity-100"
+                      : "translate-y-12 rotate-1 opacity-0"
+                  }`}
+                  style={{ transitionDelay: `${(index % 3) * 100}ms` }}
                 >
                   <div
                     onClick={() => handleViewDetail(product?.id)}
@@ -783,6 +847,17 @@ export default function VisitorScreen() {
                         {product?.type}
                       </span>
                     </div>
+
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleViewDetail(product?.id);
+                      }}
+                      className="absolute bottom-3 right-3 translate-y-2 rounded-md bg-white px-3 py-1.5 text-xs font-semibold text-[#003087] opacity-0 shadow-sm transition group-hover:translate-y-0 group-hover:opacity-100"
+                    >
+                      Xem nhanh
+                    </button>
                   </div>
 
                   <div className="p-4">
