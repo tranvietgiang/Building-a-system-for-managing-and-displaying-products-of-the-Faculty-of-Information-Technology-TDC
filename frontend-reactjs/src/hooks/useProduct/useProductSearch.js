@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { productApi } from "../../api";
 
-const MAX_SEARCH_KEYWORD_LENGTH = 500;
+const MAX_SEARCH_KEYWORD_LENGTH = 300;
 
 const getErrorMessage = (err) =>
   err?.response?.data?.message ||

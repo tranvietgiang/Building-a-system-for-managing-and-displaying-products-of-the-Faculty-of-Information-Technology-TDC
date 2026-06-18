@@ -3,7 +3,7 @@ import { Eye, Heart, Search, Trash2 } from "lucide-react";
 import adminApi from "../../../api/admin.api";
 import { aiApi, productApi } from "../../../api";
 
-const MAX_SEARCH_KEYWORD_LENGTH = 500;
+const MAX_SEARCH_KEYWORD_LENGTH = 300;
 
 const statusOptions = [
   { value: "", label: "Tất cả trạng thái" },

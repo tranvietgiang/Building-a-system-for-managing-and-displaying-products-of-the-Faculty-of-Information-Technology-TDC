@@ -19,7 +19,10 @@ import useScrollControls from "../../hooks/common/useScrollControls";
 import ScrollButtons from "../../components/common/ScrollButtons";
 import { productApi } from "../../api";
 
-const MAX_SEARCH_KEYWORD_LENGTH = 500;
+const MAX_SEARCH_KEYWORD_LENGTH = 300;
+const VisitorHeroScene = React.lazy(
+  () => import("../../components/visitor/VisitorHeroScene"),
+);
 
 const HeartIcon = ({ filled = false }) => (
   <svg
@@ -513,28 +516,34 @@ export default function VisitorScreen() {
 
       <main>
         {/* HERO */}
-        <section className="bg-[#003087] text-white py-12 md:py-16">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-4xl mx-auto text-center">
-              <p className="text-blue-100 text-sm md:text-base mb-3">
+        <section className="relative overflow-hidden bg-[#003087] py-12 text-white md:py-16">
+          <div className="absolute inset-0 bg-[#00245f]" />
+          <Suspense fallback={null}>
+            <VisitorHeroScene />
+          </Suspense>
+          <div className="absolute inset-0 bg-[#003087]/80" />
+
+          <div className="container relative z-10 mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-4xl text-center">
+              <p className="mb-3 text-sm text-blue-100 md:text-base">
                 Khoa Công Nghệ Thông Tin
               </p>
 
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
+              <h1 className="text-3xl font-bold leading-tight md:text-4xl lg:text-5xl">
                 Triển lãm sản phẩm sinh viên
               </h1>
 
-              <p className="text-base md:text-lg text-blue-100 mt-4 max-2xl mx-auto">
+              <p className="mx-auto mt-4 max-w-2xl text-base text-blue-100 md:text-lg">
                 Khám phá các đồ án, dự án nghiên cứu và sản phẩm sáng tạo
                 <br className="hidden md:block" />
                 của sinh viên 4 chuyên ngành công nghệ tại TDC
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
+              <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
                 <button
                   type="button"
                   onClick={() => handleBottom("/nckh-visitor", "san-pham")}
-                  className="px-6 py-2.5 bg-white text-[#003087] rounded-md font-semibold text-sm hover:bg-gray-100 transition-all"
+                  className="rounded-md bg-white px-6 py-2.5 text-sm font-semibold text-[#003087] transition-all hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#9ee7ff] focus:ring-offset-2 focus:ring-offset-[#003087]"
                 >
                   Xem tất cả sản phẩm
                 </button>
@@ -543,21 +552,21 @@ export default function VisitorScreen() {
                   href="https://fit.tdc.edu.vn/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-6 py-2.5 border border-white text-white rounded-md font-semibold text-sm hover:bg-white/10 transition-all"
+                  className="rounded-md border border-white px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-[#ffd166] focus:ring-offset-2 focus:ring-offset-[#003087]"
                 >
                   Tìm hiểu thêm
                 </a>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12 max-4xl mx-auto">
+            <div className="mx-auto mt-12 grid max-w-4xl grid-cols-2 gap-4 md:grid-cols-4">
               {stats.map((stat, idx) => (
                 <div key={idx} className="text-center">
-                  <div className="text-2xl md:text-3xl font-bold">
+                  <div className="text-2xl font-bold md:text-3xl">
                     {stat.value}
                   </div>
 
-                  <div className="text-xs md:text-sm text-blue-100 mt-1">
+                  <div className="mt-1 text-xs text-blue-100 md:text-sm">
                     {stat.label}
                   </div>
                 </div>

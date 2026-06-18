@@ -23,7 +23,7 @@ import { ROLE } from "../../utils/constants";
 import useProductSearch from "../../hooks/useProduct/useProductSearch";
 import { systemSettingsApi } from "../../api";
 
-const MAX_SEARCH_KEYWORD_LENGTH = 500;
+const MAX_SEARCH_KEYWORD_LENGTH = 300;
 
 const getStatusLabel = (status) => {
   switch (status) {
