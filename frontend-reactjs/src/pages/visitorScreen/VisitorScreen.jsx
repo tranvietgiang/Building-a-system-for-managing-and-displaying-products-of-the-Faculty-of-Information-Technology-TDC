@@ -18,6 +18,9 @@ import useProductSearch from "../../hooks/useProduct/useProductSearch";
 import useScrollControls from "../../hooks/common/useScrollControls";
 import ScrollButtons from "../../components/common/ScrollButtons";
 import { productApi } from "../../api";
+
+const MAX_SEARCH_KEYWORD_LENGTH = 500;
+
 const HeartIcon = ({ filled = false }) => (
   <svg
     className={`w-4 h-4 ${
@@ -348,7 +351,6 @@ export default function VisitorScreen() {
     [likedProducts],
   );
 
-
   const filteredProducts = useMemo(() => {
     const base = productsSource;
 
@@ -575,6 +577,7 @@ export default function VisitorScreen() {
               <input
                 type="text"
                 placeholder={searchConfig.placeholder}
+                maxLength={MAX_SEARCH_KEYWORD_LENGTH}
                 className="flex-1 bg-transparent outline-none text-gray-700 text-sm"
                 value={searchTerm}
                 onChange={(e) => {
@@ -893,7 +896,6 @@ export default function VisitorScreen() {
             )}
           </section>
         )}
-
       </main>
 
       <ChatBoxAi user={null} />

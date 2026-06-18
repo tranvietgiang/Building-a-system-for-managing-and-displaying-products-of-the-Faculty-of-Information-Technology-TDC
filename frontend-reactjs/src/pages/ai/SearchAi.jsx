@@ -23,6 +23,8 @@ import { ROLE } from "../../utils/constants";
 import useProductSearch from "../../hooks/useProduct/useProductSearch";
 import { systemSettingsApi } from "../../api";
 
+const MAX_SEARCH_KEYWORD_LENGTH = 500;
+
 const getStatusLabel = (status) => {
   switch (status) {
     case STATUS.APPROVED:
@@ -352,7 +354,9 @@ export default function SearchAi({
                   <span>Thường</span>
                   <button
                     type="button"
-                    onClick={() => canUseAiSearch && setAiEnabled((prev) => !prev)}
+                    onClick={() =>
+                      canUseAiSearch && setAiEnabled((prev) => !prev)
+                    }
                     disabled={!canUseAiSearch}
                     className={`relative h-6 w-11 rounded-full transition ${
                       aiEnabled ? "bg-sky-600" : "bg-slate-300"
@@ -381,6 +385,7 @@ export default function SearchAi({
                   value={keyword}
                   onChange={(event) => setKeyword(event.target.value)}
                   placeholder={searchConfig.placeholder}
+                  maxLength={MAX_SEARCH_KEYWORD_LENGTH}
                   className="min-w-0 flex-1 bg-transparent px-1 py-2 text-sm text-slate-800 outline-none placeholder:text-slate-400"
                 />
                 {keyword && (
@@ -491,7 +496,8 @@ export default function SearchAi({
               Sẵn sàng tìm kiếm
             </h2>
             <p className="mx-auto mt-1 max-w-md text-sm text-slate-500">
-              Mặc định dùng tìm kiếm thường. Bật AI nếu muốn hệ thống hiểu câu hỏi tự nhiên.
+              Mặc định dùng tìm kiếm thường. Bật AI nếu muốn hệ thống hiểu câu
+              hỏi tự nhiên.
             </p>
           </div>
         )}
