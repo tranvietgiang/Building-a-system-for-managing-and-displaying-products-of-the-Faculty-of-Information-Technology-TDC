@@ -116,6 +116,14 @@ function RoleRoutes() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path={`${ROUTES.TEACHER_DETAIL}/:id`}
+          element={
+            <ProtectedRoute allowedRoles={[ROLE.TEACHER]}>
+              <TeacherProductDetailScreen />
+            </ProtectedRoute>
+          }
+        />
 
         <Route path="/nckh-admin" element={<Navigate to={ROUTES.ADMIN} replace />} />
         <Route path="/nckh-student" element={<Navigate to={ROUTES.STUDENT} replace />} />

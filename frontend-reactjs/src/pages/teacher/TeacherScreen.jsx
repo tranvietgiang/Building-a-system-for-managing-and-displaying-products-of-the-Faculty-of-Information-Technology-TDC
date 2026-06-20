@@ -12,6 +12,7 @@ import { getStatusColor } from "../../components/common/getStatusColor";
 import { getStatusText } from "../../components/common/getStatusText";
 import { formatDate } from "../../utils/formatDate";
 import { STATUS } from "../../utils/constants";
+import { ROUTES } from "../../utils/routes";
 import ChatBoxAi from "../chatBoxAi/ChatBoxAi";
 import SearchAi from "../ai/SearchAi";
 // ========== Extracted components ==========
@@ -197,7 +198,7 @@ const TeacherScreen = () => {
   );
   const { ProductsData, loading, error } =
     useTeacherPendingApproval(teacherParams);
-  const handleViewDetail = useViewDetail("detail-teacher");
+  const handleViewDetail = useViewDetail(ROUTES.TEACHER_DETAIL);
   const { openViewer, ImageViewerModal } = useImageViewer();
 
   // useMemo: chỉ tính lại khi data thay đổi
