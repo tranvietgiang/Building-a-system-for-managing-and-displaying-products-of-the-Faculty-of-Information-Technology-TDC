@@ -5,7 +5,7 @@ export const userAPI = {
   getProfile: async () => {
     try {
       const response = await axiosClient.get("/profile");
-      return response.data;
+      return response;
     } catch (error) {
       throw (
         error.response?.data || { success: false, message: "Lỗi lấy profile" }
@@ -17,7 +17,7 @@ export const userAPI = {
   getUserById: async (userId) => {
     try {
       const response = await axiosClient.get(`/user/${userId}`);
-      return response.data;
+      return response;
     } catch (error) {
       throw (
         error.response?.data || {
@@ -32,7 +32,7 @@ export const userAPI = {
   updateProfile: async (data) => {
     try {
       const response = await axiosClient.put("/profile", data);
-      return response.data;
+      return response;
     } catch (error) {
       throw (
         error.response?.data || {
@@ -47,7 +47,7 @@ export const userAPI = {
   updatePassword: async (data) => {
     try {
       const response = await axiosClient.post("/profile/password", data);
-      return response.data;
+      return response;
     } catch (error) {
       throw (
         error.response?.data || { success: false, message: "Lỗi đổi mật khẩu" }
@@ -59,7 +59,7 @@ export const userAPI = {
   getStatistics: async () => {
     try {
       const response = await axiosClient.get("/profile/statistics");
-      return response.data;
+      return response;
     } catch (error) {
       throw (
         error.response?.data || { success: false, message: "Lỗi lấy thống kê" }
@@ -78,7 +78,7 @@ export const userAPI = {
       const response = await axiosClient.get(
         `/users/search?${params.toString()}`,
       );
-      return response.data;
+      return response;
     } catch (error) {
       throw (
         error.response?.data || {

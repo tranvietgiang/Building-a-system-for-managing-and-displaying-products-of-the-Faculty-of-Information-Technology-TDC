@@ -32,7 +32,7 @@ export const useHandleApprove = (
         toast.success("Duyệt sản phẩm thành công", {
           autoClose: 1500,
           onClose: () => {
-            navigate("/nckh-teacher");
+            navigate("/giang-vien");
           },
         });
       } else {
@@ -74,7 +74,7 @@ export const useHandleApprove = (
           toast.success("Duyệt sản phẩm thành công", {
             autoClose: 1500,
             onClose: () => {
-              navigate("/nckh-teacher");
+              navigate("/giang-vien");
             },
           });
         } catch (err) {

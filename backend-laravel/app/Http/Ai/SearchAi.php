@@ -102,7 +102,7 @@ class SearchAi
 
         if ($this->isRestrictedRoleWithoutMajor($role, $majorId)) {
             return response()->json([
-                'message' => 'TÃ i khoáº£n cá»§a báº¡n chÆ°a Ä‘Æ°á»£c gÃ¡n ngÃ nh há»c.',
+                'message' => 'Tài khoản của bạn chưa được gán ngành học.',
                 'query' => $message,
                 'intent' => $intent,
                 'count' => 0,
@@ -112,7 +112,7 @@ class SearchAi
 
         if ($this->isDifferentMajorSearch($intent, $role, $majorId)) {
             return response()->json([
-                'message' => 'Báº¡n chá»‰ cÃ³ thá»ƒ tÃ¬m kiáº¿m dá»¯ liá»‡u trong ngÃ nh cá»§a mÃ¬nh.',
+                'message' => 'Bạn chỉ có thể tìm kiếm dữ liệu trong ngành của mình.',
                 'query' => $message,
                 'intent' => $intent,
                 'count' => 0,

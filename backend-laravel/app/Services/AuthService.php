@@ -32,7 +32,7 @@ class AuthService
 
         $user = $this->userRepository->findById($username);
 
-        if (!$user) {
+        if (!$user || !hash_equals((string) $user->user_id, (string) $username)) {
             RateLimiter::hit($lockoutKey, self::LOCKOUT_MINUTES * 60);
             return [
                 'success' => false,

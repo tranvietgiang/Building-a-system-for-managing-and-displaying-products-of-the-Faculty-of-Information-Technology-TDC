@@ -5,7 +5,6 @@ import useTitle from "../../hooks/common/useTitle";
 import useMajorName from "../../hooks/common/useMajorName";
 import useProductAll from "../../hooks/useProduct/useProductAll";
 import useDeleteProduct from "../../hooks/useProduct/useDeleteProduct";
-import { useStudentStats } from "../../hooks/student/useStudentStats";
 import { mapCurrentStudent } from "../../utils/userMapper";
 import StudentHeader from "../../components/student/StudentHeader";
 import ProductCard from "../../components/student/ProductCard";
@@ -28,13 +27,21 @@ const StudentScreen = () => {
   const { majorName } = useMajorName(user?.major_id);
   localStorage.setItem("majorName", majorName);
 
-  const { products, loading, error } = useProductAll();
+  const productParams = useMemo(
+    () => ({
+      page: currentPage,
+      per_page: ITEMS_PER_PAGE,
+      status: activeTab === "all" ? undefined : activeTab,
+    }),
+    [currentPage, activeTab],
+  );
+  const { products, loading, error } = useProductAll(productParams);
   const { deleteLoading, deleteProduct } = useDeleteProduct();
   const currentStudent = mapCurrentStudent(user, majorName);
   const aiBox = JSON.parse(sessionStorage.getItem("auth_user"));
   // console.log(user);
 
-  const productData = products?.data;
+  const productData = products?.data?.data;
   // console.log("productData", productData);
 
   const theme = getMajorTheme(majorName);
@@ -47,16 +54,17 @@ const StudentScreen = () => {
     [productData, deletedProductIds],
   );
 
-  const { stats, animatedStats, filteredProducts } = useStudentStats(
-    productsArray,
-    activeTab,
-  );
+  const stats = products?.stats || {
+    total: products?.data?.total || 0,
+    approved: 0,
+    pending: 0,
+    rejected: 0,
+  };
+  const animatedStats = stats;
+  const filteredProducts = productsArray;
 
-  const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
-  const paginatedProducts = useMemo(() => {
-    const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredProducts.slice(start, start + ITEMS_PER_PAGE);
-  }, [filteredProducts, currentPage]);
+  const totalPages = products?.data?.last_page || 1;
+  const paginatedProducts = filteredProducts;
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
@@ -64,11 +72,11 @@ const StudentScreen = () => {
   };
 
   const handleViewDetail = (id) => {
-    navigate("/detail", { state: { productId: id } });
+    navigate("/chi-tiet-cua-toi", { state: { productId: id } });
   };
 
   const handleEdit = (product) => {
-    navigate("/edit-product", {
+    navigate("/chinh-sua-san-pham", {
       state: {
         product,
         productId: product.product_id,
@@ -107,7 +115,7 @@ const StudentScreen = () => {
         activeTab={activeTab}
         setActiveTab={handleTabChange}
         theme={theme}
-        onUploadClick={() => navigate("/upload")}
+        onUploadClick={() => navigate("/dang-san-pham")}
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -138,21 +146,9 @@ const StudentScreen = () => {
               Trước
             </button>
 
-            {Array.from({ length: totalPages }, (_, index) => index + 1).map(
-              (page) => (
-                <button
-                  key={page}
-                  onClick={() => setCurrentPage(page)}
-                  className={`px-4 py-2 rounded-md border text-sm ${
-                    currentPage === page
-                      ? "bg-slate-900 text-white border-slate-900"
-                      : "bg-white text-slate-700 hover:bg-slate-50"
-                  }`}
-                >
-                  {page}
-                </button>
-              ),
-            )}
+            <span className="px-4 py-2 rounded-md border border-slate-900 bg-slate-900 text-sm font-semibold text-white">
+              Trang {currentPage} / {totalPages}
+            </span>
 
             <button
               onClick={() =>
@@ -195,7 +191,7 @@ const StudentScreen = () => {
                 "Bắt đầu bằng cách đăng sản phẩm đầu tiên của bạn."}
             </p>
             <button
-              onClick={() => navigate("/upload")}
+              onClick={() => navigate("/dang-san-pham")}
               className={`mt-4 px-4 py-2 ${theme.buttonBg} text-white rounded-lg transition`}
             >
               + Đăng sản phẩm

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { createElement, useEffect, useState } from "react";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import adminApi from "../../../api/admin.api";
 
-const StatCard = ({ title, value, icon: Icon, tone }) => (
+const StatCard = ({ title, value, icon, tone }) => (
   <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
     <div className="flex items-center justify-between gap-4">
       <div>
@@ -22,7 +22,7 @@ const StatCard = ({ title, value, icon: Icon, tone }) => (
       <div
         className={`flex h-12 w-12 items-center justify-center rounded-lg ${tone}`}
       >
-        <Icon size={24} />
+        {createElement(icon, { size: 24 })}
       </div>
     </div>
   </div>

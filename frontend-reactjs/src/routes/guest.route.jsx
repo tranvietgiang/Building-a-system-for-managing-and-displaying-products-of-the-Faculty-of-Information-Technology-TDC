@@ -8,11 +8,11 @@ const GuestRoute = ({ children }) => {
   if (loading) return <div>Loading...</div>;
 
   if (token) {
-    if (user.role === ROLE.ADMIN) return <Navigate to="/nckh-admin" replace />;
+    if (user.role === ROLE.ADMIN) return <Navigate to="/quan-tri" replace />;
     if (user.role === ROLE.TEACHER)
-      return <Navigate to="/nckh-teacher" replace />;
+      return <Navigate to="/giang-vien" replace />;
     if (user.role === ROLE.STUDENT)
-      return <Navigate to="/nckh-student" replace />;
+      return <Navigate to="/sinh-vien" replace />;
 
     // fallback nếu chưa có role
     return <Navigate to="/404" replace />;

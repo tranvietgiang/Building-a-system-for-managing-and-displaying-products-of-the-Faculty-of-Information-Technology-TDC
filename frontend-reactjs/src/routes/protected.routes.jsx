@@ -1,8 +1,9 @@
-import { Routes, Route } from "react-router-dom";
+import { Navigate, Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import ProtectedRoute from "./protected.route";
 import { ROLE } from "../utils/constants";
 import NotFoundScreen from "../pages/notFoundScreen/NotFoundScreen";
+import { ROUTES } from "../utils/routes";
 
 /* ================= LAZY LOAD PAGES ================= */
 
@@ -39,7 +40,7 @@ function RoleRoutes() {
       <Routes>
         {/* ADMIN */}
         <Route
-          path="/nckh-admin"
+          path={ROUTES.ADMIN}
           element={
             <ProtectedRoute allowedRoles={[ROLE.ADMIN]}>
               <AdminScreen />
@@ -49,7 +50,7 @@ function RoleRoutes() {
 
         {/* STUDENT */}
         <Route
-          path="/nckh-student"
+          path={ROUTES.STUDENT}
           element={
             <ProtectedRoute allowedRoles={[ROLE.STUDENT]}>
               <StudentScreen />
@@ -59,7 +60,7 @@ function RoleRoutes() {
 
         {/* TEACHER */}
         <Route
-          path="/nckh-teacher"
+          path={ROUTES.TEACHER}
           element={
             <ProtectedRoute allowedRoles={[ROLE.TEACHER]}>
               <TeacherScreen />
@@ -69,7 +70,7 @@ function RoleRoutes() {
 
         {/* UPLOAD */}
         <Route
-          path="/upload"
+          path={ROUTES.UPLOAD_PRODUCT}
           element={
             <ProtectedRoute allowedRoles={[ROLE.STUDENT]}>
               <UploadProductScreen />
@@ -78,7 +79,7 @@ function RoleRoutes() {
         />
 
         <Route
-          path="/edit-product"
+          path={ROUTES.EDIT_PRODUCT}
           element={
             <ProtectedRoute allowedRoles={[ROLE.STUDENT]}>
               <UploadProductScreen />
@@ -88,7 +89,7 @@ function RoleRoutes() {
 
         {/* PRODUCT DETAIL - STUDENT */}
         <Route
-          path="/detail"
+          path={ROUTES.STUDENT_DETAIL}
           element={
             <ProtectedRoute allowedRoles={[ROLE.STUDENT]}>
               <ProductDetailScreen />
@@ -98,7 +99,7 @@ function RoleRoutes() {
 
         {/* PRODUCT DETAIL - TEACHER */}
         <Route
-          path="/detail-teacher"
+          path={ROUTES.TEACHER_DETAIL}
           element={
             <ProtectedRoute allowedRoles={[ROLE.TEACHER]}>
               <TeacherProductDetailScreen />
@@ -108,13 +109,30 @@ function RoleRoutes() {
 
         {/* COMPARE AI PRODUCTS */}
         <Route
-          path="/nckh-compare"
+          path={ROUTES.COMPARE_AI}
           element={
             <ProtectedRoute allowedRoles={[ROLE.TEACHER]}>
               <CompareProductAi />
             </ProtectedRoute>
           }
         />
+        <Route
+          path={`${ROUTES.TEACHER_DETAIL}/:id`}
+          element={
+            <ProtectedRoute allowedRoles={[ROLE.TEACHER]}>
+              <TeacherProductDetailScreen />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route path="/nckh-admin" element={<Navigate to={ROUTES.ADMIN} replace />} />
+        <Route path="/nckh-student" element={<Navigate to={ROUTES.STUDENT} replace />} />
+        <Route path="/nckh-teacher" element={<Navigate to={ROUTES.TEACHER} replace />} />
+        <Route path="/upload" element={<Navigate to={ROUTES.UPLOAD_PRODUCT} replace />} />
+        <Route path="/edit-product" element={<Navigate to={ROUTES.EDIT_PRODUCT} replace />} />
+        <Route path="/detail" element={<Navigate to={ROUTES.STUDENT_DETAIL} replace />} />
+        <Route path="/detail-teacher" element={<Navigate to={ROUTES.TEACHER_DETAIL} replace />} />
+        <Route path="/nckh-compare" element={<Navigate to={ROUTES.COMPARE_AI} replace />} />
 
         {/* 404 */}
         <Route path="*" element={<NotFoundScreen />} />

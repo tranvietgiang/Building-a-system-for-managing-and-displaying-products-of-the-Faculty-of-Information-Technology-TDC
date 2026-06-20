@@ -159,7 +159,8 @@ const UploadProductForm_CNTT = ({
 
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
-                  Mô tả ngắn <span className="text-red-500">*</span>
+                  Mô tả ngắn
+                  {" "}<span className="ml-1 text-xs font-normal text-gray-400">(có thể bỏ qua)</span>
                 </label>
                 <textarea
                   name="description"
@@ -438,7 +439,7 @@ const UploadProductForm_CNTT = ({
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
                   File đính kèm
-                </label>
+                 {" "}<span className="ml-1 text-xs font-normal text-gray-400">(có thể bỏ qua)</span></label>
 
                 <div className="relative">
                   <input
@@ -563,7 +564,7 @@ const UploadProductForm_CNTT = ({
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
                   Công nghệ sử dụng
-                </label>
+                 {" "}<span className="ml-1 text-xs font-normal text-gray-400">(có thể bỏ qua)</span></label>
                 <input
                   type="text"
                   value={tagInput}
@@ -652,7 +653,7 @@ const UploadProductForm_CNTT = ({
                 <div>
                   <label className="mb-2 block text-sm font-semibold text-gray-700">
                     GitHub Link
-                  </label>
+                   {" "}<span className="ml-1 text-xs font-normal text-gray-400">(có thể bỏ qua)</span></label>
                   <input
                     type="url"
                     name="github_link"
@@ -666,7 +667,7 @@ const UploadProductForm_CNTT = ({
                 <div>
                   <label className="mb-2 block text-sm font-semibold text-gray-700">
                     Demo Link
-                  </label>
+                   {" "}<span className="ml-1 text-xs font-normal text-gray-400">(có thể bỏ qua)</span></label>
                   <input
                     type="url"
                     name="demo_link"

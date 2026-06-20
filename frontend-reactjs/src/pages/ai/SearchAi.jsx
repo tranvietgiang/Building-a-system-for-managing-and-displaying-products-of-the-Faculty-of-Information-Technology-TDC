@@ -233,16 +233,16 @@ export default function SearchAi({
 
   const handleViewDetail = (productId) => {
     if (role === ROLE.TEACHER) {
-      navigate("/detail-teacher", { state: { productId } });
+      navigate("/giang-vien/chi-tiet-san-pham", { state: { productId } });
       return;
     }
 
     if (role === ROLE.STUDENT) {
-      navigate("/detail", { state: { productId } });
+      navigate("/chi-tiet-cua-toi", { state: { productId } });
       return;
     }
 
-    navigate("/visitor-detail", { state: { productId } });
+    navigate("/chi-tiet-san-pham", { state: { productId } });
   };
 
   useEffect(() => {

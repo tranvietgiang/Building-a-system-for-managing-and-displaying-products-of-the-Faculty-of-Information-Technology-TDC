@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import BackButton from "../../../components/common/BackButton";
 import useImageViewer from "../../../shared/useImageViewer";
 import { Icons } from "../../../components/common/Icon";
 import { productApi } from "../../../api";
+import { shareVisitorProduct } from "../../../utils/shareProduct";
 
 const ITDetailScreen = ({
   productVisitorDetail,
@@ -19,6 +20,11 @@ const ITDetailScreen = ({
   const { openViewer, ImageViewerModal } = useImageViewer();
 
   const majorDetail = productVisitorDetail?.major_detail || {};
+
+  useEffect(() => {
+    setLikeCount(productVisitorDetail?.likes || 0);
+    setShareCount(productVisitorDetail?.shares || 0);
+  }, [productVisitorDetail?.id, productVisitorDetail?.likes, productVisitorDetail?.shares]);
 
   const handleLike = async () => {
     if (isLiked) return;
@@ -42,24 +48,15 @@ const ITDetailScreen = ({
     const productId = productVisitorDetail?.id;
     if (!productId) return;
 
-    const shareUrl = `${window.location.origin}/visitor-detail/${productId}`;
+    const shareUrl = `${window.location.origin}/chi-tiet-san-pham/${productId}`;
 
     try {
-      if (navigator.share) {
-        await navigator.share({
-          title: productVisitorDetail?.title,
-          text: productVisitorDetail?.description,
-          url: shareUrl,
-        });
-      } else {
-        await navigator.clipboard.writeText(shareUrl);
-      }
+      await shareVisitorProduct({
+        title: productVisitorDetail?.title,
+        description: productVisitorDetail?.description,
+        url: shareUrl,
+      });
 
-      setShareCount((prev) => prev + 1);
-      const res = await productApi.incrementShare(productId);
-      if (typeof res?.shares === "number") {
-        setShareCount(res.shares);
-      }
     } catch (error) {
       if (error?.name !== "AbortError") {
         console.error(error);
@@ -89,7 +86,7 @@ const ITDetailScreen = ({
           <div className="text-6xl mb-4">😔</div>
           <p className="text-gray-500">Không tìm thấy sản phẩm</p>
           <button
-            onClick={() => navigate("/nckh-visitor")}
+            onClick={() => navigate("/khach-tham-quan")}
             className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
           >
             Quay lại trang chủ
@@ -118,7 +115,7 @@ const ITDetailScreen = ({
                 💻 {majorDetail.programming_language || "Fullstack"} Developer
               </span>
               <button
-                onClick={() => navigate("/login")}
+                onClick={() => navigate("/dang-nhap")}
                 className="px-5 py-1.5 bg-white/20 backdrop-blur-sm rounded-lg text-sm font-medium hover:bg-white/30 transition"
               >
                 Đăng nhập

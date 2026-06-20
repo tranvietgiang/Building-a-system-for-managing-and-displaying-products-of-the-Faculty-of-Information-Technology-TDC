@@ -56,10 +56,10 @@ const SupportScreen = () => {
         identifier: identifier.trim(),
       });
       setUser(res.data);
-      setMessage("Da tim thay email cua tai khoan.");
+      setMessage("Đã tìm thấy email của tài khoản.");
     } catch (err) {
       setError(
-        err.response?.data?.message || "Khong tim thay tai khoan phu hop.",
+        err.response?.data?.message || "Không tìm thấy tài khoản phù hợp.",
       );
     } finally {
       setLoadingLookup(false);
@@ -86,7 +86,7 @@ const SupportScreen = () => {
 
       const res = await adminApi.sendPasswordRecovery(payload);
       setUser(res.data);
-      setMessage("Da cap mat khau moi va gui email khoi phuc cho nguoi dung.");
+      setMessage("Đã cấp mật khẩu mới và gửi email khôi phục cho người dùng.");
       setTemporaryPassword("");
       if (request?.support_id) {
         setPasswordRequestId(null);
@@ -98,7 +98,7 @@ const SupportScreen = () => {
       }
       fetchRequests();
     } catch (err) {
-      setError(err.response?.data?.message || "Khong the gui email luc nay.");
+      setError(err.response?.data?.message || "Không thể gửi email lúc này.");
     } finally {
       setLoadingSend(false);
       setProcessingId(null);
@@ -120,10 +120,10 @@ const SupportScreen = () => {
 
     try {
       await adminApi.markSupportProcessed(request.support_id);
-      setMessage("Da danh dau yeu cau lien he la da xu ly.");
+      setMessage("Đã đánh dấu yêu cầu liên hệ là đã xử lý.");
       fetchRequests();
     } catch (err) {
-      setError(err.response?.data?.message || "Khong the cap nhat yeu cau.");
+      setError(err.response?.data?.message || "Không thể cập nhật yêu cầu.");
     } finally {
       setProcessingId(null);
     }
@@ -172,13 +172,13 @@ const SupportScreen = () => {
 
             <label className="block">
               <span className="mb-2 block text-sm font-semibold text-slate-700">
-                Mat khau tam thoi
+                Mật khẩu tạm thời
               </span>
               <input
                 type="text"
                 value={temporaryPassword}
                 onChange={(event) => setTemporaryPassword(event.target.value)}
-                placeholder="Bo trong de he thong tu tao"
+                placeholder="Bỏ trống để hệ thống tự tạo"
                 className="h-11 w-full rounded-lg border border-slate-200 px-3 outline-none focus:border-emerald-500"
                 maxLength={100}
               />
@@ -195,7 +195,7 @@ const SupportScreen = () => {
                 ) : (
                   <Search size={18} />
                 )}
-                Tra cuu email
+                Tra cứu email
               </button>
 
               <button
@@ -209,28 +209,27 @@ const SupportScreen = () => {
                 ) : (
                   <Mail size={18} />
                 )}
-                Gui email
+                Gửi email khôi phục
               </button>
             </div>
           </form>
 
-          {message && (
-            <div className="mt-4 flex gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
-              <CheckCircle2 size={18} />
-              <span>{message}</span>
-            </div>
-          )}
-
-          {error && (
-            <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
-              {error}
+          {(message || error) && (
+            <div
+              className={`mt-4 rounded-lg px-4 py-3 text-sm font-semibold ${
+                error
+                  ? "bg-rose-50 text-rose-700"
+                  : "bg-emerald-50 text-emerald-700"
+              }`}
+            >
+              {error || message}
             </div>
           )}
         </section>
 
         <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex items-start gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
+            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-sky-50 text-sky-700">
               <ShieldCheck size={22} />
             </div>
             <div>
@@ -246,13 +245,13 @@ const SupportScreen = () => {
             <div className="mt-5 overflow-hidden rounded-lg border border-slate-200">
               <dl className="divide-y divide-slate-100 text-sm">
                 <div className="grid gap-1 px-4 py-3 sm:grid-cols-[150px_1fr]">
-                  <dt className="font-semibold text-slate-500">Ma tai khoan</dt>
-                  <dd className="font-semibold text-slate-900">
+                  <dt className="font-semibold text-slate-500">Mã tài khoản</dt>
+                  <dd className="font-mono font-semibold text-slate-800">
                     {user.user_id}
                   </dd>
                 </div>
                 <div className="grid gap-1 px-4 py-3 sm:grid-cols-[150px_1fr]">
-                  <dt className="font-semibold text-slate-500">Ho ten</dt>
+                  <dt className="font-semibold text-slate-500">Họ tên</dt>
                   <dd className="text-slate-700">{user.name}</dd>
                 </div>
                 <div className="grid gap-1 px-4 py-3 sm:grid-cols-[150px_1fr]">
@@ -282,9 +281,9 @@ const SupportScreen = () => {
       <section className="rounded-lg border border-slate-200 bg-white shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-5 py-4">
           <div>
-            <h3 className="text-lg font-bold">Support request queue</h3>
+            <h3 className="text-lg font-bold">Hàng đợi yêu cầu hỗ trợ</h3>
             <p className="mt-1 text-sm text-slate-500">
-              Requests are ordered first in, first out.
+              Yêu cầu được xử lý theo thứ tự gửi trước xử lý trước.
             </p>
           </div>
           <button
@@ -297,7 +296,7 @@ const SupportScreen = () => {
               size={17}
               className={loadingRequests ? "animate-spin" : ""}
             />
-            Refresh
+            Làm mới
           </button>
         </div>
 
@@ -306,13 +305,13 @@ const SupportScreen = () => {
             <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase text-slate-500">
               <tr>
                 <th className="px-4 py-3">#</th>
-                <th className="px-4 py-3">Submitted</th>
-                <th className="px-4 py-3">Type</th>
-                <th className="px-4 py-3">Identifier</th>
+                <th className="px-4 py-3">Thời gian gửi</th>
+                <th className="px-4 py-3">Loại</th>
+                <th className="px-4 py-3">Mã/Tài khoản</th>
                 <th className="px-4 py-3">Email</th>
-                <th className="px-4 py-3">Subject</th>
-                <th className="px-4 py-3">Name</th>
-                <th className="px-4 py-3 text-right">Action</th>
+                <th className="px-4 py-3">Tiêu đề</th>
+                <th className="px-4 py-3">Họ tên</th>
+                <th className="px-4 py-3 text-right">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -322,7 +321,7 @@ const SupportScreen = () => {
                     className="px-4 py-8 text-center text-slate-500"
                     colSpan="8"
                   >
-                    Loading requests...
+                    Đang tải yêu cầu...
                   </td>
                 </tr>
               ) : requests.length === 0 ? (
@@ -331,7 +330,7 @@ const SupportScreen = () => {
                     className="px-4 py-8 text-center text-slate-500"
                     colSpan="8"
                   >
-                    No pending support requests.
+                    Không có yêu cầu hỗ trợ đang chờ.
                   </td>
                 </tr>
               ) : (
@@ -345,14 +344,14 @@ const SupportScreen = () => {
                     </td>
                     <td className="px-4 py-3">
                       <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700">
-                        {request.type === "contact" ? "Contact" : "Password"}
+                        {request.type === "contact" ? "Liên hệ" : "Mật khẩu"}
                       </span>
                     </td>
                     <td className="px-4 py-3 font-semibold text-slate-900">
                       {request.identifier}
                     </td>
                     <td className="px-4 py-3 text-emerald-700">
-                      {request.email || "Not matched yet"}
+                      {request.email || "Chưa tìm thấy"}
                     </td>
                     <td className="max-w-[280px] px-4 py-3 text-slate-600">
                       <p className="font-semibold text-slate-800">
@@ -380,7 +379,7 @@ const SupportScreen = () => {
                           ) : (
                             <CheckCircle2 size={16} />
                           )}
-                          Done
+                          Hoàn tất
                         </button>
                       ) : (
                         <div className="flex flex-col items-end gap-2">
@@ -397,7 +396,7 @@ const SupportScreen = () => {
                               ) : (
                                 <Mail size={16} />
                               )}
-                              Process
+                              Xử lý
                             </button>
                             <button
                               type="button"

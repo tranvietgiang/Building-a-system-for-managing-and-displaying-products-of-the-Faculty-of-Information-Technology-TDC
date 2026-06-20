@@ -35,9 +35,11 @@ axiosClient.interceptors.response.use(
   (res) => res.data,
   (error) => {
     // Handle unauthorized (401) - token expired or invalid
-    if (error.response?.status === 401) {
+    const isLoginRequest = error.config?.url?.includes("/login");
+
+    if (error.response?.status === 401 && !isLoginRequest) {
       clearAuth();
-      window.location.href = "/login";
+      window.location.href = "/dang-nhap";
     }
 
     // Handle forbidden (403) - insufficient permissions

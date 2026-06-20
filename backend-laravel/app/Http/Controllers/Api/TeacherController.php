@@ -20,7 +20,7 @@ class TeacherController extends Controller
 
         if (!$return) {
             return response()->json([
-                'message' => "Đã sảy ra lỗi!",
+                'message' => "ÄÃ£ sáº£y ra lá»—i!",
                 'teacher_result' => false
             ]);
         }
@@ -31,27 +31,25 @@ class TeacherController extends Controller
         ]);
     }
 
-    public function getTeacherData()
+    public function getTeacherData(Request $request)
     {
-        $return = $this->teacherService->showTeacherData();
+        $request->validate([
+            'status' => ['nullable', 'in:pending,approved,rejected'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
+        ]);
 
-        if (
-            $return['pending_result']->isEmpty() &&
-            $return['approved_result']->isEmpty() &&
-            $return['rejected_result']->isEmpty()
-        ) {
-            return response()->json([
-                'message' => 'không thể tải data!',
-                'teacher_data_result' => false
-            ], 404);
-        }
+        $status = $request->query('status', 'pending');
+        $perPage = (int) $request->query('per_page', 6);
+        $perPage = max(1, min($perPage, 100));
+
+        $return = $this->teacherService->showTeacherDataPaginated($status, $perPage);
+
 
         return response()->json([
             'data' => $return,
             'teacher_data_result' => true
         ]);
     }
-
     public function teacherApprove(Request $request, $product_id)
     {
         $status = 'approved';
@@ -91,7 +89,7 @@ class TeacherController extends Controller
             $statusCode = 200;
             if (!($teacher_reject['result'] ?? false)) {
                 $message = (string) ($teacher_reject['message'] ?? '');
-                $statusCode = str_contains($message, 'không tồn tại') ? 404 : 422;
+                $statusCode = str_contains($message, 'khÃ´ng tá»“n táº¡i') ? 404 : 422;
             }
 
             return response()->json(

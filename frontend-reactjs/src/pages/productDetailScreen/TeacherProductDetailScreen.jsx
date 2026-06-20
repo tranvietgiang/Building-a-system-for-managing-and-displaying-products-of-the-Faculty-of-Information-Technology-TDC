@@ -1,5 +1,5 @@
 import React, { useState, useContext, useCallback, useMemo } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { AuthContext } from "../../contexts/AuthContext";
 
 import useProductDetailTeacher from "../../hooks/useProduct/useProductDetailTeacher";
@@ -31,7 +31,8 @@ const TeacherProductDetailScreen = () => {
   useTitle("Xem chi tiết sản phẩm - Giảng viên");
   const navigate = useNavigate();
   const { state } = useLocation();
-  const id = state?.productId;
+  const { id: routeId } = useParams();
+  const id = routeId ?? state?.productId;
 
   const { product, loading, error, mutate } = useProductDetailTeacher(id);
   const { openViewer, ImageViewerModal } = useImageViewer();
@@ -154,7 +155,7 @@ const TeacherProductDetailScreen = () => {
       // console.log("FULL DATA", data);
 
       if (data?.status == true) {
-        navigate("/nckh-compare", {
+        navigate("/so-sanh-ai", {
           state: {
             currentProduct: data?.current_product || null,
             matches: data?.matches || [],

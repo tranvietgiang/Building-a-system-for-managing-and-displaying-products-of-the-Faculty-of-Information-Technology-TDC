@@ -4,7 +4,7 @@ import {
   getToken,
   getUser,
   setToken,
-  setUser,
+  setUser as setStoredUser,
   clearAuth,
   removeToken,
   removeUser,
@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }) => {
         const res = await authApi.me();
         const currentUser = res.user ?? res;
 
-        setUser(currentUser);
+        setStoredUser(currentUser);
         setUserState(currentUser);
       } catch (err) {
         clearAuth();
@@ -60,7 +60,7 @@ export const AuthProvider = ({ children }) => {
       setToken(res.token);
       setTokenState(res.token);
 
-      setUser(res.user);
+      setStoredUser(res.user);
       setUserState(res.user);
 
       return res;
@@ -71,6 +71,17 @@ export const AuthProvider = ({ children }) => {
       setUserState(null);
       throw error;
     }
+  };
+
+  const setUser = (nextUser) => {
+    if (!nextUser) {
+      removeUser();
+      setUserState(null);
+      return;
+    }
+
+    setStoredUser(nextUser);
+    setUserState(nextUser);
   };
 
   const logout = async () => {
@@ -87,7 +98,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, token, isAuthenticated, login, logout, loading }}
+      value={{ user, setUser, token, isAuthenticated, login, logout, loading }}
     >
       {children}
     </AuthContext.Provider>

@@ -75,6 +75,8 @@ const isValidUrl = (value) => {
 };
 
 const validateBasicInfo = (formData, errors) => {
+  const description = formData.description || "";
+
   // TITLE
   if (!formData.title?.trim()) {
     errors.title = "Nhập tên sản phẩm";
@@ -85,11 +87,9 @@ const validateBasicInfo = (formData, errors) => {
   }
 
   // DESCRIPTION
-  if (!formData.description?.trim()) {
-    errors.description = "Nhập mô tả";
-  } else if (formData.description.length < 10) {
+  if (description.trim() && description.length < 10) {
     errors.description = "Mô tả ≥ 10 ký tự";
-  } else if (formData.description.length > 300) {
+  } else if (description.length > 300) {
     errors.description = "Mô tả ≤ 300 ký tự";
   }
 

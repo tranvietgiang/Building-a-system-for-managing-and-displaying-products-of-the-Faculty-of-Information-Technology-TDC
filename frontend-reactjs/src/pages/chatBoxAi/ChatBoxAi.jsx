@@ -168,14 +168,14 @@ export default function ChatBoxAi({ user }) {
   const handleViewDetail = (id) => {
     if (!userRole) return;
 
-    let url = "/visitor-detail";
+    let url = "/chi-tiet-san-pham";
 
     if (userRole == ROLE.TEACHER) {
-      url = "/detail-teacher";
+      url = "/giang-vien/chi-tiet-san-pham";
     } else if (userRole == ROLE.STUDENT) {
-      url = "/detail";
+      url = "/chi-tiet-cua-toi";
     } else if (userRole == "guest") {
-      url = "/visitor-detail";
+      url = "/chi-tiet-san-pham";
     }
 
     navigate(url, {

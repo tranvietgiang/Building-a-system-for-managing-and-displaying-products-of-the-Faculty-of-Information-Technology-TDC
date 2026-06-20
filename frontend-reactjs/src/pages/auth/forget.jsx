@@ -46,7 +46,7 @@ export default function ForgotPassword() {
           </div>
 
           <Link
-            to="/nckh-visitor"
+            to="/khach-tham-quan"
             className="relative z-10 inline-flex w-fit items-center gap-3"
           >
             <span className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/20 bg-white/10">
@@ -95,7 +95,7 @@ export default function ForgotPassword() {
         <section className="flex items-center justify-center px-5 py-10 sm:px-8">
           <div className="w-full max-w-md">
             <Link
-              to="/login"
+              to="/dang-nhap"
               className="mb-8 inline-flex items-center gap-2 text-sm font-semibold text-[#003087] transition hover:text-[#C8102E]"
             >
               <ArrowLeft size={18} />

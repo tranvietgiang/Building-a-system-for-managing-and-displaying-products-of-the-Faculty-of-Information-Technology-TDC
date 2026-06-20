@@ -153,7 +153,7 @@ const UploadProductScreen = () => {
             </p>
 
             <button
-              onClick={() => navigate("/nckh-student")}
+              onClick={() => navigate("/sinh-vien")}
               className={`w-full rounded-xl bg-gradient-to-r ${gradient} px-4 py-3 font-semibold text-white`}
             >
               Xem sản phẩm của tôi

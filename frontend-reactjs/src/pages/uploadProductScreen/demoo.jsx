@@ -166,7 +166,7 @@ const UploadProductScreen = () => {
             </div>
 
             <button
-              onClick={() => navigate("/nckh-student")}
+              onClick={() => navigate("/sinh-vien")}
               className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 font-medium text-white transition hover:from-blue-700 hover:to-indigo-700"
             >
               Xem sản phẩm của tôi

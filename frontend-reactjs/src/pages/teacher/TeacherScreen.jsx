@@ -12,6 +12,7 @@ import { getStatusColor } from "../../components/common/getStatusColor";
 import { getStatusText } from "../../components/common/getStatusText";
 import { formatDate } from "../../utils/formatDate";
 import { STATUS } from "../../utils/constants";
+import { ROUTES } from "../../utils/routes";
 import ChatBoxAi from "../chatBoxAi/ChatBoxAi";
 import SearchAi from "../ai/SearchAi";
 // ========== Extracted components ==========
@@ -187,8 +188,17 @@ const TeacherScreen = () => {
   const { user } = useContext(AuthContext);
   const { majorName } = useMajorName(user?.major_id);
   const { teacherStatistic } = useTeacherStatistic();
-  const { ProductsData, loading, error } = useTeacherPendingApproval();
-  const handleViewDetail = useViewDetail("detail-teacher");
+  const teacherParams = useMemo(
+    () => ({
+      status: filter,
+      page: currentPage,
+      per_page: ITEMS_PER_PAGE,
+    }),
+    [filter, currentPage],
+  );
+  const { ProductsData, loading, error } =
+    useTeacherPendingApproval(teacherParams);
+  const handleViewDetail = useViewDetail(ROUTES.TEACHER_DETAIL);
   const { openViewer, ImageViewerModal } = useImageViewer();
 
   // useMemo: chỉ tính lại khi data thay đổi
@@ -202,31 +212,38 @@ const TeacherScreen = () => {
     [user, majorName, teacherStatistic],
   );
 
-  const pendingProducts = useMemo(
-    () => ProductsData?.pending_result ?? [],
-    [ProductsData],
-  );
-  const approvedProducts = useMemo(
-    () => ProductsData?.approved_result ?? [],
-    [ProductsData],
-  );
-  const rejectedProducts = useMemo(
-    () => ProductsData?.rejected_result ?? [],
-    [ProductsData],
-  );
+  const productPaginator = ProductsData?.products;
+  const activeProducts = productPaginator?.data ?? [];
+  const counts = ProductsData?.counts ?? {};
 
   const stats = useMemo(
     () => [
-      { label: "Tổng sản phẩm", value: teacher.totalProducts, color: "purple" },
-      { label: "Chờ duyệt", value: pendingProducts.length, color: "yellow" },
-      { label: "Đã duyệt", value: approvedProducts.length, color: "green" },
-      { label: "Từ chối", value: rejectedProducts.length, color: "red" },
+      { label: "Tổng sản phẩm", value: counts.total ?? teacher.totalProducts, color: "purple" },
+      {
+        label: "Chờ duyệt",
+        value: counts.pending ?? 0,
+        color: "yellow",
+        filter: STATUS.PENDING,
+      },
+      {
+        label: "Đã duyệt",
+        value: counts.approved ?? 0,
+        color: "green",
+        filter: STATUS.APPROVED,
+      },
+      {
+        label: "Từ chối",
+        value: counts.rejected ?? 0,
+        color: "red",
+        filter: STATUS.REJECTED,
+      },
     ],
     [
+      counts.total,
+      counts.pending,
+      counts.approved,
+      counts.rejected,
       teacher.totalProducts,
-      pendingProducts.length,
-      approvedProducts.length,
-      rejectedProducts.length,
     ],
   );
 
@@ -235,11 +252,10 @@ const TeacherScreen = () => {
     () => setIsHeaderExpanded((prev) => !prev),
     [],
   );
-  const handleStatClick = useCallback((label) => {
+  const handleStatClick = useCallback((nextFilter) => {
+    if (!nextFilter) return;
     setCurrentPage(1);
-    if (label === "Chờ duyệt") setFilter(STATUS.PENDING);
-    else if (label === "Đã duyệt") setFilter(STATUS.APPROVED);
-    else if (label === "Từ chối") setFilter(STATUS.REJECTED);
+    setFilter(nextFilter);
   }, []);
 
   const handleTabChange = useCallback((tab) => {
@@ -274,31 +290,23 @@ const TeacherScreen = () => {
     pending: {
       label: "Chờ duyệt",
       color: "yellow",
-      count: pendingProducts.length,
+      count: counts.pending ?? 0,
     },
     approved: {
       label: "Đã duyệt",
       color: "green",
-      count: approvedProducts.length,
+      count: counts.approved ?? 0,
     },
     rejected: {
       label: "Từ chối",
       color: "red",
-      count: rejectedProducts.length,
+      count: counts.rejected ?? 0,
     },
   };
 
-  const activeProducts = useMemo(() => {
-    if (filter === STATUS.APPROVED) return approvedProducts;
-    if (filter === STATUS.REJECTED) return rejectedProducts;
-    return pendingProducts;
-  }, [filter, approvedProducts, rejectedProducts, pendingProducts]);
-
-  const totalPages = Math.ceil(activeProducts.length / ITEMS_PER_PAGE);
-  const paginatedProducts = useMemo(() => {
-    const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return activeProducts.slice(start, start + ITEMS_PER_PAGE);
-  }, [activeProducts, currentPage]);
+  const activeCount = tabConfig[filter]?.count ?? 0;
+  const totalPages = productPaginator?.last_page ?? 1;
+  const paginatedProducts = activeProducts;
 
   const pagination = totalPages > 1 && (
     <div className="flex justify-center items-center gap-2 mt-8 flex-wrap">
@@ -310,21 +318,9 @@ const TeacherScreen = () => {
         Trước
       </button>
 
-      {Array.from({ length: totalPages }, (_, index) => index + 1).map(
-        (page) => (
-          <button
-            key={page}
-            onClick={() => setCurrentPage(page)}
-            className={`px-4 py-2 rounded-md border text-sm ${
-              currentPage === page
-                ? "bg-gray-900 text-white border-gray-900"
-                : "bg-white text-gray-700 hover:bg-gray-50"
-            }`}
-          >
-            {page}
-          </button>
-        ),
-      )}
+      <span className="px-4 py-2 text-sm text-gray-600">
+        Trang {currentPage} / {totalPages}
+      </span>
 
       <button
         onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
@@ -417,7 +413,7 @@ const TeacherScreen = () => {
                   return (
                     <div
                       key={stat.label}
-                      onClick={() => handleStatClick(stat.label)}
+                      onClick={() => handleStatClick(stat.filter)}
                       className={`bg-gradient-to-r ${c.bg} rounded-xl p-3 cursor-pointer hover:shadow-md transition-all`}
                     >
                       <p className={`text-xs font-medium ${c.label}`}>
@@ -473,13 +469,13 @@ const TeacherScreen = () => {
                 <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
                   <span className="w-1 h-6 bg-yellow-500 rounded-full"></span>
                   Sản phẩm cần duyệt
-                  {pendingProducts.length > 0 && (
+                  {activeCount > 0 && (
                     <span className="text-sm font-normal text-gray-500">
-                      (Hiển thị {pendingProducts.length} sản phẩm)
+                      (Hiển thị {activeProducts.length} / {activeCount} sản phẩm)
                     </span>
                   )}
                 </h2>
-                {pendingProducts.length === 0 ? (
+                {activeProducts.length === 0 ? (
                   <EmptyState message="Không có sản phẩm chờ duyệt" />
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -504,13 +500,13 @@ const TeacherScreen = () => {
                 <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
                   <span className="w-1 h-6 bg-green-500 rounded-full"></span>
                   Sản phẩm đã duyệt
-                  {approvedProducts.length > 0 && (
+                  {activeCount > 0 && (
                     <span className="text-sm font-normal text-gray-500">
-                      (Hiển thị {approvedProducts.length} sản phẩm)
+                      (Hiển thị {activeProducts.length} / {activeCount} sản phẩm)
                     </span>
                   )}
                 </h2>
-                {approvedProducts.length === 0 ? (
+                {activeProducts.length === 0 ? (
                   <EmptyState message="Không có sản phẩm đã duyệt" />
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -535,13 +531,13 @@ const TeacherScreen = () => {
                 <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
                   <span className="w-1 h-6 bg-red-500 rounded-full"></span>
                   Sản phẩm bị từ chối
-                  {rejectedProducts.length > 0 && (
+                  {activeCount > 0 && (
                     <span className="text-sm font-normal text-gray-500">
-                      (Hiển thị {rejectedProducts.length} sản phẩm)
+                      (Hiển thị {activeProducts.length} / {activeCount} sản phẩm)
                     </span>
                   )}
                 </h2>
-                {rejectedProducts.length === 0 ? (
+                {activeProducts.length === 0 ? (
                   <EmptyState message="Không có sản phẩm bị từ chối" />
                 ) : (
                   <div className="space-y-4">

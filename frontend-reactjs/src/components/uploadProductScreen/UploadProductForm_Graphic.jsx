@@ -158,6 +158,7 @@ const UploadProductForm_Graphic = ({
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
                   Mô tả ý tưởng, phong cách
+                  {" "}<span className="ml-1 text-xs font-normal text-gray-400">(có thể bỏ qua)</span>
                 </label>
                 <textarea
                   name="description"
@@ -467,7 +468,7 @@ const UploadProductForm_Graphic = ({
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
                   File nguồn (PSD, AI, Figma, PDF, video)
-                </label>
+                 {" "}<span className="ml-1 text-xs font-normal text-gray-400">(có thể bỏ qua)</span></label>
                 <div className="relative">
                   <input
                     type="file"
@@ -587,7 +588,7 @@ const UploadProductForm_Graphic = ({
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
                   Phong cách / kỹ thuật sử dụng
-                </label>
+                 {" "}<span className="ml-1 text-xs font-normal text-gray-400">(có thể bỏ qua)</span></label>
 
                 <input
                   type="text"
@@ -641,7 +642,7 @@ const UploadProductForm_Graphic = ({
                 <div>
                   <label className="mb-2 block text-sm font-semibold text-gray-700">
                     Behance / Dribbble
-                  </label>
+                   {" "}<span className="ml-1 text-xs font-normal text-gray-400">(có thể bỏ qua)</span></label>
 
                   <input
                     type="url"
@@ -661,7 +662,7 @@ const UploadProductForm_Graphic = ({
                 <div>
                   <label className="mb-2 block text-sm font-semibold text-gray-700">
                     Google Drive
-                  </label>
+                   {" "}<span className="ml-1 text-xs font-normal text-gray-400">(có thể bỏ qua)</span></label>
 
                   <input
                     type="url"
@@ -687,7 +688,7 @@ const UploadProductForm_Graphic = ({
                 <div>
                   <label className="mb-2 block text-sm font-semibold text-gray-700">
                     GitHub (nếu có web design)
-                  </label>
+                   {" "}<span className="ml-1 text-xs font-normal text-gray-400">(có thể bỏ qua)</span></label>
 
                   <input
                     type="url"
@@ -703,7 +704,7 @@ const UploadProductForm_Graphic = ({
                 <div>
                   <label className="mb-2 block text-sm font-semibold text-gray-700">
                     Demo Website / Portfolio
-                  </label>
+                   {" "}<span className="ml-1 text-xs font-normal text-gray-400">(có thể bỏ qua)</span></label>
 
                   <input
                     type="url"

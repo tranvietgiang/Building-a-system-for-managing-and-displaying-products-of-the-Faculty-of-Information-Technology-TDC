@@ -157,6 +157,7 @@ const UploadProductForm_Network = ({
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
                   Mô tả giải pháp mạng
+                  {" "}<span className="ml-1 text-xs font-normal text-gray-400">(có thể bỏ qua)</span>
                 </label>
                 <textarea
                   name="description"
@@ -498,7 +499,7 @@ const UploadProductForm_Network = ({
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
                   File cấu hình / Báo cáo / Mô phỏng
-                </label>
+                 {" "}<span className="ml-1 text-xs font-normal text-gray-400">(có thể bỏ qua)</span></label>
                 <div className="relative">
                   <input
                     type="file"
@@ -617,7 +618,7 @@ const UploadProductForm_Network = ({
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
                   Công nghệ / Giao thức
-                </label>
+                 {" "}<span className="ml-1 text-xs font-normal text-gray-400">(có thể bỏ qua)</span></label>
                 <input
                   type="text"
                   value={tagInput}

@@ -45,7 +45,7 @@ export default function CompareProductAi() {
     }
   }, [currentProduct, majorName, initialMatches]);
 
-  const getComparisonFields = (product, majorName) => {
+  const _getComparisonFields = (product, majorName) => {
     const majorLower = (majorName || "").toLowerCase();
 
     // Phát hiện AI projects (bao gồm "nhân tạo" + "trí tuệ")

@@ -32,7 +32,7 @@ class UploadRequest extends FormRequest
         $rules = [
             // CHUNG
             'title' => 'required|string|min:5|max:100',
-            'description' => 'required|string|min:10|max:300',
+            'description' => 'nullable|string|min:10|max:300',
 
             'cate_id' => 'required|exists:categories,cate_id',
 
@@ -43,6 +43,8 @@ class UploadRequest extends FormRequest
 
             'images' => 'required|array|min:1|max:10',
             'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:5120',
+            'image_meta' => 'nullable|array|max:10',
+            'image_meta.*' => 'nullable|string',
 
             'files' => 'nullable|array|max:5',
             'files.*' => 'file|max:10240',
@@ -108,7 +110,6 @@ class UploadRequest extends FormRequest
             'title.max' => 'Tên tối đa 100 ký tự',
 
             // DESCRIPTION
-            'description.required' => 'Vui lòng nhập mô tả',
             'description.min' => 'Mô tả phải ≥ 10 ký tự',
             'description.max' => 'Mô tả tối đa 300 ký tự',
 
