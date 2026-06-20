@@ -369,7 +369,7 @@ class AdminController extends Controller
         if (!$user) {
             return response()->json([
                 'success' => false,
-                'message' => 'Khong tim thay tai khoan phu hop.',
+                'message' => 'Không tìm thấy tài khoản phù hợp.',
             ], 404);
         }
 
@@ -435,7 +435,7 @@ class AdminController extends Controller
         if (!$user) {
             return response()->json([
                 'success' => false,
-                'message' => 'Khong tim thay tai khoan phu hop.',
+                'message' => 'Không tìm thấy tài khoản phù hợp.',
             ], 404);
         }
 
@@ -444,7 +444,7 @@ class AdminController extends Controller
         $user->save();
 
         $frontendUrl = $request->headers->get('origin') ?: config('app.url');
-        $loginUrl = rtrim((string) $frontendUrl, '/') . '/login';
+        $loginUrl = rtrim((string) $frontendUrl, '/') . '/dang-nhap';
         $subject = 'Thong tin khoi phuc mat khau TDC';
         $body = view('emails.password-recovery', [
             'user' => $user,
@@ -472,7 +472,7 @@ class AdminController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Da cap mat khau moi va gui email khoi phuc.',
+            'message' => 'Đã cấp mật khẩu mới và gửi email khôi phục.',
             'data' => [
                 'user_id' => $user->user_id,
                 'name' => $user->name,
@@ -484,10 +484,12 @@ class AdminController extends Controller
     private function findPasswordRecoveryUser(string $identifier): ?User
     {
         $identifier = trim($identifier);
+        $normalizedIdentifier = mb_strtolower($identifier);
 
         return User::query()
-            ->where('email', $identifier)
-            ->orWhere('user_id', $identifier)
+            ->whereRaw('LOWER(email) = ?', [$normalizedIdentifier])
+            ->orWhereRaw('LOWER(user_id) = ?', [$normalizedIdentifier])
+            ->orWhereRaw('LOWER(mssv) = ?', [$normalizedIdentifier])
             ->first();
     }
 

@@ -23,9 +23,14 @@ class ProductService extends BaseRepository
         return $this->productRepository->findProductById($productId);
     }
 
-    public function getAllProductsByUserId(int $perPage = 50): LengthAwarePaginator
+    public function getAllProductsByUserId(int $perPage = 50, ?string $status = null): LengthAwarePaginator
     {
-        return $this->productRepository->productAllById($perPage);
+        return $this->productRepository->productAllById($perPage, $status);
+    }
+
+    public function getCurrentUserProductCounts(): array
+    {
+        return $this->productRepository->productStatusCountsByCurrentUser();
     }
 
     public function productViewIdTeacher(int $productId, ?object $user = null): ?array
@@ -46,9 +51,14 @@ class ProductService extends BaseRepository
         return $this->productRepository->deleteProductStudent($productId);
     }
 
-    public function getProductsVisitor(): array
+    public function getProductsVisitor(int $perPage = 9, ?int $majorId = null, string $sortBy = 'newest'): LengthAwarePaginator
     {
-        return $this->productRepository->getProductsVisitor();
+        return $this->productRepository->getProductsVisitorPaginated($perPage, $majorId, $sortBy);
+    }
+
+    public function getVisitorStats(): array
+    {
+        return $this->productRepository->getVisitorStats();
     }
 
     public function getVisitorProductById($productId): ?array

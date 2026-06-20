@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UserRequest extends FormRequest
 {
@@ -15,9 +16,21 @@ class UserRequest extends FormRequest
     {
         // Columns NOT NULL: user_id, name, email, password, role
         $allRules = [
-            'user_id' => 'required|string|min:3|max:15|unique:users,user_id',
+            'user_id' => [
+                'required',
+                'string',
+                'min:3',
+                'max:15',
+                Rule::unique('users', 'user_id')->ignore($this->user()?->getKey(), 'user_id'),
+            ],
             'name' => 'required|string|min:3|max:100',
-            'email' => 'required|email|min:5|max:100|unique:users,email',
+            'email' => [
+                'required',
+                'email',
+                'min:5',
+                'max:100',
+                Rule::unique('users', 'email')->ignore($this->user()?->getKey(), 'user_id'),
+            ],
             'password' => 'required|string|min:6|max:255',
             'role' => 'required|in:student,teacher,admin',
             'phone' => 'nullable|string|max:20',

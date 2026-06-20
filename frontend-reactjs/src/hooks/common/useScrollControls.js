@@ -29,7 +29,7 @@ export default function useScrollControls() {
   }, []);
 
   const handleTop = useCallback(
-    (path = "/nckh-visitor") => {
+    (path = "/khach-tham-quan") => {
       if (location.pathname === path) {
         scrollToTop();
         return;
@@ -41,7 +41,7 @@ export default function useScrollControls() {
   );
 
   const handleBottom = useCallback(
-    (path = "/nckh-visitor", targetId = "san-pham") => {
+    (path = "/khach-tham-quan", targetId = "san-pham") => {
       if (location.pathname === path) {
         scrollToTarget(targetId);
         return;

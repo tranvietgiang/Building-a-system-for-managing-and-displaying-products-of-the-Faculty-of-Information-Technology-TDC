@@ -61,7 +61,7 @@ const NotFoundPage = () => {
           </button>
 
           <button
-            onClick={() => navigate("/nckh-visitor")}
+            onClick={() => navigate("/khach-tham-quan")}
             className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition font-medium flex items-center justify-center gap-2 shadow-md"
           >
             <svg

@@ -19,11 +19,21 @@ return new class extends Migration
 
             $table->string('email')->unique();
 
+            $table->string('phone', 30)->nullable();
+
+            $table->string('address', 200)->nullable();
+
+            $table->text('bio')->nullable();
+
             $table->timestamp('email_verified_at')->nullable();
 
             $table->string('password');
 
             $table->string('class')->nullable();
+
+            $table->string('mssv', 20)->nullable();
+
+            $table->string('class_name', 50)->nullable();
 
             $table->enum('role', ['student', 'teacher', 'admin'])
                 ->default('student');

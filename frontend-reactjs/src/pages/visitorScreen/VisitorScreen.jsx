@@ -144,7 +144,22 @@ export default function VisitorScreen() {
   const { handleTop, handleBottom } = useScrollControls();
 
   const { majorAll, loadingMajorAll } = useMajorAll();
-  const { productVisitor, loadingVisitor, errorVisitor } = useVisitorProduct();
+  const visitorProductParams = useMemo(
+    () => ({
+      page: currentPage,
+      per_page: ITEMS_PER_PAGE,
+      major_id: selectedMajor === "all" ? undefined : selectedMajor,
+      sort_by: sortBy,
+    }),
+    [currentPage, selectedMajor, sortBy],
+  );
+  const {
+    productVisitor,
+    paginationVisitor,
+    visitorStats,
+    loadingVisitor,
+    errorVisitor,
+  } = useVisitorProduct(visitorProductParams);
   const { searchAi, clearSearch, searchResult, searchError, loadingSearchAi } =
     useSearchAi();
   const {
@@ -227,6 +242,17 @@ export default function VisitorScreen() {
     return productVisitor ?? [];
   }, [aiEnabled, productVisitor, productSearchResult, searchResult]);
 
+  const getSearchParams = useCallback(
+    (keyword, page = 1) => ({
+      q: keyword,
+      page,
+      per_page: ITEMS_PER_PAGE,
+      major_id: selectedMajor === "all" ? undefined : selectedMajor,
+      sort_by: sortBy,
+    }),
+    [selectedMajor, sortBy],
+  );
+
   const handleSearchSubmit = async (e) => {
     e.preventDefault();
     const keyword = searchTerm.trim();
@@ -240,7 +266,7 @@ export default function VisitorScreen() {
       return;
     }
 
-    await searchProducts({ q: keyword, per_page: 30 });
+    await searchProducts(getSearchParams(keyword, 1));
   };
 
   const handleClearSearch = () => {
@@ -263,7 +289,7 @@ export default function VisitorScreen() {
       return;
     }
 
-    await searchProducts({ q: suggestion, per_page: 30 });
+    await searchProducts(getSearchParams(suggestion, 1));
   };
 
   useEffect(() => {
@@ -287,7 +313,7 @@ export default function VisitorScreen() {
       return;
     }
 
-    searchProducts({ q: keyword, per_page: 30 });
+    searchProducts(getSearchParams(keyword, 1));
   }, [
     aiEnabled,
     debouncedSearchTerm,
@@ -311,8 +337,16 @@ export default function VisitorScreen() {
       return;
     }
 
-    searchProducts({ q: keyword, per_page: 30 });
+    searchProducts(getSearchParams(keyword, 1));
   }, [aiEnabled]);
+
+  useEffect(() => {
+    const keyword = searchTerm.trim();
+
+    if (aiEnabled || !productSearchResult || !keyword) return;
+
+    searchProducts(getSearchParams(keyword, currentPage));
+  }, [currentPage, selectedMajor, sortBy]);
 
   const activeSearchResult = aiEnabled ? searchResult : productSearchResult;
   const activeSearchError = aiEnabled ? searchError : productSearchError;
@@ -330,7 +364,7 @@ export default function VisitorScreen() {
         console.error(error);
       }
 
-      navigate(`/visitor-detail/${id}`, { state: { productId: id } });
+      navigate(`/chi-tiet-san-pham/${id}`, { state: { productId: id } });
     },
     [navigate],
   );
@@ -359,6 +393,10 @@ export default function VisitorScreen() {
 
   const filteredProducts = useMemo(() => {
     const base = productsSource;
+
+    if (!aiEnabled) {
+      return base;
+    }
 
     return base
       .filter((p) => {
@@ -396,6 +434,7 @@ export default function VisitorScreen() {
         return 0;
       });
   }, [
+    aiEnabled,
     productsSource,
     selectedMajor,
     sortBy,
@@ -404,12 +443,22 @@ export default function VisitorScreen() {
     activeSearchResult,
   ]);
 
-  const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
+  const serverPagination = activeSearchResult?.data?.current_page
+    ? activeSearchResult.data
+    : paginationVisitor;
+
+  const totalPages = aiEnabled
+    ? Math.ceil(filteredProducts.length / ITEMS_PER_PAGE)
+    : serverPagination?.last_page || 1;
 
   const paginatedProducts = useMemo(() => {
+    if (!aiEnabled) {
+      return filteredProducts;
+    }
+
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
     return filteredProducts.slice(start, start + ITEMS_PER_PAGE);
-  }, [filteredProducts, currentPage]);
+  }, [aiEnabled, filteredProducts, currentPage]);
 
   useEffect(() => {
     productCardObserverRef.current?.disconnect();
@@ -467,37 +516,28 @@ export default function VisitorScreen() {
   }, []);
 
   const stats = useMemo(() => {
-    const products = productVisitor ?? [];
-    const students = new Set();
-    const advisors = new Set();
-    const totalViews = products.reduce((sum, product) => {
-      const studentKey =
-        product.studentId ||
-        product.student_id ||
-        product.user_id ||
-        product.student;
-      const advisorKey =
-        product.advisor ||
-        product.advisor_id ||
-        product.teacher_id ||
-        product.approved_by;
-
-      if (studentKey) students.add(String(studentKey));
-      if (advisorKey) advisors.add(String(advisorKey));
-
-      return sum + Number(product.views || 0);
-    }, 0);
-
     return [
-      { value: products.length, label: "Sản phẩm tiêu biểu" },
-      { value: students.size, label: "Sinh viên tham gia" },
-      { value: advisors.size, label: "Giảng viên hướng dẫn" },
-      { value: totalViews, label: "Lượt xem sản phẩm" },
+      {
+        value: visitorStats?.products_count || 0,
+        label: "Sản phẩm tiêu biểu",
+      },
+      {
+        value: visitorStats?.students_count || 0,
+        label: "Sinh viên tham gia",
+      },
+      {
+        value: visitorStats?.advisors_count || 0,
+        label: "Giảng viên hướng dẫn",
+      },
+      {
+        value: visitorStats?.views_count || 0,
+        label: "Lượt xem sản phẩm",
+      },
     ].map((stat) => ({
       ...stat,
       value: Number(stat.value || 0).toLocaleString("vi-VN"),
     }));
-  }, [productVisitor]);
+  }, [visitorStats]);
 
   const activeClass =
     "px-4 py-2 font-medium text-sm text-[#003087] border-b-2 border-[#003087]";
@@ -528,14 +568,14 @@ export default function VisitorScreen() {
             <nav className="hidden md:flex items-center gap-6">
               <button
                 type="button"
-                onClick={() => handleTop("/nckh-visitor")}
+                onClick={() => handleTop("/khach-tham-quan")}
                 className="text-sm font-medium text-gray-600 transition-colors hover:text-[#003087]"
               >
                 Trang chủ
               </button>
               <button
                 type="button"
-                onClick={() => handleBottom("/nckh-visitor", "san-pham")}
+                onClick={() => handleBottom("/khach-tham-quan", "san-pham")}
                 className="text-sm font-medium text-gray-600 transition-colors hover:text-[#003087]"
               >
                 Sản phẩm
@@ -562,7 +602,7 @@ export default function VisitorScreen() {
 
             <div className="flex items-center gap-3">
               <button
-                onClick={() => navigate("/login")}
+                onClick={() => navigate("/dang-nhap")}
                 className="px-5 py-2 text-[#003087] border border-[#003087] rounded-md font-medium text-sm hover:bg-[#003087] hover:text-white transition-all"
               >
                 Đăng nhập
@@ -600,7 +640,7 @@ export default function VisitorScreen() {
               <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
                 <button
                   type="button"
-                  onClick={() => handleBottom("/nckh-visitor", "san-pham")}
+                  onClick={() => handleBottom("/khach-tham-quan", "san-pham")}
                   className="rounded-md bg-white px-6 py-2.5 text-sm font-semibold text-[#003087] transition-all hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#9ee7ff] focus:ring-offset-2 focus:ring-offset-[#003087]"
                 >
                   Xem tất cả sản phẩm
@@ -689,7 +729,10 @@ export default function VisitorScreen() {
             <select
               className="px-4 py-2.5 bg-gray-50 rounded-md outline-none text-gray-600 text-sm border-0 cursor-pointer"
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
+              onChange={(e) => {
+                setSortBy(e.target.value);
+                setCurrentPage(1);
+              }}
             >
               <option value="newest">🆕 Mới nhất</option>
               <option value="most_viewed">👁️ Xem nhiều nhất</option>
@@ -939,32 +982,24 @@ export default function VisitorScreen() {
                   onClick={() =>
                     setCurrentPage((prev) => Math.max(prev - 1, 1))
                   }
-                  className="px-3 py-2 border rounded-md bg-white hover:bg-gray-50"
+                  disabled={currentPage <= 1 || loadingVisitor || activeSearchLoading}
+                  className="px-3 py-2 border rounded-md bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   ‹
                 </button>
 
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                  (page) => (
-                    <button
-                      key={page}
-                      onClick={() => setCurrentPage(page)}
-                      className={`px-4 py-2 rounded-md border text-sm ${
-                        currentPage === page
-                          ? "bg-[#003087] text-white border-[#003087]"
-                          : "bg-white text-gray-700 hover:bg-gray-50"
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  ),
-                )}
+                <span className="px-4 py-2 rounded-md border border-[#003087] bg-[#003087] text-sm font-semibold text-white">
+                  Trang {currentPage} / {totalPages}
+                </span>
 
                 <button
                   onClick={() =>
                     setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                   }
-                  className="px-3 py-2 border rounded-md bg-white hover:bg-gray-50"
+                  disabled={
+                    currentPage >= totalPages || loadingVisitor || activeSearchLoading
+                  }
+                  className="px-3 py-2 border rounded-md bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   ›
                 </button>

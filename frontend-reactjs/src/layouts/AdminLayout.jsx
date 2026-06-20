@@ -19,7 +19,7 @@ const menuItems = [
   { id: "users", label: "Người dùng", icon: Users },
   { id: "products", label: "Sản phẩm", icon: PackageCheck },
   { id: "majors", label: "Chuyên ngành", icon: GraduationCap },
-  { id: "support", label: "Support", icon: LifeBuoy },
+  { id: "support", label: "Hỗ trợ", icon: LifeBuoy },
   { id: "settings", label: "Cài đặt", icon: Settings },
 ];
 
@@ -96,7 +96,7 @@ const AdminLayout = ({ activeSection, setActiveSection, title, children }) => {
               </div>
               <button
                 type="button"
-                onClick={() => navigate("/nckh-visitor")}
+                onClick={() => navigate("/khach-tham-quan")}
                 className="hidden items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-100 md:flex"
                 title="Xem sản phẩm toàn ngành"
               >
@@ -105,7 +105,7 @@ const AdminLayout = ({ activeSection, setActiveSection, title, children }) => {
               </button>
               <button
                 type="button"
-                onClick={() => navigate("/nckh-visitor")}
+                onClick={() => navigate("/khach-tham-quan")}
                 className="flex h-10 w-10 items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-100 md:hidden"
                 title="Xem sản phẩm toàn ngành"
                 aria-label="Xem sản phẩm toàn ngành"

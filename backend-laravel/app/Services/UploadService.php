@@ -30,6 +30,7 @@ class UploadService extends BaseRepository
         $uploadedImages = [];
         $uploadedFiles = [];
         $tags = $data['tags'] ?? [];
+        $thumbnailIndex = $this->resolveThumbnailIndex($data['image_meta'] ?? []);
 
         DB::beginTransaction();
 
@@ -124,10 +125,11 @@ class UploadService extends BaseRepository
                 $dbData,
                 $uploadedImages,
                 $uploadedFiles,
-                $tags
+                $tags,
+                $thumbnailIndex
             );
 
-            $product->thumbnail = $uploadedImages[0] ?? null;
+            $product->thumbnail = $uploadedImages[$thumbnailIndex] ?? ($uploadedImages[0] ?? null);
             $product->images = $uploadedImages;
 
             DB::commit();
@@ -144,5 +146,18 @@ class UploadService extends BaseRepository
     public function countPublishedProducts(): ?int
     {
         return $this->upload_repository->countPublishedProducts();
+    }
+
+    private function resolveThumbnailIndex(array $imageMeta): int
+    {
+        foreach ($imageMeta as $index => $meta) {
+            $decoded = is_string($meta) ? json_decode($meta, true) : $meta;
+
+            if (is_array($decoded) && ($decoded['is_thumbnail'] ?? false)) {
+                return (int) $index;
+            }
+        }
+
+        return 0;
     }
 }

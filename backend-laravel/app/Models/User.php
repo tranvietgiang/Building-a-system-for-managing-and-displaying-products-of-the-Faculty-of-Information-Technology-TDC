@@ -31,8 +31,13 @@ class User extends Authenticatable
         'email',
         'password',
         'class',
+        'class_name',
         'role',
         'major_id',
+        'phone',
+        'address',
+        'bio',
+        'mssv',
         'avatar'
     ];
 
@@ -57,5 +62,10 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function products()
+    {
+        return $this->hasMany(Product::class, 'user_id', 'user_id');
     }
 }

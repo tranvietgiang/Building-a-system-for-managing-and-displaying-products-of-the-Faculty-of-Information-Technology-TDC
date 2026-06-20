@@ -240,14 +240,20 @@ class ProductRepository extends BaseRepository
     }
 
     // lấy tất cả sản phẩm của sinh viên theo id
-    public function productAllById(int $perPage = 50): LengthAwarePaginator
+    public function productAllById(int $perPage = 50, ?string $status = null): LengthAwarePaginator
     {
         $userId = $this->getCurrentUserId();
 
-        return Product::query()
+        $query = Product::query()
             ->leftJoin('categories', 'products.cate_id', '=', 'categories.cate_id')
             ->leftJoin('product_statistics', 'products.product_id', '=', 'product_statistics.product_id')
-            ->where('products.user_id', $userId)
+            ->where('products.user_id', $userId);
+
+        if ($status) {
+            $query->where('products.status', $status);
+        }
+
+        return $query
             ->select(
                 'products.product_id',
                 'products.title',
@@ -266,7 +272,26 @@ class ProductRepository extends BaseRepository
                 LIMIT 1) as feedback')
             )
             ->orderByDesc('products.approved_at')
+            ->orderByDesc('products.created_at')
             ->paginate($perPage);
+    }
+
+    public function productStatusCountsByCurrentUser(): array
+    {
+        $userId = $this->getCurrentUserId();
+
+        $counts = Product::query()
+            ->where('user_id', $userId)
+            ->select('status', DB::raw('COUNT(*) as total'))
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        return [
+            'total' => (int) $counts->sum(),
+            'approved' => (int) ($counts['approved'] ?? 0),
+            'pending' => (int) ($counts['pending'] ?? 0),
+            'rejected' => (int) ($counts['rejected'] ?? 0),
+        ];
     }
 
     public function deleteProductStudent(int $productId): bool
@@ -325,6 +350,72 @@ class ProductRepository extends BaseRepository
             )
             ->orderBy('products.approved_at', 'desc')
             ->get();
+    }
+
+    private function currentTeacherMajorId(): ?int
+    {
+        $idUser = $this->getCurrentUserId();
+
+        return User::query()
+            ->join('majors', 'users.major_id', '=', 'majors.major_id')
+            ->where('users.user_id', $idUser)
+            ->value('majors.major_id');
+    }
+
+    private function teacherProductBaseQuery()
+    {
+        return Product::query()
+            ->leftJoin('majors', 'products.major_id', '=', 'majors.major_id')
+            ->leftJoin('users', 'products.user_id', '=', 'users.user_id')
+            ->leftJoin('categories', 'products.cate_id', '=', 'categories.cate_id')
+            ->where('products.major_id', $this->currentTeacherMajorId());
+    }
+
+    public function teacherProductsByStatus(string $status, int $perPage = 6): LengthAwarePaginator
+    {
+        return $this->teacherProductBaseQuery()
+            ->where('products.status', $status)
+            ->select(
+                'products.product_id',
+                'products.title',
+                'products.description',
+                'products.thumbnail',
+                'products.github_link',
+                'products.demo_link',
+                'products.status',
+                'products.user_id',
+                'products.major_id',
+                'products.approved_by',
+                'products.approved_at',
+                'products.created_at',
+                'products.updated_at',
+                'majors.major_name',
+                'majors.major_code',
+                'categories.category_name',
+                'categories.description as category_description',
+                'users.name as student_fullname',
+                'users.email as student_email',
+                'users.class as student_class',
+            )
+            ->orderByDesc('products.approved_at')
+            ->orderByDesc('products.created_at')
+            ->paginate($perPage);
+    }
+
+    public function teacherStatusCounts(): array
+    {
+        $counts = Product::query()
+            ->where('major_id', $this->currentTeacherMajorId())
+            ->select('status', DB::raw('COUNT(*) as total'))
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        return [
+            'total' => (int) $counts->sum(),
+            'pending' => (int) ($counts['pending'] ?? 0),
+            'approved' => (int) ($counts['approved'] ?? 0),
+            'rejected' => (int) ($counts['rejected'] ?? 0),
+        ];
     }
 
     public function productViewIdTeacher(int $productId, ?object $user = null)
@@ -431,6 +522,86 @@ class ProductRepository extends BaseRepository
         return Product::where('product_id', $productId)
             ->where('major_id', $majorId)
             ->first();
+    }
+
+    public function getProductsVisitorPaginated(int $perPage = 9, ?int $majorId = null, string $sortBy = 'newest'): LengthAwarePaginator
+    {
+        $query = DB::table('products as p')
+            ->join('majors as m', 'p.major_id', '=', 'm.major_id')
+            ->leftJoin('product_statistics as s', 'p.product_id', '=', 's.product_id')
+            ->leftJoin('categories as c', 'p.cate_id', '=', 'c.cate_id')
+            ->leftJoin('users as u', 'p.user_id', '=', 'u.user_id')
+            ->leftJoin('users as gv', 'p.approved_by', '=', 'gv.user_id')
+            ->where('p.status', 'approved');
+
+        if ($majorId) {
+            $query->where('p.major_id', $majorId);
+        }
+
+        match ($sortBy) {
+            'most_viewed' => $query->orderByDesc(DB::raw('COALESCE(s.views, 0)'))->orderByDesc('p.created_at'),
+            'most_liked' => $query->orderByDesc(DB::raw('COALESCE(s.likes, 0)'))->orderByDesc('p.created_at'),
+            default => $query->orderByDesc('p.created_at'),
+        };
+
+        $paginator = $query
+            ->select(
+                'p.product_id as id',
+                'p.title',
+                'p.description',
+                'p.thumbnail',
+                'p.created_at',
+                'p.cate_id',
+                'm.major_id',
+                'm.major_name as major',
+                'u.name as student',
+                'u.user_id as studentId',
+                'gv.name as advisor',
+                'c.category_name as type',
+                's.views',
+                's.likes',
+                's.shares'
+            )
+            ->paginate($perPage);
+
+        $paginator->getCollection()->transform(fn($p) => [
+            'id' => $p->id,
+            'title' => $p->title,
+            'cate_id' => $p->cate_id,
+            'description' => $p->description,
+            'thumbnail' => $p->thumbnail,
+            'year' => $p->created_at ? date('Y', strtotime($p->created_at)) : null,
+            'student' => $p->student ?? 'Ẩn danh',
+            'studentId' => $p->studentId ?? null,
+            'major_id' => $p->major_id,
+            'major' => $p->major,
+            'type' => $p->type ?? null,
+            'views' => (int) ($p->views ?? 0),
+            'likes' => (int) ($p->likes ?? 0),
+            'shares' => (int) ($p->shares ?? 0),
+            'advisor' => $p->advisor ?? null,
+        ]);
+
+        return $paginator;
+    }
+
+    public function getVisitorStats(): array
+    {
+        $stats = DB::table('products as p')
+            ->leftJoin('product_statistics as s', 'p.product_id', '=', 's.product_id')
+            ->where('p.status', 'approved')
+            ->selectRaw('COUNT(DISTINCT p.product_id) as products_count')
+            ->selectRaw('COUNT(DISTINCT p.user_id) as students_count')
+            ->selectRaw('COUNT(DISTINCT p.approved_by) as advisors_count')
+            ->selectRaw('COALESCE(SUM(s.views), 0) as views_count')
+            ->first();
+
+        return [
+            'products_count' => (int) ($stats->products_count ?? 0),
+            'students_count' => (int) ($stats->students_count ?? 0),
+            'advisors_count' => (int) ($stats->advisors_count ?? 0),
+            'views_count' => (int) ($stats->views_count ?? 0),
+        ];
     }
 
     public function getProductsVisitor(): array

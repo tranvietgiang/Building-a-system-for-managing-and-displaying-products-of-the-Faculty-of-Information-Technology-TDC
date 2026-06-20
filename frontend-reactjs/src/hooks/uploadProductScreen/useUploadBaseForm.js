@@ -177,7 +177,20 @@ export default function useUploadBaseForm({
   );
 
   const removeImage = (id) => {
-    setImages((prev) => prev.filter((x) => x.id !== id));
+    setImages((prev) => {
+      const removedIndex = prev.findIndex((image) => image.id === id);
+      const nextImages = prev.filter((image) => image.id !== id);
+
+      setThumbnailIndex((currentIndex) => {
+        if (nextImages.length === 0) return 0;
+        if (removedIndex === -1) return Math.min(currentIndex, nextImages.length - 1);
+        if (removedIndex === currentIndex) return 0;
+        if (removedIndex < currentIndex) return currentIndex - 1;
+        return Math.min(currentIndex, nextImages.length - 1);
+      });
+
+      return nextImages;
+    });
   };
 
   const setAsThumbnail = (index) => {
@@ -321,15 +334,14 @@ export default function useUploadBaseForm({
         images.forEach((img, index) => {
           if (img.file) {
             payload.append("images[]", img.file);
+            payload.append(
+              "image_meta[]",
+              JSON.stringify({
+                name: img.name,
+                is_thumbnail: index === thumbnailIndex,
+              }),
+            );
           }
-
-          payload.append(
-            "image_meta[]",
-            JSON.stringify({
-              name: img.name,
-              is_thumbnail: index === thumbnailIndex,
-            }),
-          );
         });
 
         files.forEach((file) => {

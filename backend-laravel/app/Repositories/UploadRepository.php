@@ -38,16 +38,20 @@ class UploadRepository extends BaseRepository
     /**
      * Upload product và liên quan
      */
-    public function upload(array $data, array $uploadedImages, array $uploadedFiles, array $tags): Product
+    public function upload(array $data, array $uploadedImages, array $uploadedFiles, array $tags, int $thumbnailIndex = 0): Product
     {
-        return DB::transaction(function () use ($data, $uploadedImages, $uploadedFiles, $tags) {
+        return DB::transaction(function () use ($data, $uploadedImages, $uploadedFiles, $tags, $thumbnailIndex) {
 
-            $thumbnail = $uploadedImages[0] ?? null;
-            $otherImages = array_slice($uploadedImages, 1);
+            $thumbnail = $uploadedImages[$thumbnailIndex] ?? ($uploadedImages[0] ?? null);
+            $otherImages = array_values(array_filter(
+                $uploadedImages,
+                fn($imageUrl, $index) => $index !== $thumbnailIndex,
+                ARRAY_FILTER_USE_BOTH
+            ));
 
             $product = Product::create([
                 'title' => $data['title'],
-                'description' => $data['description'],
+                'description' => $data['description'] ?? null,
                 'thumbnail' => $thumbnail,
                 'status' => 'pending',
                 'user_id' => $this->getCurrentUserId(),

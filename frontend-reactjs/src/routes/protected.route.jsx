@@ -8,11 +8,11 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   if (loading) return <div>Loading...</div>;
 
   if (!user || !token) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/dang-nhap" replace />;
   }
 
   if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/dang-nhap" replace />;
   }
 
   return children;

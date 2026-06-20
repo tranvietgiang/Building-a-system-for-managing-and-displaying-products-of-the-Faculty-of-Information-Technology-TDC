@@ -30,7 +30,7 @@ export const useHandleSubmitRejection = (
         toast.success("Đã gửi phản hồi từ chối!", {
           autoClose: 1500,
           onClose: () => {
-            navigate("/nckh-teacher");
+            navigate("/giang-vien");
           },
         });
       }

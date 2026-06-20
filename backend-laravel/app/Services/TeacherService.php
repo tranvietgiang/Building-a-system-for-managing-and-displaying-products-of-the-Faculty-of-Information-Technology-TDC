@@ -57,6 +57,14 @@ class TeacherService extends BaseRepository
         ]);
     }
 
+    public function showTeacherDataPaginated(string $status = 'pending', int $perPage = 6): array
+    {
+        return [
+            'products' => $this->product_repo->teacherProductsByStatus($status, $perPage),
+            'counts' => $this->product_repo->teacherStatusCounts(),
+        ];
+    }
+
     public function updateStatus($product_id, $status, $feedback = null, array $moderationContext = []): array
     {
         $productId = (int) $product_id;

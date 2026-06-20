@@ -154,7 +154,7 @@ const TeacherProductDetailScreen = () => {
       // console.log("FULL DATA", data);
 
       if (data?.status == true) {
-        navigate("/nckh-compare", {
+        navigate("/so-sanh-ai", {
           state: {
             currentProduct: data?.current_product || null,
             matches: data?.matches || [],

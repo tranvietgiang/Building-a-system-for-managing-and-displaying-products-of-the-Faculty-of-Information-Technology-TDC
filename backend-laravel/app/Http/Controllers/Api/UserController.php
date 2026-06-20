@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UserRequest;
+use App\Models\Product;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
@@ -71,25 +73,39 @@ class UserController extends Controller
     }
 
     /**
-     * Get user statistics (for students)
+     * Get user product statistics.
      */
     public function statistics(Request $request)
     {
         $user = $request->user();
 
-        // Nếu không phải student thì return error
-        if ($user->role !== 'student') {
+        if (!in_array($user->role, ['student', 'teacher'], true)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Chỉ sinh viên có thể xem thống kê!',
+                'message' => 'Khong co thong ke san pham cho vai tro nay.',
             ], 403);
         }
 
+        $query = Product::query();
+
+        if ($user->role === 'student') {
+            $query->where('user_id', $user->user_id);
+        }
+
+        if ($user->role === 'teacher') {
+            $query->where('major_id', $user->major_id);
+        }
+
+        $counts = (clone $query)
+            ->select('status', DB::raw('COUNT(*) as total'))
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
         $stats = [
-            'total_products' => $user->products()->count(),
-            'approved_products' => $user->products()->where('status', 'approved')->count(),
-            'pending_products' => $user->products()->where('status', 'pending')->count(),
-            'rejected_products' => $user->products()->where('status', 'rejected')->count(),
+            'total_products' => (int) $counts->sum(),
+            'approved_products' => (int) ($counts['approved'] ?? 0),
+            'pending_products' => (int) ($counts['pending'] ?? 0),
+            'rejected_products' => (int) ($counts['rejected'] ?? 0),
         ];
 
         return response()->json([

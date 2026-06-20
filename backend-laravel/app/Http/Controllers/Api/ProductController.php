@@ -25,7 +25,7 @@ class ProductController extends Controller
 
         if (!$result) {
             return response()->json([
-                'message' => 'Không tìm thấy sản phẩm cần tìm!',
+                'message' => 'KhÃ´ng tÃ¬m tháº¥y sáº£n pháº©m cáº§n tÃ¬m!',
                 'product_result' => false,
             ], 404);
         }
@@ -37,20 +37,28 @@ class ProductController extends Controller
 
     public function productAll(Request $request)
     {
+        $request->validate([
+            'status' => ['nullable', 'in:approved,pending,rejected'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
+        ]);
+
         $perPage = (int) $request->query('per_page', 50);
         $perPage = max(1, min($perPage, 100));
+        $status = $request->query('status');
 
-        $result = $this->productService->getAllProductsByUserId($perPage);
-        return response()->json(
-            $result
-        );
+        $result = $this->productService->getAllProductsByUserId($perPage, $status);
+
+        return response()->json([
+            'data' => $result,
+            'stats' => $this->productService->getCurrentUserProductCounts(),
+        ]);
     }
 
     public function searchProducts(Request $request)
     {
         if (!$this->settings->enabled(SystemSettingService::PRODUCT_SEARCH)) {
             return response()->json([
-                'message' => 'Tính năng tìm kiếm sản phẩm hiện đang bị quản trị viên tắt.',
+                'message' => 'TÃ­nh nÄƒng tÃ¬m kiáº¿m sáº£n pháº©m hiá»‡n Ä‘ang bá»‹ quáº£n trá»‹ viÃªn táº¯t.',
                 'count' => 0,
                 'products' => [],
                 'data' => [
@@ -70,23 +78,24 @@ class ProductController extends Controller
             'status' => ['nullable', 'in:approved,pending,rejected'],
             'major_id' => ['nullable', 'integer'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'sort_by' => ['nullable', 'in:newest,most_viewed,most_liked'],
         ], [
-            'q.string' => 'Nội dung tìm kiếm không hợp lệ.',
-            'q.max' => 'Nội dung tìm kiếm không được vượt quá 300 ký tự.',
-            'status.in' => 'Trạng thái tìm kiếm không hợp lệ.',
-            'major_id.integer' => 'Ngành học không hợp lệ.',
-            'per_page.integer' => 'Số lượng sản phẩm mỗi trang không hợp lệ.',
-            'per_page.min' => 'Số lượng sản phẩm mỗi trang phải lớn hơn 0.',
-            'per_page.max' => 'Số lượng sản phẩm mỗi trang không được vượt quá 100.',
+            'q.string' => 'Ná»™i dung tÃ¬m kiáº¿m khÃ´ng há»£p lá»‡.',
+            'q.max' => 'Ná»™i dung tÃ¬m kiáº¿m khÃ´ng Ä‘Æ°á»£c vÆ°á»£t quÃ¡ 300 kÃ½ tá»±.',
+            'status.in' => 'Tráº¡ng thÃ¡i tÃ¬m kiáº¿m khÃ´ng há»£p lá»‡.',
+            'major_id.integer' => 'NgÃ nh há»c khÃ´ng há»£p lá»‡.',
+            'per_page.integer' => 'Sá»‘ lÆ°á»£ng sáº£n pháº©m má»—i trang khÃ´ng há»£p lá»‡.',
+            'per_page.min' => 'Sá»‘ lÆ°á»£ng sáº£n pháº©m má»—i trang pháº£i lá»›n hÆ¡n 0.',
+            'per_page.max' => 'Sá»‘ lÆ°á»£ng sáº£n pháº©m má»—i trang khÃ´ng Ä‘Æ°á»£c vÆ°á»£t quÃ¡ 100.',
         ]);
 
         $keyword = trim((string) $request->query('q', ''));
 
         if ($this->containsUnsafeInput($keyword)) {
             return response()->json([
-                'message' => 'Nội dung tìm kiếm chứa ký tự không hợp lệ.',
+                'message' => 'Ná»™i dung tÃ¬m kiáº¿m chá»©a kÃ½ tá»± khÃ´ng há»£p lá»‡.',
                 'errors' => [
-                    'q' => ['Nội dung tìm kiếm chứa ký tự không hợp lệ.'],
+                    'q' => ['Ná»™i dung tÃ¬m kiáº¿m chá»©a kÃ½ tá»± khÃ´ng há»£p lá»‡.'],
                 ],
             ], 422);
         }
@@ -113,7 +122,7 @@ class ProductController extends Controller
                     $searchKeyword = '';
                 } else {
                     return response()->json([
-                        'message' => 'Tìm kiếm thường thành công.',
+                        'message' => 'TÃ¬m kiáº¿m thÆ°á»ng thÃ nh cÃ´ng.',
                         'query' => $keyword,
                         'search_keyword' => $searchKeyword,
                         'major_code' => $detectedMajorCode,
@@ -152,13 +161,23 @@ class ProductController extends Controller
             $query->where('products.status', $status);
         }
 
-        if ($role === 'admin' && $majorId) {
+        if ($majorId) {
             $query->where('products.major_id', $majorId);
         }
+
+        $sortBy = $request->query('sort_by', 'newest');
 
         if ($searchKeyword !== '' && !empty($scoutIds)) {
             $placeholders = implode(',', array_fill(0, count($scoutIds), '?'));
             $query->orderByRaw("FIELD(products.product_id, {$placeholders})", $scoutIds);
+        } elseif ($sortBy === 'most_viewed') {
+            $query->orderByDesc(DB::raw('COALESCE(product_statistics.views, 0)'))
+                ->orderByDesc('products.submitted_at')
+                ->orderByDesc('products.created_at');
+        } elseif ($sortBy === 'most_liked') {
+            $query->orderByDesc(DB::raw('COALESCE(product_statistics.likes, 0)'))
+                ->orderByDesc('products.submitted_at')
+                ->orderByDesc('products.created_at');
         } else {
             $query->orderByDesc('products.submitted_at')
                 ->orderByDesc('products.created_at');
@@ -167,12 +186,13 @@ class ProductController extends Controller
         $paginator = $query->paginate($perPage);
 
         return response()->json([
-            'message' => 'Tìm kiếm thường thành công.',
+            'message' => 'TÃ¬m kiáº¿m thÆ°á»ng thÃ nh cÃ´ng.',
             'query' => $keyword,
             'search_keyword' => $searchKeyword,
             'major_code' => $detectedMajorCode,
             'mode' => 'scout',
             'count' => $paginator->total(),
+            'stats' => $this->productService->getVisitorStats(),
             'products' => $paginator->items(),
             'data' => $paginator,
         ]);
@@ -306,7 +326,7 @@ class ProductController extends Controller
     {
         $value = mb_strtolower($value, 'UTF-8');
         $value = str_replace(
-            ['à', 'á', 'ạ', 'ả', 'ã', 'â', 'ầ', 'ấ', 'ậ', 'ẩ', 'ẫ', 'ă', 'ằ', 'ắ', 'ặ', 'ẳ', 'ẵ', 'è', 'é', 'ẹ', 'ẻ', 'ẽ', 'ê', 'ề', 'ế', 'ệ', 'ể', 'ễ', 'ì', 'í', 'ị', 'ỉ', 'ĩ', 'ò', 'ó', 'ọ', 'ỏ', 'õ', 'ô', 'ồ', 'ố', 'ộ', 'ổ', 'ỗ', 'ơ', 'ờ', 'ớ', 'ợ', 'ở', 'ỡ', 'ù', 'ú', 'ụ', 'ủ', 'ũ', 'ư', 'ừ', 'ứ', 'ự', 'ử', 'ữ', 'ỳ', 'ý', 'ỵ', 'ỷ', 'ỹ', 'đ'],
+            ['Ã ', 'Ã¡', 'áº¡', 'áº£', 'Ã£', 'Ã¢', 'áº§', 'áº¥', 'áº­', 'áº©', 'áº«', 'Äƒ', 'áº±', 'áº¯', 'áº·', 'áº³', 'áºµ', 'Ã¨', 'Ã©', 'áº¹', 'áº»', 'áº½', 'Ãª', 'á»', 'áº¿', 'á»‡', 'á»ƒ', 'á»…', 'Ã¬', 'Ã­', 'á»‹', 'á»‰', 'Ä©', 'Ã²', 'Ã³', 'á»', 'á»', 'Ãµ', 'Ã´', 'á»“', 'á»‘', 'á»™', 'á»•', 'á»—', 'Æ¡', 'á»', 'á»›', 'á»£', 'á»Ÿ', 'á»¡', 'Ã¹', 'Ãº', 'á»¥', 'á»§', 'Å©', 'Æ°', 'á»«', 'á»©', 'á»±', 'á»­', 'á»¯', 'á»³', 'Ã½', 'á»µ', 'á»·', 'á»¹', 'Ä‘'],
             ['a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'e', 'e', 'e', 'e', 'e', 'e', 'e', 'e', 'e', 'e', 'e', 'i', 'i', 'i', 'i', 'i', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'y', 'y', 'y', 'y', 'y', 'd'],
             $value
         );
@@ -329,7 +349,7 @@ class ProductController extends Controller
 
         if (!$result) {
             return response()->json([
-                'message' => 'Không tìm thấy sản phẩm hoặc bạn không có quyền xem sản phẩm này.',
+                'message' => 'KhÃ´ng tÃ¬m tháº¥y sáº£n pháº©m hoáº·c báº¡n khÃ´ng cÃ³ quyá»n xem sáº£n pháº©m nÃ y.',
                 'product_result' => false,
             ], 404);
         }
@@ -351,17 +371,33 @@ class ProductController extends Controller
         }
 
         return response()->json([
-            'message' => 'Xóa sản phẩm thành công',
+            'message' => 'XÃ³a sáº£n pháº©m thÃ nh cÃ´ng',
             'deleted' => true,
         ]);
     }
 
-    public function getProductsVisitor()
+    public function getProductsVisitor(Request $request)
     {
-        $result = $this->productService->getProductsVisitor();
-        return response()->json(
-            $result
-        );
+        $request->validate([
+            'major_id' => ['nullable', 'integer'],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
+            'sort_by' => ['nullable', 'in:newest,most_viewed,most_liked'],
+        ]);
+
+        $perPage = (int) $request->query('per_page', 9);
+        $perPage = max(1, min($perPage, 100));
+        $majorId = $request->filled('major_id') ? (int) $request->query('major_id') : null;
+        $sortBy = $request->query('sort_by', 'newest');
+
+        $paginator = $this->productService->getProductsVisitor($perPage, $majorId, $sortBy);
+
+        return response()->json([
+            'message' => 'Tải danh sách sản phẩm thành công.',
+            'count' => $paginator->total(),
+            'products' => $paginator->items(),
+            'data' => $paginator,
+            'stats' => $this->productService->getVisitorStats(),
+        ]);
     }
 
     public function getVisitorProductById($id)

@@ -102,7 +102,7 @@ export const LoginUI = ({
             {/* Logo */}
             <div className="mb-12 md:mb-16">
               <Link
-                to="/nckh-visitor"
+                to="/khach-tham-quan"
                 className="group inline-flex items-center gap-3"
               >
                 <div className="bg-white/10 backdrop-blur-sm w-12 h-12 rounded-xl flex items-center justify-center border border-white/20 group-hover:scale-110 transition-transform">
@@ -337,7 +337,7 @@ export const LoginUI = ({
                 </label>
                 <button
                   type="button"
-                  onClick={() => navigate("/forgot")}
+                  onClick={() => navigate("/quen-mat-khau")}
                   className="text-sm text-[#C8102E] hover:underline"
                 >
                   Quên mật khẩu?

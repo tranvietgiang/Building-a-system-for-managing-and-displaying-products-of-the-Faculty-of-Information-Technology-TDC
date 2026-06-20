@@ -21,17 +21,26 @@ const roles = [
 
 const UsersScreen = () => {
   const [users, setUsers] = useState([]);
+  const [paginator, setPaginator] = useState(null);
   const [majors, setMajors] = useState([]);
   const [filters, setFilters] = useState({ q: "", role: "", major_id: "" });
+  const [page, setPage] = useState(1);
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(true);
+  const perPage = 12;
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (nextPage = page) => {
     setLoading(true);
     try {
-      const res = await adminApi.getUsers({ ...filters, per_page: 50 });
-      setUsers(res.data?.data || []);
+      const res = await adminApi.getUsers({
+        ...filters,
+        page: nextPage,
+        per_page: perPage,
+      });
+      const nextPaginator = res.data?.data || null;
+      setPaginator(nextPaginator);
+      setUsers(nextPaginator?.data || []);
     } finally {
       setLoading(false);
     }
@@ -43,11 +52,12 @@ const UsersScreen = () => {
 
   useEffect(() => {
     fetchUsers();
-  }, [filters.role, filters.major_id]);
+  }, [filters.role, filters.major_id, page]);
 
   const handleSearch = (event) => {
     event.preventDefault();
-    fetchUsers();
+    setPage(1);
+    fetchUsers(1);
   };
 
   const submitUser = async (event) => {
@@ -105,7 +115,10 @@ const UsersScreen = () => {
           </label>
           <select
             value={filters.role}
-            onChange={(event) => setFilters((prev) => ({ ...prev, role: event.target.value }))}
+            onChange={(event) => {
+              setPage(1);
+              setFilters((prev) => ({ ...prev, role: event.target.value }));
+            }}
             className="h-11 rounded-lg border border-slate-200 px-3 outline-none focus:border-emerald-500"
           >
             {roles.map((role) => (
@@ -114,7 +127,13 @@ const UsersScreen = () => {
           </select>
           <select
             value={filters.major_id}
-            onChange={(event) => setFilters((prev) => ({ ...prev, major_id: event.target.value }))}
+            onChange={(event) => {
+              setPage(1);
+              setFilters((prev) => ({
+                ...prev,
+                major_id: event.target.value,
+              }));
+            }}
             className="h-11 rounded-lg border border-slate-200 px-3 outline-none focus:border-emerald-500"
           >
             <option value="">Tất cả chuyên ngành</option>
@@ -250,6 +269,36 @@ const UsersScreen = () => {
               </tbody>
             </table>
           </div>
+          {paginator && paginator.last_page > 1 && (
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 px-4 py-3 text-sm text-slate-600">
+              <span>
+                Trang {paginator.current_page} / {paginator.last_page} -
+                Tong {paginator.total} nguoi dung
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={page <= 1 || loading}
+                  className="h-9 rounded-lg border border-slate-200 px-3 font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+                >
+                  Truoc
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setPage((prev) =>
+                      Math.min(prev + 1, paginator.last_page || prev),
+                    )
+                  }
+                  disabled={page >= paginator.last_page || loading}
+                  className="h-9 rounded-lg border border-slate-200 px-3 font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+                >
+                  Sau
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

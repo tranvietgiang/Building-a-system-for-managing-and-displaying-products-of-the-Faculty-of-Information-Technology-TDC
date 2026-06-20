@@ -19,7 +19,7 @@ return new class extends Migration
 
             $table->text('description')->nullable();
 
-            $table->string('thumbnail')->nullable();
+            $table->string('thumbnail');
 
             $table->enum('status', ['pending', 'approved', 'rejected'])
                 ->default('pending');

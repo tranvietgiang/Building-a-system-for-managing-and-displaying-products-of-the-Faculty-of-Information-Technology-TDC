@@ -23,7 +23,7 @@ class userSeeder extends Seeder
             [
                 'user_id' => '23211TT2984',
                 'name' => 'Nguyễn Văn An',
-                'email' => 'an2984@student.tdc.edu.vn',
+                'email' => 'wedgiang@gmail.com',
                 'password' => Hash::make('12345678'),
                 'role' => 'student',
                 'major_id' => 1,

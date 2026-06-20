@@ -158,6 +158,7 @@ const UploadProductForm_AI = ({
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
                   Mô tả bài toán, dữ liệu, phương pháp
+                  {" "}<span className="ml-1 text-xs font-normal text-gray-400">(có thể bỏ qua)</span>
                 </label>
                 <textarea
                   name="description"
@@ -475,7 +476,7 @@ const UploadProductForm_AI = ({
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
                   File đính kèm (notebook, model, dataset mẫu)
-                </label>
+                 {" "}<span className="ml-1 text-xs font-normal text-gray-400">(có thể bỏ qua)</span></label>
                 <div className="relative">
                   <input
                     type="file"
@@ -593,7 +594,7 @@ const UploadProductForm_AI = ({
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
                   Công nghệ / Kỹ thuật
-                </label>
+                 {" "}<span className="ml-1 text-xs font-normal text-gray-400">(có thể bỏ qua)</span></label>
                 <input
                   type="text"
                   value={tagInput}
@@ -637,7 +638,7 @@ const UploadProductForm_AI = ({
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
                   Ngôn ngữ lập trình
-                </label>
+                 {" "}<span className="ml-1 text-xs font-normal text-gray-400">(có thể bỏ qua)</span></label>
                 <input
                   type="text"
                   name="language"
@@ -681,7 +682,7 @@ const UploadProductForm_AI = ({
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
                   Độ chính xác (Accuracy %)
-                </label>
+                 {" "}<span className="ml-1 text-xs font-normal text-gray-400">(có thể bỏ qua)</span></label>
                 <input
                   type="number"
                   name="accuracy_score"
@@ -724,7 +725,7 @@ const UploadProductForm_AI = ({
                 <div>
                   <label className="mb-2 block text-sm font-semibold text-gray-700">
                     Video demo / Bài báo
-                  </label>
+                   {" "}<span className="ml-1 text-xs font-normal text-gray-400">(có thể bỏ qua)</span></label>
                   <input
                     type="url"
                     name="demo_link"
@@ -749,7 +750,7 @@ const UploadProductForm_AI = ({
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
                   GitHub (Mã nguồn)
-                </label>
+                 {" "}<span className="ml-1 text-xs font-normal text-gray-400">(có thể bỏ qua)</span></label>
                 <input
                   type="url"
                   name="github_link"

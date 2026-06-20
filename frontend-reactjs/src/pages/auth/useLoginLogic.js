@@ -54,11 +54,11 @@ export const useLoginLogic = () => {
 
       // Điều hướng theo role thực tế
       if (actualRole === ROLE.STUDENT) {
-        window.location.href = "/nckh-student";
+        window.location.href = "/sinh-vien";
       } else if (actualRole === ROLE.TEACHER) {
-        window.location.href = "/nckh-teacher";
+        window.location.href = "/giang-vien";
       } else if (actualRole === ROLE.ADMIN) {
-        window.location.href = "/nckh-admin";
+        window.location.href = "/quan-tri";
       }
     } catch (error) {
       toast.dismiss();

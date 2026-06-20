@@ -19,7 +19,7 @@ function UserDropdown() {
     try {
       setLoadingLogout(true);
       await logout();
-      navigate("/login", { replace: true });
+      navigate("/dang-nhap", { replace: true });
     } catch (error) {
       console.error(error);
     } finally {
@@ -31,7 +31,7 @@ function UserDropdown() {
 
   const handleProfile = () => {
     setShowDropdown(false);
-    goToProfile("/nckh-profile");
+    goToProfile("/ho-so");
   };
 
   const handleSetting = () => {
@@ -41,7 +41,7 @@ function UserDropdown() {
 
   const handleViewAllProducts = () => {
     setShowDropdown(false);
-    navigate("/nckh-visitor");
+    navigate("/khach-tham-quan");
   };
 
   return (
