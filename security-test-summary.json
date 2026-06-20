@@ -1,0 +1,135 @@
+﻿[
+    {
+        "Name":  "visitor-products-baseline",
+        "Count":  1,
+        "Statuses":  "200:1",
+        "SqlLeak":  0,
+        "ScriptReflected":  0
+    },
+    {
+        "Name":  "login-valid-student",
+        "Count":  1,
+        "Statuses":  "200:1",
+        "SqlLeak":  0,
+        "ScriptReflected":  0
+    },
+    {
+        "Name":  "login-valid-teacher",
+        "Count":  1,
+        "Statuses":  "200:1",
+        "SqlLeak":  0,
+        "ScriptReflected":  0
+    },
+    {
+        "Name":  "login-valid-admin",
+        "Count":  1,
+        "Statuses":  "200:1",
+        "SqlLeak":  0,
+        "ScriptReflected":  0
+    },
+    {
+        "Name":  "login-injection-username",
+        "Count":  10,
+        "Statuses":  "401:1, 429:9",
+        "SqlLeak":  0,
+        "ScriptReflected":  0
+    },
+    {
+        "Name":  "login-injection-password",
+        "Count":  10,
+        "Statuses":  "401:1, 429:9",
+        "SqlLeak":  0,
+        "ScriptReflected":  0
+    },
+    {
+        "Name":  "visitor-product-search",
+        "Count":  10,
+        "Statuses":  "200:10",
+        "SqlLeak":  0,
+        "ScriptReflected":  5
+    },
+    {
+        "Name":  "chatbot",
+        "Count":  10,
+        "Statuses":  "200:10",
+        "SqlLeak":  0,
+        "ScriptReflected":  0
+    },
+    {
+        "Name":  "upload-validation",
+        "Count":  10,
+        "Statuses":  "422:10",
+        "SqlLeak":  0,
+        "ScriptReflected":  0
+    },
+    {
+        "Name":  "teacher-reject-invalid-product",
+        "Count":  10,
+        "Statuses":  "405:10",
+        "SqlLeak":  10,
+        "ScriptReflected":  0
+    },
+    {
+        "Name":  "admin-create-user-xss-name",
+        "Count":  1,
+        "Statuses":  "201:1",
+        "SqlLeak":  0,
+        "ScriptReflected":  null
+    },
+    {
+        "Name":  "admin-list-users-after-xss-create",
+        "Count":  1,
+        "Statuses":  "200:1",
+        "SqlLeak":  0,
+        "ScriptReflected":  null
+    },
+    {
+        "Name":  "admin-delete-temp-user",
+        "Count":  1,
+        "Statuses":  "200:1",
+        "SqlLeak":  0,
+        "ScriptReflected":  0
+    },
+    {
+        "Name":  "admin-create-major-xss-name",
+        "Count":  1,
+        "Statuses":  "201:1",
+        "SqlLeak":  0,
+        "ScriptReflected":  null
+    },
+    {
+        "Name":  "admin-list-majors-after-xss-create",
+        "Count":  1,
+        "Statuses":  "200:1",
+        "SqlLeak":  0,
+        "ScriptReflected":  null
+    },
+    {
+        "Name":  "admin-delete-temp-major",
+        "Count":  1,
+        "Statuses":  "200:1",
+        "SqlLeak":  0,
+        "ScriptReflected":  0
+    },
+    {
+        "Name":  "admin-users-search",
+        "Count":  10,
+        "Statuses":  "200:10",
+        "SqlLeak":  0,
+        "ScriptReflected":  0
+    },
+    {
+        "Name":  "admin-products-search",
+        "Count":  10,
+        "Statuses":  "200:10",
+        "SqlLeak":  0,
+        "ScriptReflected":  0
+    },
+    {
+        "Name":  "visitor-products-after-tests",
+        "Count":  1,
+        "Statuses":  "200:1",
+        "SqlLeak":  0,
+        "ScriptReflected":  0
+    }
+]

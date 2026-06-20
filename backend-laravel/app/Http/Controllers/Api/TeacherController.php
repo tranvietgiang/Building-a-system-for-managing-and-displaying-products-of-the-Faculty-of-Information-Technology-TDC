@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\RejectProductRequest;
 use App\Services\TeacherService;
 use Illuminate\Http\Request;
 
@@ -76,14 +77,26 @@ class TeacherController extends Controller
         }
     }
 
-    public function teacherReject(Request $request)
+    public function teacherReject(RejectProductRequest $request)
     {
         $status = 'rejected';
         try {
-            $teacher_reject = $this->teacherService->updateStatus($request->product_id, $status, $request->feedback);
+            $validated = $request->validated();
+            $teacher_reject = $this->teacherService->updateStatus(
+                $validated['product_id'],
+                $status,
+                $validated['feedback']
+            );
+
+            $statusCode = 200;
+            if (!($teacher_reject['result'] ?? false)) {
+                $message = (string) ($teacher_reject['message'] ?? '');
+                $statusCode = str_contains($message, 'không tồn tại') ? 404 : 422;
+            }
 
             return response()->json(
-                $teacher_reject
+                $teacher_reject,
+                $statusCode
             );
         } catch (\Exception $e) {
             return response()->json([

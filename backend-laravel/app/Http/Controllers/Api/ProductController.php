@@ -81,6 +81,16 @@ class ProductController extends Controller
         ]);
 
         $keyword = trim((string) $request->query('q', ''));
+
+        if ($this->containsUnsafeInput($keyword)) {
+            return response()->json([
+                'message' => 'Nội dung tìm kiếm chứa ký tự không hợp lệ.',
+                'errors' => [
+                    'q' => ['Nội dung tìm kiếm chứa ký tự không hợp lệ.'],
+                ],
+            ], 422);
+        }
+
         $perPage = (int) $request->query('per_page', 12);
         $perPage = max(1, min($perPage, 100));
         $user = Auth::guard('sanctum')->user() ?? $request->user();
@@ -303,6 +313,11 @@ class ProductController extends Controller
         $value = preg_replace('/[^a-z0-9]+/u', ' ', $value);
 
         return trim(preg_replace('/\s+/', ' ', $value));
+    }
+
+    private function containsUnsafeInput(string $value): bool
+    {
+        return (bool) preg_match('/<[^>]*>|javascript:/i', $value);
     }
 
     public function productViewIdTeacher(ProductViewRequest $p_rq)

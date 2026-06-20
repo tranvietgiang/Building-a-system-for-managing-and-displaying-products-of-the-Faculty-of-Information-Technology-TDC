@@ -293,6 +293,10 @@ class AdminController extends Controller
             'avatar' => ['nullable', 'string', 'max:500'],
         ]);
 
+        if ($response = $this->rejectUnsafeInput($validated, ['user_id', 'name', 'class', 'avatar'])) {
+            return $response;
+        }
+
         $validated['password'] = Hash::make($validated['password']);
 
         $user = User::create($validated);
@@ -317,6 +321,10 @@ class AdminController extends Controller
             'class' => ['nullable', 'string', 'max:255'],
             'avatar' => ['nullable', 'string', 'max:500'],
         ]);
+
+        if ($response = $this->rejectUnsafeInput($validated, ['name', 'class', 'avatar'])) {
+            return $response;
+        }
 
         if (!empty($validated['password'])) {
             $validated['password'] = Hash::make($validated['password']);
@@ -585,6 +593,10 @@ class AdminController extends Controller
             'description' => ['nullable', 'string'],
         ]);
 
+        if ($response = $this->rejectUnsafeInput($validated, ['major_name', 'major_code', 'description'])) {
+            return $response;
+        }
+
         $major = Major::create($validated);
 
         return response()->json([
@@ -603,6 +615,10 @@ class AdminController extends Controller
             'major_code' => ['required', 'string', 'max:50', Rule::unique('majors', 'major_code')->ignore($major->major_id, 'major_id')],
             'description' => ['nullable', 'string'],
         ]);
+
+        if ($response = $this->rejectUnsafeInput($validated, ['major_name', 'major_code', 'description'])) {
+            return $response;
+        }
 
         $major->update($validated);
 
@@ -639,5 +655,23 @@ class AdminController extends Controller
             'success' => true,
             'data' => Category::orderBy('category_name')->get(),
         ]);
+    }
+
+    private function rejectUnsafeInput(array $data, array $fields)
+    {
+        foreach ($fields as $field) {
+            $value = $data[$field] ?? null;
+
+            if (is_string($value) && preg_match('/<[^>]*>|javascript:/i', $value)) {
+                return response()->json([
+                    'message' => 'Dữ liệu nhập chứa ký tự không hợp lệ.',
+                    'errors' => [
+                        $field => ['Dữ liệu nhập chứa ký tự không hợp lệ.'],
+                    ],
+                ], 422);
+            }
+        }
+
+        return null;
     }
 }

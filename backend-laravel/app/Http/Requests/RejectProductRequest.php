@@ -15,6 +15,7 @@ class RejectProductRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'product_id' => 'required|integer',
             'feedback' => 'required|string|min:5|max:1000',
         ];
     }
@@ -26,6 +27,8 @@ class RejectProductRequest extends FormRequest
             'feedback.string' => 'Lý do từ chối phải là chuỗi.',
             'feedback.min' => 'Lý do quá ngắn.',
             'feedback.max' => 'Lý do quá dài.',
+            'product_id.required' => 'Thiếu thông tin sản phẩm.',
+            'product_id.integer' => 'Sản phẩm không hợp lệ.',
         ];
     }
 }

@@ -1,0 +1,730 @@
+﻿[
+    {
+        "Name":  "visitor-products-baseline",
+        "Status":  200,
+        "Payload":  "",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "[{\"id\":199,\"title\":\"B\\u1ed9 nh\\u1eadn di\\u1ec7n th\\u01b0\\u01a1ng hi\\u1ec7u salon t\\u00f3c v49\",\"cate_id\":2,\"description\":\"\\u0110\\u1ec1 t\\u00e0i thu\\u1ed9c ng\\u00e0nh Thi\\u1ebft k\\u1ebf \\u0111\\u1ed3 h\\u1ecda.\",\"thumbnail\":\"https:\\/\\/images.pexels.com\\/photos\\/2"
+    },
+    {
+        "Name":  "login-valid-student",
+        "Status":  200,
+        "Payload":  "",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"success\":true,\"user\":{\"user_id\":\"23211TT2984\",\"name\":\"Nguy\\u1ec5n V\\u0103n An\",\"email\":\"an2984@student.tdc.edu.vn\",\"email_verified_at\":null,\"class\":null,\"role\":\"student\",\"major_id\":1,\"avatar\":null,\"created_at\":\"2026-06-15T09:41:02.000000Z\",\"updated_at\":\"2026"
+    },
+    {
+        "Name":  "login-valid-teacher",
+        "Status":  200,
+        "Payload":  "",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"success\":true,\"user\":{\"user_id\":\"GV001\",\"name\":\"Tr\\u1ea7n V\\u0103n B\",\"email\":\"teacher@test.com\",\"email_verified_at\":null,\"class\":null,\"role\":\"teacher\",\"major_id\":1,\"avatar\":null,\"created_at\":\"2026-06-15T09:41:05.000000Z\",\"updated_at\":\"2026-06-15T09:41:05.00"
+    },
+    {
+        "Name":  "login-valid-admin",
+        "Status":  200,
+        "Payload":  "",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"success\":true,\"user\":{\"user_id\":\"ADMIN02\",\"name\":\"Admin2\",\"email\":\"admin2@test.com\",\"email_verified_at\":null,\"class\":null,\"role\":\"admin\",\"major_id\":null,\"avatar\":null,\"created_at\":\"2026-06-15T09:41:11.000000Z\",\"updated_at\":\"2026-06-15T09:41:11.000000Z\"},\"tok"
+    },
+    {
+        "Name":  "login-injection-username",
+        "Status":  401,
+        "Payload":  "\u003cscript\u003ealert(\u0027XSS\u0027)\u003c/script\u003e",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"success\":false,\"message\":\"Sai t\\u00e0i kho\\u1ea3n ho\\u1eb7c m\\u1eadt kh\\u1ea9u!\",\"status\":401}  "
+    },
+    {
+        "Name":  "login-injection-password",
+        "Status":  401,
+        "Payload":  "\u003cscript\u003ealert(\u0027XSS\u0027)\u003c/script\u003e",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"success\":false,\"message\":\"Sai t\\u00e0i kho\\u1ea3n ho\\u1eb7c m\\u1eadt kh\\u1ea9u!\",\"status\":401}  "
+    },
+    {
+        "Name":  "visitor-product-search",
+        "Status":  200,
+        "Payload":  "\u003cscript\u003ealert(\u0027XSS\u0027)\u003c/script\u003e",
+        "HasSqlState":  false,
+        "ContainsScript":  true,
+        "Body":  "{\"message\":\"T\\u00ecm ki\\u1ebfm th\\u01b0\\u1eddng th\\u00e0nh c\\u00f4ng.\",\"query\":\"\u003cscript\u003ealert(\u0027XSS\u0027)\u003c\\/script\u003e\",\"search_keyword\":\"\u003cscript\u003ealert(\u0027XSS\u0027)\u003c\\/script\u003e\",\"major_code\":null,\"mode\":\"scout\",\"count\":0,\"products\":[],\"data\":{\"data\":[],\"current_page\":1,\"from\""
+    },
+    {
+        "Name":  "chatbot",
+        "Status":  200,
+        "Payload":  "\u003cscript\u003ealert(\u0027XSS\u0027)\u003c/script\u003e",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"reply\":\"Xin l\\u1ed7i, m\\u00ecnh ch\\u1ec9 h\\u1ed7 tr\\u1ee3 c\\u00e1c c\\u00e2u h\\u1ecfi li\\u00ean quan \\u0111\\u1ebfn h\\u1ec7 th\\u1ed1ng qu\\u1ea3n l\\u00fd \\u0111\\u1ed3 \\u00e1n. B\\u1ea1n c\\u00f3 th\\u1ec3 h\\u1ecfi v\\u1ec1 s\\u1ea3n ph\\u1ea9m, ng\\u00e0nh h\\u1ecdc, d"
+    },
+    {
+        "Name":  "upload-validation",
+        "Status":  422,
+        "Payload":  "\u003cscript\u003ealert(\u0027XSS\u0027)\u003c/script\u003e",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"message\":\"C\\u1ea7n \\u00edt nh\\u1ea5t 1 \\u1ea3nh (and 2 more errors)\",\"errors\":{\"images\":[\"C\\u1ea7n \\u00edt nh\\u1ea5t 1 \\u1ea3nh\"],\"github_link\":[\"Link GitHub kh\\u00f4ng h\\u1ee3p l\\u1ec7\"],\"demo_link\":[\"Link demo kh\\u00f4ng h\\u1ee3p l\\u1ec7\"]}}  "
+    },
+    {
+        "Name":  "teacher-reject-invalid-product",
+        "Status":  405,
+        "Payload":  "\u003cscript\u003ealert(\u0027XSS\u0027)\u003c/script\u003e",
+        "HasSqlState":  true,
+        "ContainsScript":  false,
+        "Body":  "{     \"message\": \"The POST method is not supported for route api/v1/product/reject. Supported methods: GET, HEAD.\",     \"exception\": \"Symfony\\\\Component\\\\HttpKernel\\\\Exception\\\\MethodNotAllowedHttpException\",     \"file\": \"/var/www/html/vendor/laravel/framework"
+    },
+    {
+        "Name":  "login-injection-username",
+        "Status":  429,
+        "Payload":  "\u003cimg src=x onerror=alert(\u0027XSS\u0027)\u003e",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"message\":\"Kh\\u00f4ng \\u0111\\u01b0\\u1ee3c spam API \\ud83d\\ude21, \\u0111\\u1ee3i 1 ph\\u00fat r\\u1ed3i th\\u1eed l\\u1ea1i!\"}  "
+    },
+    {
+        "Name":  "login-injection-password",
+        "Status":  429,
+        "Payload":  "\u003cimg src=x onerror=alert(\u0027XSS\u0027)\u003e",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"message\":\"Kh\\u00f4ng \\u0111\\u01b0\\u1ee3c spam API \\ud83d\\ude21, \\u0111\\u1ee3i 1 ph\\u00fat r\\u1ed3i th\\u1eed l\\u1ea1i!\"}  "
+    },
+    {
+        "Name":  "visitor-product-search",
+        "Status":  200,
+        "Payload":  "\u003cimg src=x onerror=alert(\u0027XSS\u0027)\u003e",
+        "HasSqlState":  false,
+        "ContainsScript":  true,
+        "Body":  "{\"message\":\"T\\u00ecm ki\\u1ebfm th\\u01b0\\u1eddng th\\u00e0nh c\\u00f4ng.\",\"query\":\"\u003cimg src=x onerror=alert(\u0027XSS\u0027)\u003e\",\"search_keyword\":\"\u003cimg src=x onerror=alert(\u0027XSS\u0027)\u003e\",\"major_code\":null,\"mode\":\"scout\",\"count\":0,\"products\":[],\"data\":{\"data\":[],\"current_page\":1,\"f"
+    },
+    {
+        "Name":  "chatbot",
+        "Status":  200,
+        "Payload":  "\u003cimg src=x onerror=alert(\u0027XSS\u0027)\u003e",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"reply\":\"Xin l\\u1ed7i, m\\u00ecnh ch\\u1ec9 h\\u1ed7 tr\\u1ee3 c\\u00e1c c\\u00e2u h\\u1ecfi li\\u00ean quan \\u0111\\u1ebfn h\\u1ec7 th\\u1ed1ng qu\\u1ea3n l\\u00fd \\u0111\\u1ed3 \\u00e1n. B\\u1ea1n c\\u00f3 th\\u1ec3 h\\u1ecfi v\\u1ec1 s\\u1ea3n ph\\u1ea9m, ng\\u00e0nh h\\u1ecdc, d"
+    },
+    {
+        "Name":  "upload-validation",
+        "Status":  422,
+        "Payload":  "\u003cimg src=x onerror=alert(\u0027XSS\u0027)\u003e",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"message\":\"C\\u1ea7n \\u00edt nh\\u1ea5t 1 \\u1ea3nh (and 2 more errors)\",\"errors\":{\"images\":[\"C\\u1ea7n \\u00edt nh\\u1ea5t 1 \\u1ea3nh\"],\"github_link\":[\"Link GitHub kh\\u00f4ng h\\u1ee3p l\\u1ec7\"],\"demo_link\":[\"Link demo kh\\u00f4ng h\\u1ee3p l\\u1ec7\"]}}  "
+    },
+    {
+        "Name":  "teacher-reject-invalid-product",
+        "Status":  405,
+        "Payload":  "\u003cimg src=x onerror=alert(\u0027XSS\u0027)\u003e",
+        "HasSqlState":  true,
+        "ContainsScript":  false,
+        "Body":  "{     \"message\": \"The POST method is not supported for route api/v1/product/reject. Supported methods: GET, HEAD.\",     \"exception\": \"Symfony\\\\Component\\\\HttpKernel\\\\Exception\\\\MethodNotAllowedHttpException\",     \"file\": \"/var/www/html/vendor/laravel/framework"
+    },
+    {
+        "Name":  "login-injection-username",
+        "Status":  429,
+        "Payload":  "\u003csvg onload=alert(\u0027XSS\u0027)\u003e",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"message\":\"Kh\\u00f4ng \\u0111\\u01b0\\u1ee3c spam API \\ud83d\\ude21, \\u0111\\u1ee3i 1 ph\\u00fat r\\u1ed3i th\\u1eed l\\u1ea1i!\"}  "
+    },
+    {
+        "Name":  "login-injection-password",
+        "Status":  429,
+        "Payload":  "\u003csvg onload=alert(\u0027XSS\u0027)\u003e",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"message\":\"Kh\\u00f4ng \\u0111\\u01b0\\u1ee3c spam API \\ud83d\\ude21, \\u0111\\u1ee3i 1 ph\\u00fat r\\u1ed3i th\\u1eed l\\u1ea1i!\"}  "
+    },
+    {
+        "Name":  "visitor-product-search",
+        "Status":  200,
+        "Payload":  "\u003csvg onload=alert(\u0027XSS\u0027)\u003e",
+        "HasSqlState":  false,
+        "ContainsScript":  true,
+        "Body":  "{\"message\":\"T\\u00ecm ki\\u1ebfm th\\u01b0\\u1eddng th\\u00e0nh c\\u00f4ng.\",\"query\":\"\u003csvg onload=alert(\u0027XSS\u0027)\u003e\",\"search_keyword\":\"\u003csvg onload=alert(\u0027XSS\u0027)\u003e\",\"major_code\":null,\"mode\":\"scout\",\"count\":0,\"products\":[],\"data\":{\"data\":[],\"current_page\":1,\"from\":0,\"last_p"
+    },
+    {
+        "Name":  "chatbot",
+        "Status":  200,
+        "Payload":  "\u003csvg onload=alert(\u0027XSS\u0027)\u003e",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"reply\":\"Ch\\u00e0o! T\\u00f4i c\\u00f3 th\\u1ec3 gi\\u00fap g\\u00ec cho b\\u1ea1n h\\u00f4m nay? B\\u1ea1n quan t\\u00e2m \\u0111\\u1ebfn \\u0111\\u1ed3 \\u00e1n hay t\\u00e0i li\\u1ec7u h\\u1ecdc thu\\u1eadt n\\u00e0o kh\\u00f4ng?\"}  "
+    },
+    {
+        "Name":  "upload-validation",
+        "Status":  422,
+        "Payload":  "\u003csvg onload=alert(\u0027XSS\u0027)\u003e",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"message\":\"C\\u1ea7n \\u00edt nh\\u1ea5t 1 \\u1ea3nh (and 2 more errors)\",\"errors\":{\"images\":[\"C\\u1ea7n \\u00edt nh\\u1ea5t 1 \\u1ea3nh\"],\"github_link\":[\"Link GitHub kh\\u00f4ng h\\u1ee3p l\\u1ec7\"],\"demo_link\":[\"Link demo kh\\u00f4ng h\\u1ee3p l\\u1ec7\"]}}  "
+    },
+    {
+        "Name":  "teacher-reject-invalid-product",
+        "Status":  405,
+        "Payload":  "\u003csvg onload=alert(\u0027XSS\u0027)\u003e",
+        "HasSqlState":  true,
+        "ContainsScript":  false,
+        "Body":  "{     \"message\": \"The POST method is not supported for route api/v1/product/reject. Supported methods: GET, HEAD.\",     \"exception\": \"Symfony\\\\Component\\\\HttpKernel\\\\Exception\\\\MethodNotAllowedHttpException\",     \"file\": \"/var/www/html/vendor/laravel/framework"
+    },
+    {
+        "Name":  "login-injection-username",
+        "Status":  429,
+        "Payload":  "javascript:alert(\u0027XSS\u0027)",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"message\":\"Kh\\u00f4ng \\u0111\\u01b0\\u1ee3c spam API \\ud83d\\ude21, \\u0111\\u1ee3i 1 ph\\u00fat r\\u1ed3i th\\u1eed l\\u1ea1i!\"}  "
+    },
+    {
+        "Name":  "login-injection-password",
+        "Status":  429,
+        "Payload":  "javascript:alert(\u0027XSS\u0027)",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"message\":\"Kh\\u00f4ng \\u0111\\u01b0\\u1ee3c spam API \\ud83d\\ude21, \\u0111\\u1ee3i 1 ph\\u00fat r\\u1ed3i th\\u1eed l\\u1ea1i!\"}  "
+    },
+    {
+        "Name":  "visitor-product-search",
+        "Status":  200,
+        "Payload":  "javascript:alert(\u0027XSS\u0027)",
+        "HasSqlState":  false,
+        "ContainsScript":  true,
+        "Body":  "{\"message\":\"T\\u00ecm ki\\u1ebfm th\\u01b0\\u1eddng th\\u00e0nh c\\u00f4ng.\",\"query\":\"javascript:alert(\u0027XSS\u0027)\",\"search_keyword\":\"javascript:alert(\u0027XSS\u0027)\",\"major_code\":null,\"mode\":\"scout\",\"count\":0,\"products\":[],\"data\":{\"data\":[],\"current_page\":1,\"from\":0,\"last_page\""
+    },
+    {
+        "Name":  "chatbot",
+        "Status":  200,
+        "Payload":  "javascript:alert(\u0027XSS\u0027)",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"reply\":\"Ch\\u00e0o b\\u1ea1n! M\\u00ecnh l\\u00e0 tr\\u1ee3 l\\u00fd h\\u1ec7 th\\u1ed1ng qu\\u1ea3n l\\u00fd \\u0111\\u1ed3 \\u00e1n v\\u00e0 t\\u00e0i li\\u1ec7u h\\u1ecdc thu\\u1eadt, r\\u1ea5t vui \\u0111\\u01b0\\u1ee3c h\\u1ed7 tr\\u1ee3 b\\u1ea1n. B\\u1ea1n c\\u00f3 th\\u1ec3 \\u0"
+    },
+    {
+        "Name":  "upload-validation",
+        "Status":  422,
+        "Payload":  "javascript:alert(\u0027XSS\u0027)",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"message\":\"C\\u1ea7n \\u00edt nh\\u1ea5t 1 \\u1ea3nh (and 2 more errors)\",\"errors\":{\"images\":[\"C\\u1ea7n \\u00edt nh\\u1ea5t 1 \\u1ea3nh\"],\"github_link\":[\"Link GitHub kh\\u00f4ng h\\u1ee3p l\\u1ec7\"],\"demo_link\":[\"Link demo kh\\u00f4ng h\\u1ee3p l\\u1ec7\"]}}  "
+    },
+    {
+        "Name":  "teacher-reject-invalid-product",
+        "Status":  405,
+        "Payload":  "javascript:alert(\u0027XSS\u0027)",
+        "HasSqlState":  true,
+        "ContainsScript":  false,
+        "Body":  "{     \"message\": \"The POST method is not supported for route api/v1/product/reject. Supported methods: GET, HEAD.\",     \"exception\": \"Symfony\\\\Component\\\\HttpKernel\\\\Exception\\\\MethodNotAllowedHttpException\",     \"file\": \"/var/www/html/vendor/laravel/framework"
+    },
+    {
+        "Name":  "login-injection-username",
+        "Status":  429,
+        "Payload":  "\"\u003e\u003cscript\u003ealert(\u0027XSS\u0027)\u003c/script\u003e",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"message\":\"Kh\\u00f4ng \\u0111\\u01b0\\u1ee3c spam API \\ud83d\\ude21, \\u0111\\u1ee3i 1 ph\\u00fat r\\u1ed3i th\\u1eed l\\u1ea1i!\"}  "
+    },
+    {
+        "Name":  "login-injection-password",
+        "Status":  429,
+        "Payload":  "\"\u003e\u003cscript\u003ealert(\u0027XSS\u0027)\u003c/script\u003e",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"message\":\"Kh\\u00f4ng \\u0111\\u01b0\\u1ee3c spam API \\ud83d\\ude21, \\u0111\\u1ee3i 1 ph\\u00fat r\\u1ed3i th\\u1eed l\\u1ea1i!\"}  "
+    },
+    {
+        "Name":  "visitor-product-search",
+        "Status":  200,
+        "Payload":  "\"\u003e\u003cscript\u003ealert(\u0027XSS\u0027)\u003c/script\u003e",
+        "HasSqlState":  false,
+        "ContainsScript":  true,
+        "Body":  "{\"message\":\"T\\u00ecm ki\\u1ebfm th\\u01b0\\u1eddng th\\u00e0nh c\\u00f4ng.\",\"query\":\"\\\"\u003e\u003cscript\u003ealert(\u0027XSS\u0027)\u003c\\/script\u003e\",\"search_keyword\":\"\\\"\u003e\u003cscript\u003ealert(\u0027XSS\u0027)\u003c\\/script\u003e\",\"major_code\":null,\"mode\":\"scout\",\"count\":0,\"products\":[],\"data\":{\"data\":[],\"current_page\":1,"
+    },
+    {
+        "Name":  "chatbot",
+        "Status":  200,
+        "Payload":  "\"\u003e\u003cscript\u003ealert(\u0027XSS\u0027)\u003c/script\u003e",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"reply\":\"Xin l\\u1ed7i, m\\u00ecnh ch\\u1ec9 h\\u1ed7 tr\\u1ee3 c\\u00e1c c\\u00e2u h\\u1ecfi li\\u00ean quan \\u0111\\u1ebfn h\\u1ec7 th\\u1ed1ng qu\\u1ea3n l\\u00fd \\u0111\\u1ed3 \\u00e1n. B\\u1ea1n c\\u00f3 th\\u1ec3 h\\u1ecfi v\\u1ec1 s\\u1ea3n ph\\u1ea9m, ng\\u00e0nh h\\u1ecdc, d"
+    },
+    {
+        "Name":  "upload-validation",
+        "Status":  422,
+        "Payload":  "\"\u003e\u003cscript\u003ealert(\u0027XSS\u0027)\u003c/script\u003e",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"message\":\"C\\u1ea7n \\u00edt nh\\u1ea5t 1 \\u1ea3nh (and 2 more errors)\",\"errors\":{\"images\":[\"C\\u1ea7n \\u00edt nh\\u1ea5t 1 \\u1ea3nh\"],\"github_link\":[\"Link GitHub kh\\u00f4ng h\\u1ee3p l\\u1ec7\"],\"demo_link\":[\"Link demo kh\\u00f4ng h\\u1ee3p l\\u1ec7\"]}}  "
+    },
+    {
+        "Name":  "teacher-reject-invalid-product",
+        "Status":  405,
+        "Payload":  "\"\u003e\u003cscript\u003ealert(\u0027XSS\u0027)\u003c/script\u003e",
+        "HasSqlState":  true,
+        "ContainsScript":  false,
+        "Body":  "{     \"message\": \"The POST method is not supported for route api/v1/product/reject. Supported methods: GET, HEAD.\",     \"exception\": \"Symfony\\\\Component\\\\HttpKernel\\\\Exception\\\\MethodNotAllowedHttpException\",     \"file\": \"/var/www/html/vendor/laravel/framework"
+    },
+    {
+        "Name":  "login-injection-username",
+        "Status":  429,
+        "Payload":  "\u0027 OR \u00271\u0027=\u00271",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"message\":\"Kh\\u00f4ng \\u0111\\u01b0\\u1ee3c spam API \\ud83d\\ude21, \\u0111\\u1ee3i 1 ph\\u00fat r\\u1ed3i th\\u1eed l\\u1ea1i!\"}  "
+    },
+    {
+        "Name":  "login-injection-password",
+        "Status":  429,
+        "Payload":  "\u0027 OR \u00271\u0027=\u00271",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"message\":\"Kh\\u00f4ng \\u0111\\u01b0\\u1ee3c spam API \\ud83d\\ude21, \\u0111\\u1ee3i 1 ph\\u00fat r\\u1ed3i th\\u1eed l\\u1ea1i!\"}  "
+    },
+    {
+        "Name":  "visitor-product-search",
+        "Status":  200,
+        "Payload":  "\u0027 OR \u00271\u0027=\u00271",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"message\":\"T\\u00ecm ki\\u1ebfm th\\u01b0\\u1eddng th\\u00e0nh c\\u00f4ng.\",\"query\":\"\u0027 OR \u00271\u0027=\u00271\",\"search_keyword\":\"\u0027 OR \u00271\u0027=\u00271\",\"major_code\":null,\"mode\":\"scout\",\"count\":0,\"products\":[],\"data\":{\"data\":[],\"current_page\":1,\"from\":0,\"last_page\":1,\"per_page\":5,\"to\":0,\""
+    },
+    {
+        "Name":  "chatbot",
+        "Status":  200,
+        "Payload":  "\u0027 OR \u00271\u0027=\u00271",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"reply\":\"Xin l\\u1ed7i, m\\u00ecnh ch\\u1ec9 h\\u1ed7 tr\\u1ee3 c\\u00e1c c\\u00e2u h\\u1ecfi li\\u00ean quan \\u0111\\u1ebfn h\\u1ec7 th\\u1ed1ng qu\\u1ea3n l\\u00fd \\u0111\\u1ed3 \\u00e1n. B\\u1ea1n c\\u00f3 th\\u1ec3 h\\u1ecfi v\\u1ec1 s\\u1ea3n ph\\u1ea9m, ng\\u00e0nh h\\u1ecdc, d"
+    },
+    {
+        "Name":  "upload-validation",
+        "Status":  422,
+        "Payload":  "\u0027 OR \u00271\u0027=\u00271",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"message\":\"C\\u1ea7n \\u00edt nh\\u1ea5t 1 \\u1ea3nh (and 2 more errors)\",\"errors\":{\"images\":[\"C\\u1ea7n \\u00edt nh\\u1ea5t 1 \\u1ea3nh\"],\"github_link\":[\"Link GitHub kh\\u00f4ng h\\u1ee3p l\\u1ec7\"],\"demo_link\":[\"Link demo kh\\u00f4ng h\\u1ee3p l\\u1ec7\"]}}  "
+    },
+    {
+        "Name":  "teacher-reject-invalid-product",
+        "Status":  405,
+        "Payload":  "\u0027 OR \u00271\u0027=\u00271",
+        "HasSqlState":  true,
+        "ContainsScript":  false,
+        "Body":  "{     \"message\": \"The POST method is not supported for route api/v1/product/reject. Supported methods: GET, HEAD.\",     \"exception\": \"Symfony\\\\Component\\\\HttpKernel\\\\Exception\\\\MethodNotAllowedHttpException\",     \"file\": \"/var/www/html/vendor/laravel/framework"
+    },
+    {
+        "Name":  "login-injection-username",
+        "Status":  429,
+        "Payload":  "admin\u0027 --",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"message\":\"Kh\\u00f4ng \\u0111\\u01b0\\u1ee3c spam API \\ud83d\\ude21, \\u0111\\u1ee3i 1 ph\\u00fat r\\u1ed3i th\\u1eed l\\u1ea1i!\"}  "
+    },
+    {
+        "Name":  "login-injection-password",
+        "Status":  429,
+        "Payload":  "admin\u0027 --",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"message\":\"Kh\\u00f4ng \\u0111\\u01b0\\u1ee3c spam API \\ud83d\\ude21, \\u0111\\u1ee3i 1 ph\\u00fat r\\u1ed3i th\\u1eed l\\u1ea1i!\"}  "
+    },
+    {
+        "Name":  "visitor-product-search",
+        "Status":  200,
+        "Payload":  "admin\u0027 --",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"message\":\"T\\u00ecm ki\\u1ebfm th\\u01b0\\u1eddng th\\u00e0nh c\\u00f4ng.\",\"query\":\"admin\u0027 --\",\"search_keyword\":\"admin\u0027 --\",\"major_code\":null,\"mode\":\"scout\",\"count\":0,\"products\":[],\"data\":{\"data\":[],\"current_page\":1,\"from\":0,\"last_page\":1,\"per_page\":5,\"to\":0,\"tota"
+    },
+    {
+        "Name":  "chatbot",
+        "Status":  200,
+        "Payload":  "admin\u0027 --",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"reply\":\"Xin ch\\u00e0o! M\\u00ecnh l\\u00e0 tr\\u1ee3 l\\u00fd h\\u1ec7 th\\u1ed1ng \\u0111\\u1ed3 \\u00e1n. B\\u1ea1n c\\u1ea7n t\\u00ecm ki\\u1ebfm t\\u00e0i li\\u1ec7u hay xem th\\u1ed1ng k\\u00ea g\\u00ec kh\\u00f4ng?\"}  "
+    },
+    {
+        "Name":  "upload-validation",
+        "Status":  422,
+        "Payload":  "admin\u0027 --",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"message\":\"M\\u00f4 t\\u1ea3 ph\\u1ea3i \\u2265 10 k\\u00fd t\\u1ef1 (and 3 more errors)\",\"errors\":{\"description\":[\"M\\u00f4 t\\u1ea3 ph\\u1ea3i \\u2265 10 k\\u00fd t\\u1ef1\"],\"images\":[\"C\\u1ea7n \\u00edt nh\\u1ea5t 1 \\u1ea3nh\"],\"github_link\":[\"Link GitHub kh\\u00f4ng h\\u1e"
+    },
+    {
+        "Name":  "teacher-reject-invalid-product",
+        "Status":  405,
+        "Payload":  "admin\u0027 --",
+        "HasSqlState":  true,
+        "ContainsScript":  false,
+        "Body":  "{     \"message\": \"The POST method is not supported for route api/v1/product/reject. Supported methods: GET, HEAD.\",     \"exception\": \"Symfony\\\\Component\\\\HttpKernel\\\\Exception\\\\MethodNotAllowedHttpException\",     \"file\": \"/var/www/html/vendor/laravel/framework"
+    },
+    {
+        "Name":  "login-injection-username",
+        "Status":  429,
+        "Payload":  "\u0027 OR 1=1#",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"message\":\"Kh\\u00f4ng \\u0111\\u01b0\\u1ee3c spam API \\ud83d\\ude21, \\u0111\\u1ee3i 1 ph\\u00fat r\\u1ed3i th\\u1eed l\\u1ea1i!\"}  "
+    },
+    {
+        "Name":  "login-injection-password",
+        "Status":  429,
+        "Payload":  "\u0027 OR 1=1#",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"message\":\"Kh\\u00f4ng \\u0111\\u01b0\\u1ee3c spam API \\ud83d\\ude21, \\u0111\\u1ee3i 1 ph\\u00fat r\\u1ed3i th\\u1eed l\\u1ea1i!\"}  "
+    },
+    {
+        "Name":  "visitor-product-search",
+        "Status":  200,
+        "Payload":  "\u0027 OR 1=1#",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"message\":\"T\\u00ecm ki\\u1ebfm th\\u01b0\\u1eddng th\\u00e0nh c\\u00f4ng.\",\"query\":\"\u0027 OR 1=1#\",\"search_keyword\":\"\u0027 OR 1=1#\",\"major_code\":null,\"mode\":\"scout\",\"count\":0,\"products\":[],\"data\":{\"data\":[],\"current_page\":1,\"from\":0,\"last_page\":1,\"per_page\":5,\"to\":0,\"tota"
+    },
+    {
+        "Name":  "chatbot",
+        "Status":  200,
+        "Payload":  "\u0027 OR 1=1#",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"reply\":\"Xin l\\u1ed7i, m\\u00ecnh ch\\u1ec9 h\\u1ed7 tr\\u1ee3 c\\u00e1c c\\u00e2u h\\u1ecfi li\\u00ean quan \\u0111\\u1ebfn h\\u1ec7 th\\u1ed1ng qu\\u1ea3n l\\u00fd \\u0111\\u1ed3 \\u00e1n. B\\u1ea1n c\\u00f3 th\\u1ec3 h\\u1ecfi v\\u1ec1 s\\u1ea3n ph\\u1ea9m, ng\\u00e0nh h\\u1ecdc, d"
+    },
+    {
+        "Name":  "upload-validation",
+        "Status":  422,
+        "Payload":  "\u0027 OR 1=1#",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"message\":\"M\\u00f4 t\\u1ea3 ph\\u1ea3i \\u2265 10 k\\u00fd t\\u1ef1 (and 3 more errors)\",\"errors\":{\"description\":[\"M\\u00f4 t\\u1ea3 ph\\u1ea3i \\u2265 10 k\\u00fd t\\u1ef1\"],\"images\":[\"C\\u1ea7n \\u00edt nh\\u1ea5t 1 \\u1ea3nh\"],\"github_link\":[\"Link GitHub kh\\u00f4ng h\\u1e"
+    },
+    {
+        "Name":  "teacher-reject-invalid-product",
+        "Status":  405,
+        "Payload":  "\u0027 OR 1=1#",
+        "HasSqlState":  true,
+        "ContainsScript":  false,
+        "Body":  "{     \"message\": \"The POST method is not supported for route api/v1/product/reject. Supported methods: GET, HEAD.\",     \"exception\": \"Symfony\\\\Component\\\\HttpKernel\\\\Exception\\\\MethodNotAllowedHttpException\",     \"file\": \"/var/www/html/vendor/laravel/framework"
+    },
+    {
+        "Name":  "login-injection-username",
+        "Status":  429,
+        "Payload":  "\u0027 UNION SELECT * FROM users --",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"message\":\"Kh\\u00f4ng \\u0111\\u01b0\\u1ee3c spam API \\ud83d\\ude21, \\u0111\\u1ee3i 1 ph\\u00fat r\\u1ed3i th\\u1eed l\\u1ea1i!\"}  "
+    },
+    {
+        "Name":  "login-injection-password",
+        "Status":  429,
+        "Payload":  "\u0027 UNION SELECT * FROM users --",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"message\":\"Kh\\u00f4ng \\u0111\\u01b0\\u1ee3c spam API \\ud83d\\ude21, \\u0111\\u1ee3i 1 ph\\u00fat r\\u1ed3i th\\u1eed l\\u1ea1i!\"}  "
+    },
+    {
+        "Name":  "visitor-product-search",
+        "Status":  200,
+        "Payload":  "\u0027 UNION SELECT * FROM users --",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"message\":\"T\\u00ecm ki\\u1ebfm th\\u01b0\\u1eddng th\\u00e0nh c\\u00f4ng.\",\"query\":\"\u0027 UNION SELECT * FROM users --\",\"search_keyword\":\"\u0027 UNION SELECT * FROM users --\",\"major_code\":null,\"mode\":\"scout\",\"count\":0,\"products\":[],\"data\":{\"data\":[],\"current_page\":1,\"from\""
+    },
+    {
+        "Name":  "chatbot",
+        "Status":  200,
+        "Payload":  "\u0027 UNION SELECT * FROM users --",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"reply\":\"Ch\\u00e0o b\\u1ea1n! M\\u00ecnh l\\u00e0 tr\\u1ee3 l\\u00fd th\\u00f4ng minh c\\u1ee7a h\\u1ec7 th\\u1ed1ng qu\\u1ea3n l\\u00fd \\u0111\\u1ed3 \\u00e1n v\\u00e0 t\\u00e0i li\\u1ec7u h\\u1ecdc thu\\u1eadt. B\\u1ea1n c\\u00f3 th\\u1ec3 \\u0111\\u1eb7t c\\u00e2u h\\u1ecfi ho\\u1e"
+    },
+    {
+        "Name":  "upload-validation",
+        "Status":  422,
+        "Payload":  "\u0027 UNION SELECT * FROM users --",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"message\":\"C\\u1ea7n \\u00edt nh\\u1ea5t 1 \\u1ea3nh (and 2 more errors)\",\"errors\":{\"images\":[\"C\\u1ea7n \\u00edt nh\\u1ea5t 1 \\u1ea3nh\"],\"github_link\":[\"Link GitHub kh\\u00f4ng h\\u1ee3p l\\u1ec7\"],\"demo_link\":[\"Link demo kh\\u00f4ng h\\u1ee3p l\\u1ec7\"]}}  "
+    },
+    {
+        "Name":  "teacher-reject-invalid-product",
+        "Status":  405,
+        "Payload":  "\u0027 UNION SELECT * FROM users --",
+        "HasSqlState":  true,
+        "ContainsScript":  false,
+        "Body":  "{     \"message\": \"The POST method is not supported for route api/v1/product/reject. Supported methods: GET, HEAD.\",     \"exception\": \"Symfony\\\\Component\\\\HttpKernel\\\\Exception\\\\MethodNotAllowedHttpException\",     \"file\": \"/var/www/html/vendor/laravel/framework"
+    },
+    {
+        "Name":  "login-injection-username",
+        "Status":  429,
+        "Payload":  "\"; DROP TABLE products; --",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"message\":\"Kh\\u00f4ng \\u0111\\u01b0\\u1ee3c spam API \\ud83d\\ude21, \\u0111\\u1ee3i 1 ph\\u00fat r\\u1ed3i th\\u1eed l\\u1ea1i!\"}  "
+    },
+    {
+        "Name":  "login-injection-password",
+        "Status":  429,
+        "Payload":  "\"; DROP TABLE products; --",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"message\":\"Kh\\u00f4ng \\u0111\\u01b0\\u1ee3c spam API \\ud83d\\ude21, \\u0111\\u1ee3i 1 ph\\u00fat r\\u1ed3i th\\u1eed l\\u1ea1i!\"}  "
+    },
+    {
+        "Name":  "visitor-product-search",
+        "Status":  200,
+        "Payload":  "\"; DROP TABLE products; --",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"message\":\"T\\u00ecm ki\\u1ebfm th\\u01b0\\u1eddng th\\u00e0nh c\\u00f4ng.\",\"query\":\"\\\"; DROP TABLE products; --\",\"search_keyword\":\"\\\"; DROP TABLE products; --\",\"major_code\":null,\"mode\":\"scout\",\"count\":0,\"products\":[],\"data\":{\"data\":[],\"current_page\":1,\"from\":0,\"la"
+    },
+    {
+        "Name":  "chatbot",
+        "Status":  200,
+        "Payload":  "\"; DROP TABLE products; --",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"reply\":\"C\\u00e2u h\\u1ecfi n\\u00e0y n\\u1eb1m ngo\\u00e0i ph\\u1ea1m vi h\\u1ed7 tr\\u1ee3 c\\u1ee7a m\\u00ecnh r\\u1ed3i \\ud83d\\ude05\"}  "
+    },
+    {
+        "Name":  "upload-validation",
+        "Status":  422,
+        "Payload":  "\"; DROP TABLE products; --",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"message\":\"C\\u1ea7n \\u00edt nh\\u1ea5t 1 \\u1ea3nh (and 2 more errors)\",\"errors\":{\"images\":[\"C\\u1ea7n \\u00edt nh\\u1ea5t 1 \\u1ea3nh\"],\"github_link\":[\"Link GitHub kh\\u00f4ng h\\u1ee3p l\\u1ec7\"],\"demo_link\":[\"Link demo kh\\u00f4ng h\\u1ee3p l\\u1ec7\"]}}  "
+    },
+    {
+        "Name":  "teacher-reject-invalid-product",
+        "Status":  405,
+        "Payload":  "\"; DROP TABLE products; --",
+        "HasSqlState":  true,
+        "ContainsScript":  false,
+        "Body":  "{     \"message\": \"The POST method is not supported for route api/v1/product/reject. Supported methods: GET, HEAD.\",     \"exception\": \"Symfony\\\\Component\\\\HttpKernel\\\\Exception\\\\MethodNotAllowedHttpException\",     \"file\": \"/var/www/html/vendor/laravel/framework"
+    },
+    {
+        "Name":  "admin-create-user-xss-name",
+        "Status":  201,
+        "Payload":  "\u003cscript\u003ealert(\u0027XSS\u0027)\u003c/script\u003e",
+        "HasSqlState":  false,
+        "ContainsScript":  true,
+        "Body":  "{\"success\":true,\"message\":\"Tao nguoi dung thanh cong.\",\"data\":{\"user_id\":\"SECTEST20887\",\"name\":\"\u003cscript\u003ealert(\u0027XSS\u0027)\u003c\\/script\u003e\",\"email\":\"SECTEST20887@test.local\",\"role\":\"student\",\"major_id\":1,\"class\":\"\u003cscript\u003ealert(\u0027XSS\u0027)\u003c\\/script\u003e\",\"avatar\":\"\u003cscript\u003ealert(\u0027XS"
+    },
+    {
+        "Name":  "admin-list-users-after-xss-create",
+        "Status":  200,
+        "Payload":  "\u003cscript\u003ealert(\u0027XSS\u0027)\u003c/script\u003e",
+        "HasSqlState":  false,
+        "ContainsScript":  true,
+        "Body":  "{\"success\":true,\"data\":{\"current_page\":1,\"data\":[{\"user_id\":\"SECTEST20887\",\"name\":\"\u003cscript\u003ealert(\u0027XSS\u0027)\u003c\\/script\u003e\",\"email\":\"SECTEST20887@test.local\",\"email_verified_at\":null,\"class\":\"\u003cscript\u003ealert(\u0027XSS\u0027)\u003c\\/script\u003e\",\"role\":\"student\",\"major_id\":1,\"avatar\":\"\u003cscri"
+    },
+    {
+        "Name":  "admin-delete-temp-user",
+        "Status":  200,
+        "Payload":  "",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"success\":true,\"message\":\"Xoa nguoi dung thanh cong.\"}  "
+    },
+    {
+        "Name":  "admin-create-major-xss-name",
+        "Status":  201,
+        "Payload":  "\u003cscript\u003ealert(\u0027XSS\u0027)\u003c/script\u003e",
+        "HasSqlState":  false,
+        "ContainsScript":  true,
+        "Body":  "{\"success\":true,\"message\":\"Tao chuyen nganh thanh cong.\",\"data\":{\"major_name\":\"\u003cscript\u003ealert(\u0027XSS\u0027)\u003c\\/script\u003e\",\"major_code\":\"SECTEST69589\",\"description\":\"\u003cscript\u003ealert(\u0027XSS\u0027)\u003c\\/script\u003e\",\"updated_at\":\"2026-06-18T15:34:37.000000Z\",\"created_at\":\"2026-06-18T15:34:"
+    },
+    {
+        "Name":  "admin-list-majors-after-xss-create",
+        "Status":  200,
+        "Payload":  "\u003cscript\u003ealert(\u0027XSS\u0027)\u003c/script\u003e",
+        "HasSqlState":  false,
+        "ContainsScript":  true,
+        "Body":  "{\"success\":true,\"data\":[{\"major_id\":5,\"major_name\":\"\u003cscript\u003ealert(\u0027XSS\u0027)\u003c\\/script\u003e\",\"major_code\":\"SECTEST69589\",\"description\":\"\u003cscript\u003ealert(\u0027XSS\u0027)\u003c\\/script\u003e\",\"created_at\":\"2026-06-18T15:34:37.000000Z\",\"updated_at\":\"2026-06-18T15:34:37.000000Z\",\"products_count"
+    },
+    {
+        "Name":  "admin-delete-temp-major",
+        "Status":  200,
+        "Payload":  "",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"success\":true,\"message\":\"Xoa chuyen nganh thanh cong.\"}  "
+    },
+    {
+        "Name":  "admin-users-search",
+        "Status":  200,
+        "Payload":  "\u003cscript\u003ealert(\u0027XSS\u0027)\u003c/script\u003e",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"success\":true,\"data\":{\"current_page\":1,\"data\":[],\"first_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/users?page=1\",\"from\":null,\"last_page\":1,\"last_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/users?page=1\",\"links\":[{\"url\":null,\"label\":\""
+    },
+    {
+        "Name":  "admin-products-search",
+        "Status":  200,
+        "Payload":  "\u003cscript\u003ealert(\u0027XSS\u0027)\u003c/script\u003e",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"success\":true,\"data\":{\"current_page\":1,\"data\":[],\"first_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/products?page=1\",\"from\":null,\"last_page\":1,\"last_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/products?page=1\",\"links\":[{\"url\":null,\"la"
+    },
+    {
+        "Name":  "admin-users-search",
+        "Status":  200,
+        "Payload":  "\u003cimg src=x onerror=alert(\u0027XSS\u0027)\u003e",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"success\":true,\"data\":{\"current_page\":1,\"data\":[],\"first_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/users?page=1\",\"from\":null,\"last_page\":1,\"last_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/users?page=1\",\"links\":[{\"url\":null,\"label\":\""
+    },
+    {
+        "Name":  "admin-products-search",
+        "Status":  200,
+        "Payload":  "\u003cimg src=x onerror=alert(\u0027XSS\u0027)\u003e",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"success\":true,\"data\":{\"current_page\":1,\"data\":[],\"first_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/products?page=1\",\"from\":null,\"last_page\":1,\"last_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/products?page=1\",\"links\":[{\"url\":null,\"la"
+    },
+    {
+        "Name":  "admin-users-search",
+        "Status":  200,
+        "Payload":  "\u003csvg onload=alert(\u0027XSS\u0027)\u003e",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"success\":true,\"data\":{\"current_page\":1,\"data\":[],\"first_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/users?page=1\",\"from\":null,\"last_page\":1,\"last_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/users?page=1\",\"links\":[{\"url\":null,\"label\":\""
+    },
+    {
+        "Name":  "admin-products-search",
+        "Status":  200,
+        "Payload":  "\u003csvg onload=alert(\u0027XSS\u0027)\u003e",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"success\":true,\"data\":{\"current_page\":1,\"data\":[],\"first_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/products?page=1\",\"from\":null,\"last_page\":1,\"last_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/products?page=1\",\"links\":[{\"url\":null,\"la"
+    },
+    {
+        "Name":  "admin-users-search",
+        "Status":  200,
+        "Payload":  "javascript:alert(\u0027XSS\u0027)",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"success\":true,\"data\":{\"current_page\":1,\"data\":[],\"first_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/users?page=1\",\"from\":null,\"last_page\":1,\"last_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/users?page=1\",\"links\":[{\"url\":null,\"label\":\""
+    },
+    {
+        "Name":  "admin-products-search",
+        "Status":  200,
+        "Payload":  "javascript:alert(\u0027XSS\u0027)",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"success\":true,\"data\":{\"current_page\":1,\"data\":[],\"first_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/products?page=1\",\"from\":null,\"last_page\":1,\"last_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/products?page=1\",\"links\":[{\"url\":null,\"la"
+    },
+    {
+        "Name":  "admin-users-search",
+        "Status":  200,
+        "Payload":  "\"\u003e\u003cscript\u003ealert(\u0027XSS\u0027)\u003c/script\u003e",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"success\":true,\"data\":{\"current_page\":1,\"data\":[],\"first_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/users?page=1\",\"from\":null,\"last_page\":1,\"last_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/users?page=1\",\"links\":[{\"url\":null,\"label\":\""
+    },
+    {
+        "Name":  "admin-products-search",
+        "Status":  200,
+        "Payload":  "\"\u003e\u003cscript\u003ealert(\u0027XSS\u0027)\u003c/script\u003e",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"success\":true,\"data\":{\"current_page\":1,\"data\":[],\"first_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/products?page=1\",\"from\":null,\"last_page\":1,\"last_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/products?page=1\",\"links\":[{\"url\":null,\"la"
+    },
+    {
+        "Name":  "admin-users-search",
+        "Status":  200,
+        "Payload":  "\u0027 OR \u00271\u0027=\u00271",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"success\":true,\"data\":{\"current_page\":1,\"data\":[],\"first_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/users?page=1\",\"from\":null,\"last_page\":1,\"last_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/users?page=1\",\"links\":[{\"url\":null,\"label\":\""
+    },
+    {
+        "Name":  "admin-products-search",
+        "Status":  200,
+        "Payload":  "\u0027 OR \u00271\u0027=\u00271",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"success\":true,\"data\":{\"current_page\":1,\"data\":[],\"first_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/products?page=1\",\"from\":null,\"last_page\":1,\"last_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/products?page=1\",\"links\":[{\"url\":null,\"la"
+    },
+    {
+        "Name":  "admin-users-search",
+        "Status":  200,
+        "Payload":  "admin\u0027 --",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"success\":true,\"data\":{\"current_page\":1,\"data\":[],\"first_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/users?page=1\",\"from\":null,\"last_page\":1,\"last_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/users?page=1\",\"links\":[{\"url\":null,\"label\":\""
+    },
+    {
+        "Name":  "admin-products-search",
+        "Status":  200,
+        "Payload":  "admin\u0027 --",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"success\":true,\"data\":{\"current_page\":1,\"data\":[],\"first_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/products?page=1\",\"from\":null,\"last_page\":1,\"last_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/products?page=1\",\"links\":[{\"url\":null,\"la"
+    },
+    {
+        "Name":  "admin-users-search",
+        "Status":  200,
+        "Payload":  "\u0027 OR 1=1#",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"success\":true,\"data\":{\"current_page\":1,\"data\":[],\"first_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/users?page=1\",\"from\":null,\"last_page\":1,\"last_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/users?page=1\",\"links\":[{\"url\":null,\"label\":\""
+    },
+    {
+        "Name":  "admin-products-search",
+        "Status":  200,
+        "Payload":  "\u0027 OR 1=1#",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"success\":true,\"data\":{\"current_page\":1,\"data\":[],\"first_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/products?page=1\",\"from\":null,\"last_page\":1,\"last_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/products?page=1\",\"links\":[{\"url\":null,\"la"
+    },
+    {
+        "Name":  "admin-users-search",
+        "Status":  200,
+        "Payload":  "\u0027 UNION SELECT * FROM users --",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"success\":true,\"data\":{\"current_page\":1,\"data\":[],\"first_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/users?page=1\",\"from\":null,\"last_page\":1,\"last_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/users?page=1\",\"links\":[{\"url\":null,\"label\":\""
+    },
+    {
+        "Name":  "admin-products-search",
+        "Status":  200,
+        "Payload":  "\u0027 UNION SELECT * FROM users --",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"success\":true,\"data\":{\"current_page\":1,\"data\":[],\"first_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/products?page=1\",\"from\":null,\"last_page\":1,\"last_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/products?page=1\",\"links\":[{\"url\":null,\"la"
+    },
+    {
+        "Name":  "admin-users-search",
+        "Status":  200,
+        "Payload":  "\"; DROP TABLE products; --",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"success\":true,\"data\":{\"current_page\":1,\"data\":[],\"first_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/users?page=1\",\"from\":null,\"last_page\":1,\"last_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/users?page=1\",\"links\":[{\"url\":null,\"label\":\""
+    },
+    {
+        "Name":  "admin-products-search",
+        "Status":  200,
+        "Payload":  "\"; DROP TABLE products; --",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "{\"success\":true,\"data\":{\"current_page\":1,\"data\":[],\"first_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/products?page=1\",\"from\":null,\"last_page\":1,\"last_page_url\":\"http:\\/\\/192.168.33.11:8000\\/api\\/v1\\/admin\\/products?page=1\",\"links\":[{\"url\":null,\"la"
+    },
+    {
+        "Name":  "visitor-products-after-tests",
+        "Status":  200,
+        "Payload":  "",
+        "HasSqlState":  false,
+        "ContainsScript":  false,
+        "Body":  "[{\"id\":199,\"title\":\"B\\u1ed9 nh\\u1eadn di\\u1ec7n th\\u01b0\\u01a1ng hi\\u1ec7u salon t\\u00f3c v49\",\"cate_id\":2,\"description\":\"\\u0110\\u1ec1 t\\u00e0i thu\\u1ed9c ng\\u00e0nh Thi\\u1ebft k\\u1ebf \\u0111\\u1ed3 h\\u1ecda.\",\"thumbnail\":\"https:\\/\\/images.pexels.com\\/photos\\/2"
+    }
+]
