@@ -587,20 +587,23 @@ class ProductRepository extends BaseRepository
 
     public function getVisitorStats(): array
     {
-        $stats = DB::table('products as p')
+        $productStats = DB::table('products as p')
             ->leftJoin('product_statistics as s', 'p.product_id', '=', 's.product_id')
             ->where('p.status', 'approved')
             ->selectRaw('COUNT(DISTINCT p.product_id) as products_count')
-            ->selectRaw('COUNT(DISTINCT p.user_id) as students_count')
-            ->selectRaw('COUNT(DISTINCT p.approved_by) as advisors_count')
             ->selectRaw('COALESCE(SUM(s.views), 0) as views_count')
             ->first();
 
+        $userStats = DB::table('users')
+            ->selectRaw("SUM(CASE WHEN role = 'student' THEN 1 ELSE 0 END) as students_count")
+            ->selectRaw("SUM(CASE WHEN role = 'teacher' THEN 1 ELSE 0 END) as advisors_count")
+            ->first();
+
         return [
-            'products_count' => (int) ($stats->products_count ?? 0),
-            'students_count' => (int) ($stats->students_count ?? 0),
-            'advisors_count' => (int) ($stats->advisors_count ?? 0),
-            'views_count' => (int) ($stats->views_count ?? 0),
+            'products_count' => (int) ($productStats->products_count ?? 0),
+            'students_count' => (int) ($userStats->students_count ?? 0),
+            'advisors_count' => (int) ($userStats->advisors_count ?? 0),
+            'views_count' => (int) ($productStats->views_count ?? 0),
         ];
     }
 
