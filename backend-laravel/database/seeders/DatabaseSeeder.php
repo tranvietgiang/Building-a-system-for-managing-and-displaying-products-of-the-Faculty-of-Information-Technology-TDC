@@ -11,13 +11,13 @@ class DatabaseSeeder extends Seeder
         $this->call([
             MajorSeeder::class,
             userSeeder::class,
-            CategorySeeder::class,
-            ProductSeeder::class,
-            ProductImageSeeder::class,
-            ProductFileSeeder::class,
-            ProductTagSeeder::class,
-            ProductStatisticSeeder::class,
-            ReviewSeeder::class,
+            // CategorySeeder::class,
+            // ProductSeeder::class,
+            // ProductImageSeeder::class,
+            // ProductFileSeeder::class,
+            // ProductTagSeeder::class,
+            // ProductStatisticSeeder::class,
+            // ReviewSeeder::class,
         ]);
     }
 }
