@@ -3,6 +3,11 @@ import { uploadApi } from "../useUpload/uploadApi.api";
 import { AuthContext } from "../../contexts/AuthContext";
 import useMajorNameCode from "../common/useMajorCode";
 import { useState, useContext, useCallback } from "react";
+import {
+  getDrafts,
+  restoreDraftImages,
+  saveDrafts,
+} from "../../utils/uploadProductScreen/draftStorage";
 
 export default function useUploadBaseForm({
   initialData,
@@ -39,6 +44,10 @@ export default function useUploadBaseForm({
     { id: 3, name: "Hoàn tất", icon: "✅" },
   ];
   const { user } = useContext(AuthContext);
+  const studentId = user?.user_id;
+  const scopedDraftKey = studentId
+    ? `${draftKey}:student:${studentId}`
+    : null;
 
   const { majorCode } = useMajorNameCode(user?.major_id);
 
@@ -254,48 +263,82 @@ export default function useUploadBaseForm({
   };
 
   /* ================= DRAFT ================= */
-  const handleSaveDraft = () => {
+  const handleSaveDraft = async () => {
+    if (!scopedDraftKey) {
+      toast.error("Không xác định được sinh viên để lưu bản nháp");
+      return;
+    }
+
     const draft = {
       id: Date.now(),
+      studentId,
       formData,
       images,
-      files,
-      tags,
+      files: [],
+      tags: [...tags],
       currentStep,
+      thumbnailIndex,
       createdAt: new Date().toISOString(),
     };
 
-    const old = JSON.parse(localStorage.getItem(draftKey)) || [];
-
-    localStorage.setItem(draftKey, JSON.stringify([draft, ...old]));
-    toast.success("Đã lưu nháp");
+    try {
+      const old = await getDrafts(scopedDraftKey, draftKey);
+      await saveDrafts(scopedDraftKey, [draft, ...old]);
+      toast.success("Đã lưu nháp");
+    } catch (error) {
+      console.error("Save draft error:", error);
+      toast.error("Không thể lưu bản nháp. Vui lòng kiểm tra dung lượng trình duyệt");
+    }
   };
 
-  const handleViewDraft = () => {
-    const old = JSON.parse(localStorage.getItem(draftKey)) || [];
-    setDrafts(old);
-    setOpenViewDraft(true);
+  const handleViewDraft = async () => {
+    if (!scopedDraftKey) {
+      toast.error("Không xác định được sinh viên để mở bản nháp");
+      return;
+    }
+
+    try {
+      const old = await getDrafts(scopedDraftKey, draftKey);
+      setDrafts(old);
+      setOpenViewDraft(true);
+    } catch (error) {
+      console.error("View drafts error:", error);
+      toast.error("Không thể mở danh sách bản nháp");
+    }
   };
 
   const handleLoadDraft = (draft) => {
-    setFormData(draft.formData || initialData);
-    setImages(draft.images || []);
-    setFiles(draft.files || []);
+    setFormData({ ...(initialData || {}), ...(draft.formData || {}) });
+    setImages(restoreDraftImages(draft.images));
+    setFiles([]);
     setTags(draft.tags || []);
-    setCurrentStep(draft.currentStep || 1);
+    setCurrentStep(Math.min(3, Math.max(1, draft.currentStep || 1)));
+    setThumbnailIndex(
+      Math.min(
+        Math.max(0, draft.thumbnailIndex || 0),
+        Math.max(0, (draft.images?.length || 1) - 1),
+      ),
+    );
+    setErrors({});
     setOpenViewDraft(false);
 
     toast.success("Đã tải bản nháp");
   };
 
-  const handleDeleteDraft = (id) => {
-    const old = JSON.parse(localStorage.getItem(draftKey)) || [];
-    const next = old.filter((x) => x.id !== id);
+  const handleDeleteDraft = async (id) => {
+    if (!scopedDraftKey) return;
 
-    localStorage.setItem(draftKey, JSON.stringify(next));
-    setDrafts(next);
+    try {
+      const old = await getDrafts(scopedDraftKey, draftKey);
+      const next = old.filter((x) => x.id !== id);
 
-    toast.success("Đã xóa bản nháp");
+      await saveDrafts(scopedDraftKey, next);
+      setDrafts(next);
+      toast.success("Đã xóa bản nháp");
+    } catch (error) {
+      console.error("Delete draft error:", error);
+      toast.error("Không thể xóa bản nháp");
+    }
   };
 
   /* ================= SUBMIT ================= */
@@ -341,12 +384,6 @@ export default function useUploadBaseForm({
                 is_thumbnail: index === thumbnailIndex,
               }),
             );
-          }
-        });
-
-        files.forEach((file) => {
-          if (file.file) {
-            payload.append("files[]", file.file);
           }
         });
 

@@ -105,10 +105,8 @@ class ProductRepository extends BaseRepository
             ->select('product_image_id', 'image_url', 'created_at')
             ->get();
 
-        $files = DB::table('product_files')
-            ->where('product_id', $productId)
-            ->select('product_file_id', 'file_url', 'file_type', 'created_at')
-            ->get();
+        // Không trả source/file đính kèm vì website chỉ dùng để tham khảo.
+        $files = collect();
 
         $tags = DB::table('product_tags')
             ->where('product_id', $productId)
@@ -465,9 +463,8 @@ class ProductRepository extends BaseRepository
             ->where('product_id', $productId)
             ->get();
 
-        $files = DB::table('product_files')
-            ->where('product_id', $productId)
-            ->get();
+        // Không trả source/file đính kèm vì website chỉ dùng để tham khảo.
+        $files = collect();
 
         $tags = DB::table('product_tags')
             ->where('product_id', $productId)
