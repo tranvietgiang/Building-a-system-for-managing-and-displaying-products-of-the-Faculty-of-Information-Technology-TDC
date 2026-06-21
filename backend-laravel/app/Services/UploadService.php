@@ -57,7 +57,8 @@ class UploadService extends BaseRepository
 
                     return [
                         'error' => true,
-                        'message' => 'Ảnh vi phạm nội dung',
+                        'message' => 'Ảnh thứ ' . ($index + 1) . ' không đạt kiểm duyệt: ' . ($result['reason'] ?? 'Nội dung không phù hợp'),
+                        'image_index' => $index,
                         'detail' => $result
                     ];
                 }

@@ -252,5 +252,6 @@ jobs:
             grep -q "https://tvg.adtech.pro.vn" config/cors.php || sed -i "/http:\/\/192\.168\.33\.11:5173/a\        'https://tvg.adtech.pro.vn'," config/cors.php
             php artisan storage:link || true
             php artisan config:clear
+            php artisan migrate --force
             php artisan config:cache
             php artisan view:cache
