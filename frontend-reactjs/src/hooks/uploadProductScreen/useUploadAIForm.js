@@ -12,7 +12,6 @@ export default function useUploadAIForm(options = {}) {
     initialData: initialAIFormData,
     editData: options.editData,
     editImages: options.editImages,
-    editFiles: options.editFiles,
     editTags: options.editTags,
     stepsConfig: [
       { id: 1, name: "Thông tin mô hình", icon: "🤖" },

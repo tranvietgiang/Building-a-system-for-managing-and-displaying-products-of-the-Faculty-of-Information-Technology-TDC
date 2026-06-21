@@ -108,15 +108,12 @@ const validateBasicInfo = (formData, errors) => {
   }
 };
 
-const validateMedia = (images = [], files = [], errors) => {
+const validateMedia = (images = [], errors) => {
   if (images.length === 0) {
     errors.images = "Cần ít nhất 1 ảnh";
   }
   if (images.length > 10) {
     errors.images = "Tối đa 10 ảnh";
-  }
-  if (files.length > 5) {
-    errors.files = "Tối đa 5 file";
   }
 };
 
@@ -125,12 +122,11 @@ export const validateCNTTStep = ({
   step,
   formData,
   images = [],
-  files = [],
 }) => {
   const errors = {};
 
   if (step === 1) validateBasicInfo(formData, errors);
-  if (step === 2) validateMedia(images, files, errors);
+  if (step === 2) validateMedia(images, errors);
 
   if (step === 3) {
     if (!formData.programming_language?.trim()) {
@@ -160,7 +156,6 @@ export const validateGraphicStep = ({
   step,
   formData,
   images = [],
-  files = [],
 }) => {
   const errors = {};
 
@@ -188,13 +183,13 @@ export const validateGraphicStep = ({
     }
   }
 
-  if (step === 2) validateMedia(images, files, errors);
+  if (step === 2) validateMedia(images, errors);
 
   return errors;
 };
 
 /* ================= AI ================= */
-export const validateAIStep = ({ step, formData, images = [], files = [] }) => {
+export const validateAIStep = ({ step, formData, images = [] }) => {
   const errors = {};
 
   if (step === 1) {
@@ -213,7 +208,7 @@ export const validateAIStep = ({ step, formData, images = [], files = [] }) => {
     }
   }
 
-  if (step === 2) validateMedia(images, files, errors);
+  if (step === 2) validateMedia(images, errors);
 
   if (step === 3) {
     if (!formData.dataset_used?.trim()) {
@@ -247,7 +242,6 @@ export const validateNetworkStep = ({
   step,
   formData,
   images = [],
-  files = [],
 }) => {
   const errors = {};
 
@@ -270,7 +264,7 @@ export const validateNetworkStep = ({
   }
 
   if (step === 2) {
-    validateMedia(images, files, errors);
+    validateMedia(images, errors);
   }
 
   if (step === 3) {

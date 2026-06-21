@@ -17,9 +17,6 @@ const UploadProductForm_AI = ({
   thumbnailIndex,
   removeImage,
   setAsThumbnail,
-  handleFileUpload,
-  files,
-  removeFile,
   tagInput,
   setTagInput,
   handleAddTag,
@@ -44,7 +41,6 @@ const UploadProductForm_AI = ({
 
   // State cho loading upload ảnh
   const [uploadingImage, setUploadingImage] = useState(false);
-  const [uploadingFile, setUploadingFile] = useState(false);
 
   // State cho loading submit sản phẩm
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -57,17 +53,6 @@ const UploadProductForm_AI = ({
       console.error("Upload image error:", error);
     } finally {
       setUploadingImage(false);
-    }
-  };
-
-  const handleFileUploadWithLoading = async (e) => {
-    setUploadingFile(true);
-    try {
-      await handleFileUpload(e);
-    } catch (error) {
-      console.error("Upload file error:", error);
-    } finally {
-      setUploadingFile(false);
     }
   };
 
@@ -88,7 +73,7 @@ const UploadProductForm_AI = ({
   return (
     <>
       {/* Loading overlay khi upload ảnh hoặc file */}
-      {(uploadingImage || uploadingFile) && (
+      {uploadingImage && (
         <LoadingSpinner
           fullScreen={true}
           message={
@@ -472,107 +457,6 @@ const UploadProductForm_AI = ({
                 )}
               </div>
 
-              {/* Upload file notebook, model */}
-              <div className="hidden">
-                <label className="mb-2 block text-sm font-semibold text-gray-700">
-                  File đính kèm (notebook, model, dataset mẫu)
-                 {" "}<span className="ml-1 text-xs font-normal text-gray-400">(có thể bỏ qua)</span></label>
-                <div className="relative">
-                  <input
-                    type="file"
-                    multiple
-                    onChange={handleFileUploadWithLoading}
-                    className="hidden"
-                    id="file-upload"
-                    disabled={uploadingFile}
-                  />
-                  <label
-                    htmlFor="file-upload"
-                    className={`group relative block w-full cursor-pointer rounded-2xl border-2 border-dashed border-indigo-200 bg-gradient-to-br from-indigo-50 to-blue-50 p-8 transition-all hover:from-indigo-100 hover:to-blue-100 ${
-                      uploadingFile ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
-                  >
-                    <div className="text-center">
-                      <div className="mb-3 inline-flex rounded-full bg-white p-3 shadow-lg transition-transform group-hover:scale-110">
-                        {uploadingFile ? (
-                          <div className="w-6 h-6 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-                        ) : (
-                          <svg
-                            className="h-6 w-6 text-indigo-500"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.414 6.586a6 6 0 106.364 6.364l6.364-6.364"
-                            />
-                          </svg>
-                        )}
-                      </div>
-                      <p className="mb-1 text-base font-medium text-gray-700">
-                        {uploadingFile
-                          ? "Đang tải file lên..."
-                          : "Tải lên notebook, model, dataset mẫu"}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        IPYNB, PY, PKL, CSV • Tối đa 5 files • Mỗi file ≤ 100MB
-                      </p>
-                    </div>
-                  </label>
-                </div>
-                {files.length > 0 && (
-                  <div className="mt-6 space-y-3">
-                    <p className="text-sm font-medium text-gray-700">
-                      📁 Files đã tải lên ({files.length}/5)
-                    </p>
-                    {files.map((file) => (
-                      <div
-                        key={file.id}
-                        className="group flex items-center justify-between rounded-xl bg-gray-50 p-4 transition hover:bg-gray-100"
-                      >
-                        <div className="flex flex-1 items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 font-bold text-indigo-600">
-                            {file.type}
-                          </div>
-                          <div className="flex-1">
-                            <p className="font-medium text-gray-900">
-                              {file.name}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              {file.size} MB
-                            </p>
-                          </div>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => removeFile(file.id)}
-                          className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-100 text-red-600 opacity-0 transition hover:bg-red-200 group-hover:opacity-100"
-                        >
-                          <svg
-                            className="h-4 w-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M6 18L18 6M6 6l12 12"
-                            />
-                          </svg>
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                {errors.files && (
-                  <p className="mt-2 text-sm text-red-600">{errors.files}</p>
-                )}
-              </div>
             </div>
           </div>
 

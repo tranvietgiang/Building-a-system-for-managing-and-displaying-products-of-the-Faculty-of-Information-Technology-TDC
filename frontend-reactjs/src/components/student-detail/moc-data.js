@@ -40,20 +40,6 @@ export const mockAiProduct = {
     { product_image_id: 2, image_url: "https://picsum.photos/id/3/400/400" },
     { product_image_id: 3, image_url: "https://picsum.photos/id/4/400/400" },
   ],
-  files: [
-    {
-      product_file_id: 1,
-      file_url: "https://example.com/report_ai.pdf",
-      file_type: "PDF",
-      created_at: "2024-11-10T08:30:00Z",
-    },
-    {
-      product_file_id: 2,
-      file_url: "https://example.com/code_ai.zip",
-      file_type: "ZIP",
-      created_at: "2024-11-10T08:35:00Z",
-    },
-  ],
   tags: [
     { tag_id: 1, tag_name: "Machine Learning" },
     { tag_id: 2, tag_name: "CNN" },
@@ -124,14 +110,6 @@ export const mockItProduct = {
     { product_image_id: 5, image_url: "https://picsum.photos/id/22/400/400" },
     { product_image_id: 6, image_url: "https://picsum.photos/id/23/400/400" },
   ],
-  files: [
-    {
-      product_file_id: 3,
-      file_url: "https://example.com/report_it.pdf",
-      file_type: "PDF",
-      created_at: "2024-11-25T08:30:00Z",
-    },
-  ],
   tags: [
     { tag_id: 5, tag_name: "ReactJS" },
     { tag_id: 6, tag_name: "NodeJS" },
@@ -192,20 +170,6 @@ export const mockGraphicProduct = {
     { product_image_id: 8, image_url: "https://picsum.photos/id/32/400/400" },
     { product_image_id: 9, image_url: "https://picsum.photos/id/33/400/400" },
     { product_image_id: 10, image_url: "https://picsum.photos/id/34/400/400" },
-  ],
-  files: [
-    {
-      product_file_id: 4,
-      file_url: "https://example.com/brand_guide.pdf",
-      file_type: "PDF",
-      created_at: "2024-10-15T08:30:00Z",
-    },
-    {
-      product_file_id: 5,
-      file_url: "https://example.com/mockup.psd",
-      file_type: "PSD",
-      created_at: "2024-10-15T08:35:00Z",
-    },
   ],
   tags: [
     { tag_id: 9, tag_name: "Logo Design" },
@@ -273,26 +237,6 @@ export const mockNetworkProduct = {
     { product_image_id: 12, image_url: "https://picsum.photos/id/42/400/400" },
     { product_image_id: 13, image_url: "https://picsum.photos/id/43/400/400" },
   ],
-  files: [
-    {
-      product_file_id: 6,
-      file_url: "https://example.com/report_network.pdf",
-      file_type: "PDF",
-      created_at: "2024-09-05T08:30:00Z",
-    },
-    {
-      product_file_id: 7,
-      file_url: "https://example.com/simulation_script.py",
-      file_type: "PY",
-      created_at: "2024-09-05T08:35:00Z",
-    },
-    {
-      product_file_id: 8,
-      file_url: "https://example.com/config_file.py",
-      file_type: "PY",
-      created_at: "2024-09-05T08:40:00Z",
-    },
-  ],
   tags: [
     { tag_id: 13, tag_name: "SDN" },
     { tag_id: 14, tag_name: "Mininet" },
@@ -352,14 +296,6 @@ export const mockPendingProduct = {
   images: [
     { product_image_id: 14, image_url: "https://picsum.photos/id/51/400/400" },
   ],
-  files: [
-    {
-      product_file_id: 9,
-      file_url: "https://example.com/app_demo.apk",
-      file_type: "APK",
-      created_at: "2024-12-18T08:30:00Z",
-    },
-  ],
   tags: [
     { tag_id: 18, tag_name: "React Native" },
     { tag_id: 19, tag_name: "AI" },
@@ -409,7 +345,6 @@ export const mockRejectedProduct = {
     shares: 1,
   },
   images: [],
-  files: [],
   tags: [
     { tag_id: 21, tag_name: "HTML/CSS" },
     { tag_id: 22, tag_name: "JavaScript" },

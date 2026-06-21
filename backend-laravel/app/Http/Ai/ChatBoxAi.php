@@ -522,7 +522,6 @@ class ChatBoxAi
             'total_majors'     => DB::table('majors')->count(),
             'total_users'      => DB::table('users')->count(),
             'total_reviews'    => DB::table('reviews')->count(),
-            'total_files'      => DB::table('product_files')->count(),
             'total_images'     => DB::table('product_images')->count(),
         ];
 

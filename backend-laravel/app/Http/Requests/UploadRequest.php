@@ -46,8 +46,6 @@ class UploadRequest extends FormRequest
             'image_meta' => 'nullable|array|max:10',
             'image_meta.*' => 'nullable|string',
 
-            'files' => 'prohibited',
-
             'github_link' => 'nullable|url',
             'demo_link' => 'nullable|url',
 
@@ -123,9 +121,6 @@ class UploadRequest extends FormRequest
             'images.required' => 'Cần ít nhất 1 ảnh',
             'images.min' => 'Cần ít nhất 1 ảnh',
             'images.max' => 'Tối đa 10 ảnh',
-
-            // FILES
-            'files.prohibited' => 'Website chỉ dùng để tham khảo, không hỗ trợ đăng source hoặc file đính kèm',
 
             // LINKS
             'github_link.url' => 'Link GitHub không hợp lệ',

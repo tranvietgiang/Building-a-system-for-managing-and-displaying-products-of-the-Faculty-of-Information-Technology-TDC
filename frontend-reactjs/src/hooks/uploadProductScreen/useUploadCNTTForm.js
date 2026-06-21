@@ -12,7 +12,6 @@ export default function useUploadCNTTForm(options = {}) {
     initialData: initialCNTTFormData,
     editData: options.editData,
     editImages: options.editImages,
-    editFiles: options.editFiles,
     editTags: options.editTags,
     stepsConfig: [
       { id: 1, name: "Thông tin", icon: "📋" },

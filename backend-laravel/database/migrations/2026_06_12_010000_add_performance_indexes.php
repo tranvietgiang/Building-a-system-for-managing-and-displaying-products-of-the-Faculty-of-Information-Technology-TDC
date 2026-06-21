@@ -31,10 +31,6 @@ return new class extends Migration
             $table->index(['email', 'status'], 'support_email_status_idx');
         });
 
-        Schema::table('product_files', function (Blueprint $table) {
-            $table->index(['product_id', 'file_type'], 'product_files_product_file_type_idx');
-        });
-
         Schema::table('product_images', function (Blueprint $table) {
             $table->index(['product_id', 'created_at'], 'product_images_product_created_idx');
         });
@@ -72,10 +68,6 @@ return new class extends Migration
 
         Schema::table('product_images', function (Blueprint $table) {
             $table->dropIndex('product_images_product_created_idx');
-        });
-
-        Schema::table('product_files', function (Blueprint $table) {
-            $table->dropIndex('product_files_product_file_type_idx');
         });
 
         Schema::table('support', function (Blueprint $table) {

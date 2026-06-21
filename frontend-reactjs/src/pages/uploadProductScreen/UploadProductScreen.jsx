@@ -75,7 +75,6 @@ const UploadProductScreen = () => {
   const form = useHook({
     editData,
     editImages,
-    editFiles: [],
     editTags: Array.isArray(editProduct?.tags) ? editProduct.tags : [],
   });
 
@@ -85,7 +84,6 @@ const UploadProductScreen = () => {
     tagInput,
     setTagInput,
     images,
-    files,
     thumbnailIndex,
     loading,
     errors,
@@ -108,8 +106,6 @@ const UploadProductScreen = () => {
     handleImageUpload,
     removeImage,
     setAsThumbnail,
-    handleFileUpload,
-    removeFile,
     handleSubmit,
 
     setSelectedImage,
@@ -278,9 +274,6 @@ const UploadProductScreen = () => {
           thumbnailIndex={thumbnailIndex}
           removeImage={removeImage}
           setAsThumbnail={setAsThumbnail}
-          handleFileUpload={handleFileUpload}
-          files={files}
-          removeFile={removeFile}
           tagInput={tagInput}
           setTagInput={setTagInput}
           handleAddTag={handleAddTag}

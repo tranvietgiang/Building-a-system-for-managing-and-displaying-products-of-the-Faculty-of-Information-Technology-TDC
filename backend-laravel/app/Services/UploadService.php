@@ -28,7 +28,6 @@ class UploadService extends BaseRepository
     public function upload(array $data)
     {
         $uploadedImages = [];
-        $uploadedFiles = [];
         $tags = $data['tags'] ?? [];
         $thumbnailIndex = $this->resolveThumbnailIndex($data['image_meta'] ?? []);
 
@@ -61,12 +60,6 @@ class UploadService extends BaseRepository
                         'image_index' => $index,
                         'detail' => $result
                     ];
-                }
-            }
-
-            if (!empty($data['files'])) {
-                foreach ($data['files'] as $file) {
-                    $uploadedFiles[] = $file->store('uploads/files', 'public');
                 }
             }
 
@@ -111,7 +104,7 @@ class UploadService extends BaseRepository
                     $dbData['simulation_tool'] = $data['simulation_tool'] ?? null;
                     $dbData['network_protocol'] = $data['network_protocol'] ?? null;
                     $dbData['topology_type'] = $data['topology_type'] ?? null;
-                    $dbData['config_file'] = isset($uploadedFiles[0]) ? $uploadedFiles[0] : null;
+                    $dbData['config_file'] = $data['config_file'] ?? null;
                     break;
 
                 case 'tkdh':
@@ -125,7 +118,6 @@ class UploadService extends BaseRepository
             $product = $this->upload_repository->upload(
                 $dbData,
                 $uploadedImages,
-                $uploadedFiles,
                 $tags,
                 $thumbnailIndex
             );

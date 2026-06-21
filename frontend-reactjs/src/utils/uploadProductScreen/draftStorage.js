@@ -48,7 +48,6 @@ const migrateLegacyDrafts = async (legacyKey, targetKey) => {
           images: (draft.images || []).filter(
             (image) => image.url && !image.url.startsWith("blob:"),
           ),
-          files: [],
         }))
       : [];
 

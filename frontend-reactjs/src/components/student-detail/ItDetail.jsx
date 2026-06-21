@@ -292,7 +292,7 @@ const ItDetail = ({ product, theme }) => {
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
               <div className="border-b">
                 <div className="flex">
-                  {["overview", "files", "reviews"].map((tab) => (
+                  {["overview", "reviews"].map((tab) => (
                     <button
                       key={tab}
                       onClick={() => setActiveTab(tab)}
@@ -305,12 +305,6 @@ const ItDetail = ({ product, theme }) => {
                       {tab === "overview" && (
                         <>
                           <Icons.FileText /> Tổng quan
-                        </>
-                      )}
-                      {tab === "files" && (
-                        <>
-                          <Icons.Paperclip /> Files (
-                          {product.files?.length || 0})
                         </>
                       )}
                       {tab === "reviews" && (
@@ -333,65 +327,6 @@ const ItDetail = ({ product, theme }) => {
                   </div>
                 )}
 
-                {activeTab === "files" && (
-                  <div className="space-y-3">
-                    {product.files?.length > 0 ? (
-                      product.files.map((file) => {
-                        const fileName = file.file_url.split("/").pop();
-                        const fileExt =
-                          file.file_type?.toUpperCase() ||
-                          fileName.split(".").pop().toUpperCase();
-                        let fileType = "FILE";
-                        if (["PDF"].includes(fileExt)) fileType = "PDF";
-                        if (
-                          ["JPG", "JPEG", "PNG", "GIF", "WEBP"].includes(
-                            fileExt,
-                          )
-                        )
-                          fileType = "IMAGE";
-                        if (["MP4", "MOV", "AVI", "MKV"].includes(fileExt))
-                          fileType = "VIDEO";
-
-                        return (
-                          <div
-                            key={file.product_file_id}
-                            className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:shadow-md transition"
-                          >
-                            <div className="flex items-center gap-4">
-                              <div
-                                className={`w-12 h-12 rounded-lg flex items-center justify-center font-bold ${theme.badge}`}
-                              >
-                                <Icons.FileIcon type={fileType} />
-                              </div>
-                              <div>
-                                <p className="font-medium text-gray-900">
-                                  {fileName}
-                                </p>
-                                <p className="text-xs text-gray-500 flex items-center gap-1">
-                                  <Icons.Clock />
-                                  {formatDate(file.created_at)}
-                                </p>
-                              </div>
-                            </div>
-                            <a
-                              href={file.file_url}
-                              download
-                              className={`px-4 py-2 ${theme.button} text-white rounded-lg transition text-sm flex items-center gap-2`}
-                            >
-                              <Icons.Download />
-                              Tải xuống
-                            </a>
-                          </div>
-                        );
-                      })
-                    ) : (
-                      <p className="text-center text-gray-500 py-8 flex items-center justify-center gap-2">
-                        <Icons.Paperclip />
-                        Chưa có file đính kèm
-                      </p>
-                    )}
-                  </div>
-                )}
 
                 {activeTab === "reviews" && (
                   <div className="space-y-5">

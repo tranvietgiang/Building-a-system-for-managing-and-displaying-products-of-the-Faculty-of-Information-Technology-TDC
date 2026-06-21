@@ -385,65 +385,6 @@ const TeacherProductDetailScreen = () => {
               </div>
             )}
 
-            {/* Files */}
-            {product.files && product.files.length > 0 && (
-              <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-                <div className="p-6 border-b border-gray-100">
-                  <h2
-                    className={`text-lg font-bold flex items-center gap-2 ${theme.text}`}
-                  >
-                    <Icons.FileText className="w-5 h-5" />
-                    Tệp đính kèm
-                  </h2>
-                </div>
-                <div className="p-6">
-                  <div className="grid gap-3">
-                    {product.files.map((file) => {
-                      const fileName =
-                        file.file_url?.split("/").pop() || "Tệp tin";
-                      const fileExt =
-                        file.file_type?.toUpperCase() ||
-                        fileName.split(".").pop().toUpperCase();
-                      let fileType = "FILE";
-                      if (["PDF"].includes(fileExt)) fileType = "PDF";
-                      if (
-                        ["JPG", "JPEG", "PNG", "GIF", "WEBP"].includes(fileExt)
-                      )
-                        fileType = "IMAGE";
-                      if (["MP4", "MOV", "AVI", "MKV"].includes(fileExt))
-                        fileType = "VIDEO";
-
-                      return (
-                        <a
-                          key={file.product_file_id}
-                          href={file.file_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl hover:shadow-md transition-all group"
-                        >
-                          <div
-                            className={`w-12 h-12 ${theme.light} rounded-xl flex items-center justify-center`}
-                          >
-                            <Icons.FileIcon type={fileType} />
-                          </div>
-                          <div className="flex-1">
-                            <p className="font-medium text-gray-900 group-hover:underline">
-                              {fileName}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              Nhấn để tải xuống
-                            </p>
-                          </div>
-                          <Icons.Download
-                            className={`w-5 h-5 ${theme.text} opacity-60 group-hover:opacity-100 transition`}
-                          />
-                        </a>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            )}
 
             {/* Nhận xét */}
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden">

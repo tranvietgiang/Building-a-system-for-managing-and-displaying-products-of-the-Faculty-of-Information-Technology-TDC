@@ -13,7 +13,6 @@ export default function useUploadBaseForm({
   initialData,
   editData,
   editImages,
-  editFiles,
   editTags,
   validateStep,
   draftKey,
@@ -24,7 +23,6 @@ export default function useUploadBaseForm({
     ...(editData || {}),
   }));
   const [images, setImages] = useState(editImages || []);
-  const [files, setFiles] = useState(editFiles || []);
   const [tags, setTags] = useState(editTags || []);
   const [tagInput, setTagInput] = useState("");
   const [errors, setErrors] = useState({});
@@ -102,7 +100,6 @@ export default function useUploadBaseForm({
       step,
       formData,
       images,
-      files,
     });
 
     return Object.keys(err).length === 0;
@@ -114,9 +111,9 @@ export default function useUploadBaseForm({
 
   const validateAllSteps = () => {
     return {
-      ...validateStep({ step: 1, formData, images, files }),
-      ...validateStep({ step: 2, formData, images, files }),
-      ...validateStep({ step: 3, formData, images, files }),
+      ...validateStep({ step: 1, formData, images }),
+      ...validateStep({ step: 2, formData, images }),
+      ...validateStep({ step: 3, formData, images }),
     };
   };
 
@@ -126,7 +123,6 @@ export default function useUploadBaseForm({
       step: currentStep,
       formData,
       images,
-      files,
     });
 
     if (Object.keys(err).length > 0) {
@@ -149,7 +145,7 @@ export default function useUploadBaseForm({
     }));
 
     setCurrentStep((prev) => prev + 1);
-  }, [currentStep, formData, images, files]);
+  }, [currentStep, formData, images]);
 
   const handlePrevStep = useCallback(() => {
     setCurrentStep((prev) => Math.max(1, prev - 1));
@@ -206,40 +202,6 @@ export default function useUploadBaseForm({
     setThumbnailIndex(index);
   };
 
-  /* ================= FILE ================= */
-  const handleFileUpload = useCallback(
-    (e) => {
-      const arr = Array.from(e.target.files || []);
-
-      if (files.length + arr.length > 5) {
-        toast.error("Chỉ được tải tối đa 5 file");
-        return;
-      }
-
-      const mapped = arr.map((file, index) => ({
-        id: Date.now() + index,
-        file,
-        name: file.name,
-        size: (file.size / 1024 / 1024).toFixed(2),
-        type: file.name.split(".").pop()?.toUpperCase() || "FILE",
-      }));
-
-      setFiles((prev) => [...prev, ...mapped]);
-
-      if (errors.files) {
-        setErrors((prev) => ({
-          ...prev,
-          files: null,
-        }));
-      }
-    },
-    [files, errors],
-  );
-
-  const removeFile = (id) => {
-    setFiles((prev) => prev.filter((x) => x.id !== id));
-  };
-
   /* ================= TAG ================= */
   const handleAddTag = useCallback(
     (e) => {
@@ -274,7 +236,6 @@ export default function useUploadBaseForm({
       studentId,
       formData,
       images,
-      files: [],
       tags: [...tags],
       currentStep,
       thumbnailIndex,
@@ -310,7 +271,6 @@ export default function useUploadBaseForm({
   const handleLoadDraft = (draft) => {
     setFormData({ ...(initialData || {}), ...(draft.formData || {}) });
     setImages(restoreDraftImages(draft.images));
-    setFiles([]);
     setTags(draft.tags || []);
     setCurrentStep(Math.min(3, Math.max(1, draft.currentStep || 1)));
     setThumbnailIndex(
@@ -409,14 +369,13 @@ export default function useUploadBaseForm({
         setLoading(false);
       }
     },
-    [majorCode, formData, tags, images, files, thumbnailIndex, user],
+    [majorCode, formData, tags, images, thumbnailIndex, user],
   );
 
   return {
     formData,
     errors,
     images,
-    files,
     tags,
     tagInput,
     currentStep,
@@ -443,8 +402,6 @@ export default function useUploadBaseForm({
     handleImageUpload,
     removeImage,
     setAsThumbnail,
-    handleFileUpload,
-    removeFile,
     handleAddTag,
     removeTag,
     handleSaveDraft,

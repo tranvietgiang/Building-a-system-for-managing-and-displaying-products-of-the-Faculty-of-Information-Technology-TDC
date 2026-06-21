@@ -105,9 +105,6 @@ class ProductRepository extends BaseRepository
             ->select('product_image_id', 'image_url', 'created_at')
             ->get();
 
-        // Không trả source/file đính kèm vì website chỉ dùng để tham khảo.
-        $files = collect();
-
         $tags = DB::table('product_tags')
             ->where('product_id', $productId)
             ->select('product_tag_id', 'tag_name')
@@ -170,7 +167,6 @@ class ProductRepository extends BaseRepository
             ],
 
             'images' => $images,
-            'files' => $files,
             'tags' => $tags,
 
             'reviews' => $reviews->map(function ($review) {
@@ -463,9 +459,6 @@ class ProductRepository extends BaseRepository
             ->where('product_id', $productId)
             ->get();
 
-        // Không trả source/file đính kèm vì website chỉ dùng để tham khảo.
-        $files = collect();
-
         $tags = DB::table('product_tags')
             ->where('product_id', $productId)
             ->select('product_tag_id', 'tag_name')
@@ -502,7 +495,6 @@ class ProductRepository extends BaseRepository
             'product' => $product,
             'author'  => $author,
             'images'  => $images,
-            'files'   => $files,
             'tags'    => $tags,
             'reviews' => $reviews,
         ];

@@ -3,7 +3,6 @@
 namespace App\Repositories;
 
 use App\Models\Product;
-use App\Models\ProductFile;
 use App\Models\ProductImage;
 use App\Models\ProductTag;
 use App\Models\User;
@@ -38,9 +37,9 @@ class UploadRepository extends BaseRepository
     /**
      * Upload product và liên quan
      */
-    public function upload(array $data, array $uploadedImages, array $uploadedFiles, array $tags, int $thumbnailIndex = 0): Product
+    public function upload(array $data, array $uploadedImages, array $tags, int $thumbnailIndex = 0): Product
     {
-        return DB::transaction(function () use ($data, $uploadedImages, $uploadedFiles, $tags, $thumbnailIndex) {
+        return DB::transaction(function () use ($data, $uploadedImages, $tags, $thumbnailIndex) {
 
             $thumbnail = $uploadedImages[$thumbnailIndex] ?? ($uploadedImages[0] ?? null);
             $otherImages = array_values(array_filter(
@@ -113,17 +112,6 @@ class UploadRepository extends BaseRepository
 
                 default:
                     throw new \Exception("Invalid major_code");
-            }
-
-            foreach ($uploadedFiles as $fileUrl) {
-
-                $extension = pathinfo($fileUrl, PATHINFO_EXTENSION);
-
-                ProductFile::create([
-                    'product_id' => $product->product_id,
-                    'file_url' => $fileUrl,
-                    'file_type' => $extension,
-                ]);
             }
 
             foreach ($otherImages as $imageUrl) {
