@@ -1,30 +1,32 @@
 import { useCallback, useState } from "react";
 import { aiApi } from "../../api/";
 
-export default function useCompareProduct(product_id) {
+export default function useCompareProduct(productId) {
   const [loadingCompare, setLoadingCompare] = useState(false);
   const [errorCompare, setErrorCompare] = useState("");
   const [result, setResult] = useState(null);
 
   const checkCompareProduct = useCallback(async () => {
-    if (!product_id) return null;
+    if (!productId) return null;
 
     setLoadingCompare(true);
     setErrorCompare("");
 
     try {
-      const res = await aiApi.compareAiProduct(product_id);
+      const response = await aiApi.compareAiProduct(productId);
+      setResult(response);
+      return response;
+    } catch (error) {
+      const message =
+        error.response?.data?.message || "Lỗi server khi so sánh sản phẩm";
 
-      setResult(res);
-      return res;
-    } catch (err) {
-      console.error(err);
-      setErrorCompare("Lỗi server khi so sánh sản phẩm");
-      return null;
+      console.error(error);
+      setErrorCompare(message);
+      throw error;
     } finally {
       setLoadingCompare(false);
     }
-  }, [product_id]);
+  }, [productId]);
 
   return {
     result,

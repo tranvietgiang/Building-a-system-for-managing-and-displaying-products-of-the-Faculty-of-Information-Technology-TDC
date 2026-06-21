@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RejectProductRequest;
+use App\Http\Requests\StoreReviewRequest;
 use App\Services\TeacherService;
 use Illuminate\Http\Request;
 
@@ -101,5 +102,15 @@ class TeacherController extends Controller
                 'message' => $e->getMessage()
             ], 422);
         }
+    }
+
+    public function storeReview(StoreReviewRequest $request, int $product_id)
+    {
+        $result = $this->teacherService->addReview(
+            $product_id,
+            $request->validated('comment')
+        );
+
+        return response()->json($result, $result['status'] ?? 200);
     }
 }

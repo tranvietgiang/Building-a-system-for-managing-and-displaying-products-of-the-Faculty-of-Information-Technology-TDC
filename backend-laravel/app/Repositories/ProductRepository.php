@@ -982,34 +982,42 @@ class ProductRepository extends BaseRepository
             ->where('p.product_id', '!=', $productId)
             ->where('p.major_id', $current->major_id)
             ->where(function ($q) use ($current) {
-                $q->where('p.title', $current->title)
-                    ->orWhere('p.description', $current->description)
-                    ->orWhere('p.thumbnail', $current->thumbnail)
-                    ->orWhere('p.github_link', $current->github_link)
-                    ->orWhere('p.demo_link', $current->demo_link)
+                $comparableFields = [
+                    'p.title' => $current->title,
+                    'p.description' => $current->description,
+                    'p.thumbnail' => $current->thumbnail,
+                    'p.github_link' => $current->github_link,
+                    'p.demo_link' => $current->demo_link,
+                    'ai.model_used' => $current->model_used,
+                    'ai.framework' => $current->ai_framework,
+                    'ai.language' => $current->language,
+                    'ai.dataset_used' => $current->dataset_used,
+                    'cntt.programming_language' => $current->programming_language,
+                    'cntt.framework' => $current->cntt_framework,
+                    'cntt.database_used' => $current->database_used,
+                    'mmt.simulation_tool' => $current->simulation_tool,
+                    'mmt.network_protocol' => $current->network_protocol,
+                    'mmt.topology_type' => $current->topology_type,
+                    'mmt.config_file' => $current->config_file,
+                    'gr.design_type' => $current->design_type,
+                    'gr.tools_used' => $current->tools_used,
+                    'gr.drive_link' => $current->drive_link,
+                    'gr.behance_link' => $current->behance_link,
+                ];
+                $hasComparableValue = false;
 
-                    // AI
-                    ->orWhere('ai.model_used', $current->model_used)
-                    ->orWhere('ai.framework', $current->ai_framework)
-                    ->orWhere('ai.language', $current->language)
-                    ->orWhere('ai.dataset_used', $current->dataset_used)
+                foreach ($comparableFields as $column => $value) {
+                    if ($value === null || trim((string) $value) === '') {
+                        continue;
+                    }
 
-                    // CNTT
-                    ->orWhere('cntt.programming_language', $current->programming_language)
-                    ->orWhere('cntt.framework', $current->cntt_framework)
-                    ->orWhere('cntt.database_used', $current->database_used)
+                    $hasComparableValue = true;
+                    $q->orWhere($column, $value);
+                }
 
-                    // MMT
-                    ->orWhere('mmt.simulation_tool', $current->simulation_tool)
-                    ->orWhere('mmt.network_protocol', $current->network_protocol)
-                    ->orWhere('mmt.topology_type', $current->topology_type)
-                    ->orWhere('mmt.config_file', $current->config_file)
-
-                    // Graphic
-                    ->orWhere('gr.design_type', $current->design_type)
-                    ->orWhere('gr.tools_used', $current->tools_used)
-                    ->orWhere('gr.drive_link', $current->drive_link)
-                    ->orWhere('gr.behance_link', $current->behance_link);
+                if (!$hasComparableValue) {
+                    $q->whereRaw('1 = 0');
+                }
             })
             ->select(
                 'p.product_id',

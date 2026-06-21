@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { productApi } from "../../api";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -9,46 +9,53 @@ export default function useProductDetailTeacher(productId) {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!productId) return;
+  const fetchProductDetail = useCallback(
+    async (showSuccessToast = false) => {
+      if (!productId) return null;
 
-    const toastId = "product-detail-toast";
-
-    const fetchProductDetail = async () => {
       try {
-        setLoading(true);
+        if (showSuccessToast) setLoading(true);
         setError(null);
+        const response = await productApi.getProductByIdTeacher(productId);
 
-        const res = await productApi.getProductByIdTeacher(productId);
+        setProduct(response);
+        if (showSuccessToast) {
+          toast.success("Tải dữ liệu chi tiết sản phẩm thành công", {
+            toastId: "product-detail-toast",
+          });
+        }
 
-        toast.success("Tải dữ liệu chi tiết sản phẩm thành công", {
-          toastId,
-        });
-
-        setProduct(res);
+        return response;
       } catch (err) {
         if (
           err.response?.status === 404 ||
           err.response?.data?.product_result === false
         ) {
-          navigate("/not-found");
           setProduct(null);
           setError(err.response?.data?.message || "Không tìm thấy sản phẩm");
+          navigate("/not-found");
         } else {
           setError("Không tải được chi tiết sản phẩm");
         }
+
+        throw err;
       } finally {
-        setLoading(false);
+        if (showSuccessToast) setLoading(false);
       }
-    };
+    },
+    [productId, navigate],
+  );
 
-    fetchProductDetail();
+  useEffect(() => {
+    fetchProductDetail(true).catch(() => {});
 
-    // 👇 cleanup khi đổi route / unmount
-    return () => {
-      toast.dismiss(toastId);
-    };
-  }, [productId, navigate]);
+    return () => toast.dismiss("product-detail-toast");
+  }, [fetchProductDetail]);
 
-  return { product, loading, error };
+  const mutate = useCallback(
+    () => fetchProductDetail(false),
+    [fetchProductDetail],
+  );
+
+  return { product, loading, error, mutate };
 }

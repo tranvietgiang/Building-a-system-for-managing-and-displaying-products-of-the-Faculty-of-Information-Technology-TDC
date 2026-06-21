@@ -95,6 +95,7 @@ Route::prefix('v1')->group(function () {
     Route::middleware(['auth:sanctum', 'role:teacher,admin'])->prefix('teacher')->group(function () {
         Route::get('/product/{product_id}', [ProductController::class, 'productViewIdTeacher']);
         Route::post('/product/{product_id}/approve', [TeacherController::class, 'teacherApprove']);
+        Route::post('/product/{product_id}/reviews', [TeacherController::class, 'storeReview']);
         Route::post('/product/reject', [TeacherController::class, 'teacherReject']);
     });
     /*

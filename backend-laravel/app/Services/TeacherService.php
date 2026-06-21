@@ -148,4 +148,51 @@ class TeacherService extends BaseRepository
             'data' => $product
         ];
     }
+
+    public function addReview(int $productId, string $comment): array
+    {
+        $user = request()->user();
+        $product = Product::query()->find($productId);
+
+        if (!$product) {
+            return [
+                'result' => false,
+                'status' => 404,
+                'message' => 'Sản phẩm không tồn tại.',
+            ];
+        }
+
+        if ($user->role !== 'admin' && (int) $user->major_id !== (int) $product->major_id) {
+            return [
+                'result' => false,
+                'status' => 403,
+                'message' => 'Bạn không có quyền nhận xét sản phẩm thuộc chuyên ngành khác.',
+            ];
+        }
+
+        $review = $this->review_repo->create([
+            'product_id' => $productId,
+            'teacher_id' => $user->user_id,
+            'comment' => trim($comment),
+        ]);
+        $review->load('teacher:user_id,name,email,role');
+
+        return [
+            'result' => true,
+            'status' => 201,
+            'message' => 'Đã gửi nhận xét thành công.',
+            'data' => [
+                'review_id' => $review->review_id,
+                'teacher_id' => $review->teacher_id,
+                'comment' => $review->comment,
+                'created_at' => $review->created_at,
+                'teacher' => [
+                    'user_id' => $review->teacher?->user_id,
+                    'fullname' => $review->teacher?->name,
+                    'email' => $review->teacher?->email,
+                    'role' => $review->teacher?->role,
+                ],
+            ],
+        ];
+    }
 }

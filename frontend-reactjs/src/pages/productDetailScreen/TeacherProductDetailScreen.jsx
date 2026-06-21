@@ -48,8 +48,7 @@ const TeacherProductDetailScreen = () => {
     useTeacherApprove();
   const { teacherReject, loading_reject, error_reject } = useTeacherReject();
 
-  const { checkCompareProduct, loadingCompare, errorCompare } =
-    useCompareProduct(id);
+  const { checkCompareProduct, loadingCompare } = useCompareProduct(id);
 
   const images = useMemo(() => product?.images || [], [product]);
   const productData = useMemo(() => product?.product || {}, [product]);
@@ -68,11 +67,12 @@ const TeacherProductDetailScreen = () => {
   );
 
   const handleSubmitReviewOriginal = useHandleSubmitReview(
-    confirmToast,
-    setIsSubmitting,
+    id,
+    reviewComment,
     toast,
+    setIsSubmitting,
+    setReviewComment,
     mutate,
-    navigate,
   );
 
   const submitRejectionOriginal = useHandleSubmitRejection(
@@ -152,22 +152,31 @@ const TeacherProductDetailScreen = () => {
     try {
       const data = await checkCompareProduct();
 
-      // console.log("FULL DATA", data);
+      const matches = Array.isArray(data?.matches)
+        ? data.matches
+        : [
+            ...(data?.matches?.approved || []),
+            ...(data?.matches?.unapproved || []),
+          ];
 
-      if (data?.status == true) {
-        navigate("/so-sanh-ai", {
-          state: {
-            currentProduct: data?.current_product || null,
-            matches: data?.matches || [],
-            summary: data?.summary || "",
-            time: Date.now(),
-          },
-        });
-      } else {
-        toast.warning("không có sản phẩm nào trùng!");
+      if (!data?.success || matches.length === 0) {
+        toast.warning("Không có sản phẩm nào trùng!");
+        return;
       }
+
+      navigate("/so-sanh-ai", {
+        state: {
+          currentProduct: data.current_product,
+          matches: data.matches,
+          summary: data.summary || "",
+          time: Date.now(),
+        },
+      });
     } catch (error) {
       console.error(error);
+      toast.error(
+        error.response?.data?.message || "Lỗi server khi so sánh sản phẩm",
+      );
     }
   };
 
@@ -225,14 +234,6 @@ const TeacherProductDetailScreen = () => {
         {typeof error_reject === "string"
           ? error_reject
           : error_reject?.message || "Có lỗi xảy ra khi từ chối"}
-      </div>
-    );
-  }
-
-  if (errorCompare) {
-    return (
-      <div className="mb-4 p-3 bg-red-100 text-red-600 rounded-lg">
-        {errorCompare}
       </div>
     );
   }

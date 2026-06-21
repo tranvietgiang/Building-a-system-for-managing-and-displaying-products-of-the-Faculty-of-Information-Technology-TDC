@@ -19,6 +19,8 @@ const teacherApi = {
   approve: (productId, data = {}) =>
     axiosClient.post(`/teacher/product/${productId}/approve`, data),
   reject: (data) => axiosClient.post("/teacher/product/reject", data),
+  submitReview: (productId, comment) =>
+    axiosClient.post(`/teacher/product/${productId}/reviews`, { comment }),
 };
 
 export default teacherApi;

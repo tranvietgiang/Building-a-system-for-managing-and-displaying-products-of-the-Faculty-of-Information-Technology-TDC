@@ -1,29 +1,42 @@
+import { useCallback } from "react";
+import teacherApi from "../../api/teacher.api";
+
 export const useHandleSubmitReview = (
+  productId,
   reviewComment,
   toast,
   setIsSubmitting,
   setReviewComment,
   mutate,
-) => {
-  const handleSubmitReview = () => {
-    if (!reviewComment.trim()) {
+) =>
+  useCallback(async () => {
+    const comment = reviewComment.trim();
+
+    if (!comment) {
       toast.warning("Vui lòng nhập nhận xét!");
       return;
     }
 
     setIsSubmitting(true);
     try {
-      // Gọi API gửi nhận xét
-      // await submitReview(id, { comment: reviewComment });
-      toast.success("✅ Đã gửi nhận xét thành công!");
+      const response = await teacherApi.submitReview(productId, comment);
       setReviewComment("");
-      mutate();
+      await mutate();
+      toast.success(response?.message || "Đã gửi nhận xét thành công!");
     } catch (error) {
       console.error(error);
-      toast.error("❌ Có lỗi xảy ra, vui lòng thử lại!");
+      toast.error(
+        error.response?.data?.message ||
+          "Có lỗi xảy ra, vui lòng thử lại!",
+      );
     } finally {
       setIsSubmitting(false);
     }
-  };
-  return handleSubmitReview;
-};
+  }, [
+    productId,
+    reviewComment,
+    toast,
+    setIsSubmitting,
+    setReviewComment,
+    mutate,
+  ]);
