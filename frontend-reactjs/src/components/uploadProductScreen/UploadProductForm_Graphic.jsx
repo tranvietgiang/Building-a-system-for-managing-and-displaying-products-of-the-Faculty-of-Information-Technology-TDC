@@ -465,7 +465,7 @@ const UploadProductForm_Graphic = ({
               </div>
 
               {/* Upload file nguồn */}
-              <div>
+              <div className="hidden">
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
                   File nguồn (PSD, AI, Figma, PDF, video)
                  {" "}<span className="ml-1 text-xs font-normal text-gray-400">(có thể bỏ qua)</span></label>
@@ -886,10 +886,8 @@ const UploadProductForm_Graphic = ({
                 </div>
               )}
               <button
-                onClick={() => {
-                  setOpenViewDraft(false);
-                  window.location.reload();
-                }}
+                type="button"
+                onClick={() => setOpenViewDraft(false)}
                 className="mt-4 w-full rounded-lg bg-gray-200 py-2 hover:bg-gray-300"
               >
                 Đóng
