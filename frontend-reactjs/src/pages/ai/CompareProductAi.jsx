@@ -316,8 +316,8 @@ export default function CompareProductAi() {
                     onClick={() => setSelectedMatch(product)}
                     className={`text-left rounded-lg border p-4 transition ${
                       isSelected
-                        ? "border-blue-500 bg-blue-50 shadow-sm"
-                        : "border-gray-200 bg-white hover:border-blue-300 hover:bg-gray-50"
+                        ? "border-red-800 bg-red-50 shadow-sm"
+                        : "border-gray-200 bg-white hover:border-red-400 hover:bg-red-50/40"
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">
@@ -342,7 +342,7 @@ export default function CompareProductAi() {
                       <span
                         className={`px-2 py-1 rounded-full text-xs font-semibold ${
                           duplicateFields.length > 0
-                            ? "bg-green-50 text-green-700"
+                            ? "bg-red-800 text-white"
                             : "bg-gray-100 text-gray-600"
                         }`}
                       >
@@ -364,7 +364,13 @@ export default function CompareProductAi() {
         {selectedMatch && overlap && (
           <>
             {/* Overlap Summary Section */}
-            <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl shadow-lg p-6 mb-8 text-white">
+            <div
+              className={`bg-gradient-to-r rounded-2xl shadow-lg p-6 mb-8 text-white ${
+                overlap.matchCount > 0
+                  ? "from-red-700 to-red-900"
+                  : "from-blue-500 to-blue-600"
+              }`}
+            >
               <h2 className="text-xl font-bold mb-4">
                 📊 Tổng quan độ trùng khớp
               </h2>
@@ -387,7 +393,7 @@ export default function CompareProductAi() {
                         key={`${detail.key}-${idx}`}
                         className={`px-2 py-1 rounded-full text-xs font-medium ${
                           detail.isMatch
-                            ? "bg-green-500 text-white"
+                            ? "bg-red-950 text-white"
                             : "bg-gray-500 text-white"
                         }`}
                       >
@@ -487,7 +493,7 @@ export default function CompareProductAi() {
                           key={field.key}
                           className={`rounded-lg p-3 ${
                             detail?.isMatch
-                              ? "bg-green-50 border border-green-200"
+                              ? "bg-red-100 border-2 border-red-700"
                               : "bg-gray-50"
                           }`}
                         >
@@ -502,7 +508,7 @@ export default function CompareProductAi() {
                               </p>
                             </div>
                             {detail?.isMatch && (
-                              <span className="text-green-600 text-sm font-bold ml-2">
+                              <span className="text-red-800 text-sm font-bold ml-2">
                                 ✓ Trùng
                               </span>
                             )}
@@ -553,7 +559,7 @@ export default function CompareProductAi() {
                       {overlap.details.map((detail, idx) => (
                         <tr
                           key={`${detail.key}-${idx}`}
-                          className={detail.isMatch ? "bg-green-50" : ""}
+                          className={detail.isMatch ? "bg-red-100" : ""}
                         >
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                             {detail.label}
@@ -566,11 +572,11 @@ export default function CompareProductAi() {
                           </td>
                           <td className="px-6 py-4 text-center text-sm">
                             {detail.isMatch ? (
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-800 text-white">
                                 ✓ Trùng
                               </span>
                             ) : (
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
                                 ✗ Khác
                               </span>
                             )}
@@ -644,11 +650,29 @@ export default function CompareProductAi() {
                 </div>
                 <div className="p-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="bg-blue-50 rounded-lg p-4">
-                      <p className="text-sm text-blue-600 font-semibold">
+                    <div
+                      className={`rounded-lg p-4 ${
+                        selectedMatch.ai_similarity >= 85
+                          ? "bg-red-100 border-2 border-red-700"
+                          : "bg-blue-50"
+                      }`}
+                    >
+                      <p
+                        className={`text-sm font-semibold ${
+                          selectedMatch.ai_similarity >= 85
+                            ? "text-red-800"
+                            : "text-blue-600"
+                        }`}
+                      >
                         Độ tương đồng
                       </p>
-                      <p className="text-2xl font-bold text-blue-700">
+                      <p
+                        className={`text-2xl font-bold ${
+                          selectedMatch.ai_similarity >= 85
+                            ? "text-red-950"
+                            : "text-blue-700"
+                        }`}
+                      >
                         {selectedMatch.ai_similarity}%
                       </p>
                     </div>

@@ -31,6 +31,7 @@ export default function useUploadBaseForm({
   const [loading, setLoading] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
   const [drafts, setDrafts] = useState([]);
+  const [loadedDraftId, setLoadedDraftId] = useState(null);
   const [openViewDraft, setOpenViewDraft] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [statusApi, setStatusApi] = useState(null);
@@ -269,6 +270,7 @@ export default function useUploadBaseForm({
   };
 
   const handleLoadDraft = (draft) => {
+    setLoadedDraftId(draft.id ?? null);
     setFormData({ ...(initialData || {}), ...(draft.formData || {}) });
     setImages(restoreDraftImages(draft.images));
     setTags(draft.tags || []);
@@ -294,6 +296,7 @@ export default function useUploadBaseForm({
 
       await saveDrafts(scopedDraftKey, next);
       setDrafts(next);
+      setLoadedDraftId((currentId) => (currentId === id ? null : currentId));
       toast.success("Đã xóa bản nháp");
     } catch (error) {
       console.error("Delete draft error:", error);
@@ -358,6 +361,23 @@ export default function useUploadBaseForm({
 
         setSubmitStatus("success");
         setStatusApi(res);
+
+        if (loadedDraftId !== null && scopedDraftKey) {
+          try {
+            const old = await getDrafts(scopedDraftKey, draftKey);
+            const next = old.filter((draft) => draft.id !== loadedDraftId);
+
+            await saveDrafts(scopedDraftKey, next);
+            setDrafts(next);
+            setLoadedDraftId(null);
+          } catch (draftError) {
+            console.error("Delete published draft error:", draftError);
+            toast.warning(
+              "Sản phẩm đã đăng nhưng chưa thể xóa bản nháp khỏi trình duyệt",
+            );
+          }
+        }
+
         toast.success(res.message || "Đăng thành công");
       } catch (error) {
         setSubmitStatus("error");
@@ -369,7 +389,17 @@ export default function useUploadBaseForm({
         setLoading(false);
       }
     },
-    [majorCode, formData, tags, images, thumbnailIndex, user],
+    [
+      majorCode,
+      formData,
+      tags,
+      images,
+      thumbnailIndex,
+      user,
+      loadedDraftId,
+      scopedDraftKey,
+      draftKey,
+    ],
   );
 
   return {
