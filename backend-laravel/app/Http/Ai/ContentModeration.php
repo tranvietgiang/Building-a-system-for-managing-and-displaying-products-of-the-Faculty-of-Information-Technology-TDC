@@ -125,26 +125,7 @@ class ContentModeration
                 return $this->blocked('Invalid AI response format');
             }
 
-            $approved = (bool) ($result['approved'] ?? false);
-            $violations = $this->formatViolations($result['violations'] ?? []);
-            $reason = trim($result['reason'] ?? '');
-
-            //  reduce false positive (important)
-            if (!$approved && count($violations) === 0) {
-                return [
-                    'approved' => true,
-                    'reason' => 'Auto-approved (no strong violations)',
-                    'violations' => [],
-                    'raw' => $result,
-                ];
-            }
-
-            return [
-                'approved' => $approved,
-                'reason' => $reason ?: ($approved ? 'OK' : 'Rejected by AI'),
-                'violations' => $violations,
-                'raw' => $result,
-            ];
+            return $this->normalizeModerationResult($result);
         } catch (\Throwable $e) {
             Log::error('AI moderation exception', [
                 'message' => $e->getMessage(),
@@ -236,12 +217,7 @@ class ContentModeration
                 return $this->blocked('Invalid AI response format');
             }
 
-            return [
-                'approved' => (bool) ($result['approved'] ?? false),
-                'reason' => trim($result['reason'] ?? ''),
-                'violations' => $this->formatViolations($result['violations'] ?? []),
-                'raw' => $result,
-            ];
+            return $this->normalizeModerationResult($result);
         } catch (\Throwable $e) {
             return $this->blocked($e->getMessage());
         }
@@ -292,6 +268,67 @@ class ContentModeration
 
             return trim((string) $violation);
         }, $violations)));
+    }
+
+    private function normalizeModerationResult(array $result): array
+    {
+        $approved = (bool) ($result['approved'] ?? false);
+        $violations = $this->formatViolations($result['violations'] ?? []);
+        $reason = trim($result['reason'] ?? '');
+
+        if (!$approved && $this->isSafeEducationalSoftwareScreenshot($result, $violations)) {
+            return [
+                'approved' => true,
+                'reason' => 'Ảnh giao diện phần mềm giáo dục có dữ liệu minh họa hợp lệ',
+                'violations' => [],
+                'raw' => $result,
+            ];
+        }
+
+        // Giảm false-positive khi AI từ chối nhưng không nêu được vi phạm cụ thể.
+        if (!$approved && count($violations) === 0) {
+            return [
+                'approved' => true,
+                'reason' => 'Auto-approved (no strong violations)',
+                'violations' => [],
+                'raw' => $result,
+            ];
+        }
+
+        return [
+            'approved' => $approved,
+            'reason' => $reason ?: ($approved ? 'OK' : 'Rejected by AI'),
+            'violations' => $violations,
+            'raw' => $result,
+        ];
+    }
+
+    private function isSafeEducationalSoftwareScreenshot(array $result, array $violations): bool
+    {
+        $checks = $result['checks'] ?? [];
+
+        if (($checks['software_ui_or_prototype'] ?? false) !== true
+            || ($checks['image_related'] ?? false) !== true
+            || ($checks['major_match'] ?? false) !== true) {
+            return false;
+        }
+
+        foreach (['adult_or_sensitive', 'violence_or_danger', 'spam_or_meme', 'watermark_or_stolen_signal'] as $check) {
+            if (($checks[$check] ?? false) === true) {
+                return false;
+            }
+        }
+
+        $allowedPrivacyTerms = [
+            'sinh viên', 'học viên', 'thí sinh', 'mssv', 'mã sinh viên',
+            'mã học viên', 'điểm số', 'bảng điểm', 'ngày sinh', 'địa chỉ',
+            'họ và tên', 'thông tin cá nhân', 'thông tin nhạy cảm',
+        ];
+
+        return count($violations) > 0 && collect($violations)->every(function ($violation) use ($allowedPrivacyTerms) {
+            $text = Str::lower($violation);
+            return collect($allowedPrivacyTerms)->contains(fn ($term) => str_contains($text, $term));
+        });
     }
 
     private function resolveImageUrl(Product $product, array $frontendContext): ?string
@@ -427,6 +464,10 @@ class ContentModeration
         - Nếu vi phạm nằm trong hình ảnh, mỗi phần tử violations phải bắt đầu bằng "Ảnh:" và ghi rõ nội dung nhìn thấy trong ảnh
         - Nếu trong ảnh có chữ, logo, watermark, thông tin nhạy cảm hoặc nội dung gây vi phạm, hãy ghi lại ngắn gọn chính thông tin/chữ đó trong violations
         - Không trả violations chung chung như "image_related" hoặc "adult_or_sensitive"; phải ghi rõ ví dụ: "Ảnh: có chữ ...", "Ảnh: có watermark ...", "Ảnh: nội dung không liên quan ..."
+        - Ảnh chụp giao diện phần mềm, bài tập, prototype quản lý học viên/sinh viên/thí sinh hoặc quản lý điểm là nội dung giáo dục hợp lệ.
+        - Tên, MSSV, mã học viên, ngày sinh, địa chỉ và điểm số xuất hiện bên trong giao diện phần mềm demo phải được xem là dữ liệu minh họa; KHÔNG từ chối chỉ vì các trường hoặc dữ liệu này.
+        - Chỉ xem là vi phạm riêng tư khi đó rõ ràng là ảnh tài liệu/hồ sơ/bảng điểm thật (không phải UI phần mềm demo) hoặc lộ định danh rủi ro cao như CCCD/hộ chiếu, số điện thoại, email cá nhân hay tài khoản đăng nhập.
+        - Đặt checks.software_ui_or_prototype=true khi ảnh là screenshot giao diện ứng dụng, website, desktop app, mockup hoặc prototype.
 
         Định dạng trả về:
 
@@ -443,7 +484,8 @@ class ContentModeration
                 "violence_or_danger": false,
                 "spam_or_meme": false,
                 "major_match": true,
-                "watermark_or_stolen_signal": false
+                "watermark_or_stolen_signal": false,
+                "software_ui_or_prototype": false
             }
         }
 
