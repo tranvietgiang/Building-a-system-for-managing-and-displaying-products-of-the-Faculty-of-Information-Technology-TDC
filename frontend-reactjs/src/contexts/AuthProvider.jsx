@@ -4,9 +4,10 @@ import {
   getToken,
   getUser,
   setToken,
+  setRefreshToken,
+  getRefreshToken,
   setUser as setStoredUser,
   clearAuth,
-  removeToken,
   removeUser,
 } from "../utils/storage";
 import authApi from "../api/auth.api";
@@ -53,11 +54,12 @@ export const AuthProvider = ({ children }) => {
     try {
       const res = await authApi.login(data);
 
-      if (!res?.success || !res?.token || !res?.user) {
+      if (!res?.success || !res?.token || !res?.refresh_token || !res?.user) {
         throw new Error(res?.message || "Sai tài khoản hoặc mật khẩu!");
       }
 
       setToken(res.token);
+      setRefreshToken(res.refresh_token);
       setTokenState(res.token);
 
       setStoredUser(res.user);
@@ -65,8 +67,7 @@ export const AuthProvider = ({ children }) => {
 
       return res;
     } catch (error) {
-      removeToken();
-      removeUser();
+      clearAuth();
       setTokenState(null);
       setUserState(null);
       throw error;
@@ -86,7 +87,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await authApi.logout();
+      await authApi.logout({ refresh_token: getRefreshToken() });
     } catch (err) {
       console.log(err);
     } finally {

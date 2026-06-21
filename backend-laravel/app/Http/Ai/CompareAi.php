@@ -168,7 +168,7 @@ class CompareAi
             $prompt = $this->buildComparisonPrompt($a, $b, $projectType);
 
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . env('OPENAI_API_KEY'),
+                'Authorization' => 'Bearer ' . config('services.openai.key'),
                 'Content-Type' => 'application/json',
             ])->post('https://api.openai.com/v1/chat/completions', [
                 'model' => 'gpt-4o-mini',

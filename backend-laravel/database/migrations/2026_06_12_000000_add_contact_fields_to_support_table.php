@@ -23,12 +23,16 @@ return new class extends Migration
             }
         });
 
-        DB::statement("ALTER TABLE support MODIFY type ENUM('password_recovery', 'contact') DEFAULT 'password_recovery'");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE support MODIFY type ENUM('password_recovery', 'contact') DEFAULT 'password_recovery'");
+        }
     }
 
     public function down(): void
     {
-        DB::statement("ALTER TABLE support MODIFY type ENUM('password_recovery') DEFAULT 'password_recovery'");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE support MODIFY type ENUM('password_recovery') DEFAULT 'password_recovery'");
+        }
 
         Schema::table('support', function (Blueprint $table) {
             $table->dropColumn(['phone', 'subject', 'message']);

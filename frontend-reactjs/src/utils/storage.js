@@ -1,4 +1,5 @@
 const TOKEN_KEY = "access_token";
+const REFRESH_TOKEN_KEY = "refresh_token";
 const USER_KEY = "auth_user";
 
 // Token
@@ -10,6 +11,17 @@ export const setToken = (token) => {
 };
 
 export const removeToken = () => sessionStorage.removeItem(TOKEN_KEY);
+
+export const getRefreshToken = () =>
+  sessionStorage.getItem(REFRESH_TOKEN_KEY) || null;
+
+export const setRefreshToken = (token) => {
+  if (!token) return;
+  sessionStorage.setItem(REFRESH_TOKEN_KEY, token);
+};
+
+export const removeRefreshToken = () =>
+  sessionStorage.removeItem(REFRESH_TOKEN_KEY);
 
 // User
 export const getUser = () => {
@@ -35,5 +47,6 @@ export const removeUser = () => sessionStorage.removeItem(USER_KEY);
 // Clear all auth
 export const clearAuth = () => {
   removeToken();
+  removeRefreshToken();
   removeUser();
 };

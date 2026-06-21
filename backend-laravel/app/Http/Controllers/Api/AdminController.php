@@ -114,7 +114,7 @@ class AdminController extends Controller
     {
         $fallback = $this->buildFallbackDashboardInsights($totals, $majors);
 
-        if (!env('OPENAI_API_KEY') || !$this->settings->enabled(SystemSettingService::AI_DASHBOARD_INSIGHTS)) {
+        if (!config('services.openai.key') || !$this->settings->enabled(SystemSettingService::AI_DASHBOARD_INSIGHTS)) {
             return $fallback;
         }
 
@@ -126,10 +126,10 @@ class AdminController extends Controller
 
         try {
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . env('OPENAI_API_KEY'),
+                'Authorization' => 'Bearer ' . config('services.openai.key'),
                 'Content-Type' => 'application/json',
             ])->timeout(20)->post('https://api.openai.com/v1/chat/completions', [
-                'model' => env('OPENAI_DASHBOARD_MODEL', 'gpt-4o-mini'),
+                'model' => config('services.openai.dashboard_model', 'gpt-4o-mini'),
                 'messages' => [
                     [
                         'role' => 'system',

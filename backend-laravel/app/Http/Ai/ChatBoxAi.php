@@ -428,7 +428,7 @@ class ChatBoxAi
         $systemPrompt = $this->buildSystemPrompt($role, $data, $user);
 
         $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . env('OPENAI_API_KEY'),
+            'Authorization' => 'Bearer ' . config('services.openai.key'),
             'Content-Type'  => 'application/json',
         ])->timeout(30)->post('https://api.openai.com/v1/responses', [
             'model' => 'gpt-4.1-mini',

@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Laravel\Scout\Searchable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
@@ -67,5 +68,10 @@ class User extends Authenticatable
     public function products()
     {
         return $this->hasMany(Product::class, 'user_id', 'user_id');
+    }
+
+    public function refreshTokens(): HasMany
+    {
+        return $this->hasMany(RefreshToken::class, 'user_id', 'user_id');
     }
 }

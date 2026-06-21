@@ -22,7 +22,7 @@ class ContentModeration
             return $this->skipped('AI product checking disabled');
         }
 
-        $apiKey = env('OPENAI_API_KEY');
+        $apiKey = config('services.openai.key');
 
         if (!$apiKey) {
             return $this->blocked('Missing OPENAI_API_KEY');
@@ -84,7 +84,7 @@ class ContentModeration
             ])
                 ->timeout(45)
                 ->post('https://api.openai.com/v1/chat/completions', [
-                    'model' => env('OPENAI_VISION_MODEL', 'gpt-4o-mini'),
+                    'model' => config('services.openai.vision_model', 'gpt-4o-mini'),
                     'messages' => $messages,
                     'temperature' => 0.2,
                     'max_tokens' => 1000,
@@ -143,7 +143,7 @@ class ContentModeration
             return $this->skipped('AI product checking disabled');
         }
 
-        $apiKey = env('OPENAI_API_KEY');
+        $apiKey = config('services.openai.key');
 
         if (!$apiKey) {
             return $this->blocked('Missing OPENAI_API_KEY');
@@ -181,7 +181,7 @@ class ContentModeration
             ])
                 ->timeout(45)
                 ->post('https://api.openai.com/v1/chat/completions', [
-                    'model' => env('OPENAI_VISION_MODEL', 'gpt-4o-mini'),
+                    'model' => config('services.openai.vision_model', 'gpt-4o-mini'),
                     'messages' => [
                         [
                             'role' => 'system',

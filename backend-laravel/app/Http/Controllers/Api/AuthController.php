@@ -28,6 +28,9 @@ class AuthController extends Controller
     public function logout(Request $rq)
     {
         $user = $rq->user();
+        $validated = $rq->validate([
+            'refresh_token' => ['nullable', 'string'],
+        ]);
 
         // Log the logout action
         ActivityLog::create([
@@ -36,11 +39,32 @@ class AuthController extends Controller
             'ip_address' => $rq->ip(),
         ]);
 
-        $user->currentAccessToken()->delete();
+        $this->authService->revokeRefreshToken($validated['refresh_token'] ?? null, $user->user_id);
+        $user->currentAccessToken()?->delete();
 
         return response()->json([
             'success' => true,
             'message' => 'Đăng xuất thành công!'
+        ]);
+    }
+
+    public function refresh(Request $request)
+    {
+        $validated = $request->validate([
+            'refresh_token' => ['required', 'string'],
+        ]);
+        $tokens = $this->authService->refresh($validated['refresh_token']);
+
+        if (!$tokens) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Refresh token không hợp lệ hoặc đã hết hạn.',
+            ], 401);
+        }
+
+        return response()->json([
+            'success' => true,
+            ...$tokens,
         ]);
     }
 

@@ -35,6 +35,8 @@ Route::prefix('v1')->group(function () {
     // Xác thực người dùng
     Route::post('/login', [AuthController::class, 'login'])
         ->middleware('throttle:5,1');
+    Route::post('/refresh', [AuthController::class, 'refresh'])
+        ->middleware('throttle:10,1');
     Route::post('/support/password-recovery', [AuthController::class, 'submitPasswordRecovery'])
         ->middleware('throttle:5,1');
     Route::post('/support/contact', [AuthController::class, 'submitContact'])

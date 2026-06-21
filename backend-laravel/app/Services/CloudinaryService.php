@@ -10,7 +10,7 @@ class CloudinaryService
 
     public function __construct()
     {
-        $this->cloudinary = new Cloudinary(env('CLOUDINARY_URL'));
+        $this->cloudinary = new Cloudinary(config('services.cloudinary.url'));
     }
 
     public function upload($file)

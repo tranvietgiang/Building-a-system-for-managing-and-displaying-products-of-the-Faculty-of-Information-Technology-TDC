@@ -158,6 +158,8 @@ jobs:
           CLOUDINARY_URL: ${{ secrets.CLOUDINARY_URL }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
+          test -n "$CLOUDINARY_URL"
+          test -n "$OPENAI_API_KEY"
           cat > backend-laravel/.env.production <<EOF
           APP_NAME="TDC Gallery"
           APP_ENV=production
@@ -202,6 +204,9 @@ jobs:
 
           CLOUDINARY_URL="$CLOUDINARY_URL"
           OPENAI_API_KEY="$OPENAI_API_KEY"
+
+          ACCESS_TOKEN_TTL_MINUTES=15
+          REFRESH_TOKEN_TTL_DAYS=30
           EOF
 
       - name: Deploy backend source

@@ -35,9 +35,15 @@ return [
         ],
 
     ],
-    // 'openai' => [
-    //     'key' => env('OPENAI_API_KEY'),
-    // ],
+    'openai' => [
+        'key' => env('OPENAI_API_KEY'),
+        'vision_model' => env('OPENAI_VISION_MODEL', 'gpt-4o-mini'),
+        'dashboard_model' => env('OPENAI_DASHBOARD_MODEL', 'gpt-4o-mini'),
+    ],
+
+    'cloudinary' => [
+        'url' => env('CLOUDINARY_URL'),
+    ],
     'sightengine' => [
         'user' => env('SIGHTENGINE_USER'),
         'secret' => env('SIGHTENGINE_SECRET'),
