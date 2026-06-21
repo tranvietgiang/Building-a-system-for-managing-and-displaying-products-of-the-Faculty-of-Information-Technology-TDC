@@ -64,10 +64,6 @@ const ITDetailScreen = ({
     }
   };
 
-  const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text);
-  };
-
   if (loadingVisitorDetail) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50">
@@ -112,7 +108,7 @@ const ITDetailScreen = ({
               <span
                 className={`px-3 py-1.5 ${theme.badgeBg} backdrop-blur-sm rounded-full text-xs font-medium`}
               >
-                💻 {majorDetail.programming_language || "Fullstack"} Developer
+                💻 {majorDetail.programming_language || "CNTT"}
               </span>
               <button
                 onClick={() => navigate("/dang-nhap")}
@@ -239,8 +235,8 @@ const ITDetailScreen = ({
               <div className="flex gap-1 p-2 bg-gray-50/80 border-b">
                 {[
                   { id: "overview", label: "📖 Tổng quan" },
-                  { id: "database", label: "🗄️ Database" },
-                  { id: "api", label: "🔌 API" },
+                  { id: "technical", label: "🛠️ Kỹ thuật" },
+                  { id: "resources", label: "🔗 Tài nguyên" },
                   { id: "team", label: "👥 Đội ngũ" },
                 ].map((tab) => (
                   <button
@@ -264,140 +260,79 @@ const ITDetailScreen = ({
 
               <div className="p-6">
                 {activeTab === "overview" && (
-                  <div className="space-y-6">
-                    <p className="text-gray-600 leading-relaxed">
-                      {productVisitorDetail?.description}
-                    </p>
-                    <div>
-                      <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                        <span className="text-xl">🏗️</span> Kiến trúc hệ thống
-                      </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="p-4 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50">
-                          <div className="text-2xl mb-2">🎨</div>
-                          <div className="font-semibold">Frontend</div>
-                          <div className="text-sm text-gray-500 mt-1">
-                            ReactJS / TypeScript
-                          </div>
-                        </div>
-                        <div className="p-4 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50">
-                          <div className="text-2xl mb-2">⚙️</div>
-                          <div className="font-semibold">Backend</div>
-                          <div className="text-sm text-gray-500 mt-1">
-                            {majorDetail.framework || "Express"} / Node.js
-                          </div>
-                        </div>
-                        <div className="p-4 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50">
-                          <div className="text-2xl mb-2">🗄️</div>
-                          <div className="font-semibold">Database</div>
-                          <div className="text-sm text-gray-500 mt-1">
-                            {majorDetail.database_used || "PostgreSQL"}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {activeTab === "database" && (
                   <div className="space-y-4">
-                    <div className="p-4 rounded-xl bg-gray-50">
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="text-xl">📊</span>
-                        <h4 className="font-semibold text-gray-800">
-                          Database Schema
-                        </h4>
-                      </div>
-                      <div className="space-y-2 text-sm">
-                        {[
-                          {
-                            table: "users",
-                            fields: "id, name, email, password, created_at",
-                          },
-                          {
-                            table: "products",
-                            fields: "id, name, description, price, user_id",
-                          },
-                          {
-                            table: "orders",
-                            fields:
-                              "id, product_id, quantity, status, order_date",
-                          },
-                        ].map((item, i) => (
-                          <div key={i} className="p-3 bg-white rounded-lg">
-                            <span className="font-semibold text-blue-600">
-                              {item.table}
-                            </span>
-                            <span className="text-gray-500 ml-2">
-                              → {item.fields}
-                            </span>
-                          </div>
-                        ))}
+                    <h4 className="font-semibold text-gray-800">
+                      Giới thiệu sản phẩm
+                    </h4>
+                    <p className="text-gray-600 leading-relaxed">
+                      {productVisitorDetail?.description ||
+                        "Sản phẩm chưa có nội dung giới thiệu."}
+                    </p>
+                  </div>
+                )}
+
+                {activeTab === "technical" && (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="p-4 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50">
+                      <div className="text-2xl mb-2">💻</div>
+                      <div className="font-semibold">Ngôn ngữ lập trình</div>
+                      <div className="text-sm text-gray-500 mt-1">
+                        {majorDetail.programming_language || "Chưa cập nhật"}
                       </div>
                     </div>
-                    <div className="p-4 rounded-xl bg-green-50">
-                      <div className="flex items-center gap-2">
-                        <span>✅</span>
-                        <span className="text-sm">
-                          Relations: One-to-Many, Many-to-Many
-                        </span>
+                    <div className="p-4 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50">
+                      <div className="text-2xl mb-2">⚙️</div>
+                      <div className="font-semibold">Framework</div>
+                      <div className="text-sm text-gray-500 mt-1">
+                        {majorDetail.framework || "Chưa cập nhật"}
+                      </div>
+                    </div>
+                    <div className="p-4 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50">
+                      <div className="text-2xl mb-2">🗄️</div>
+                      <div className="font-semibold">Database</div>
+                      <div className="text-sm text-gray-500 mt-1">
+                        {majorDetail.database_used || "Chưa cập nhật"}
                       </div>
                     </div>
                   </div>
                 )}
 
-                {activeTab === "api" && (
-                  <div className="space-y-3">
-                    {[
-                      {
-                        method: "GET",
-                        endpoint: "/api/users",
-                        desc: "Lấy danh sách users",
-                      },
-                      {
-                        method: "POST",
-                        endpoint: "/api/users",
-                        desc: "Tạo user mới",
-                      },
-                      {
-                        method: "PUT",
-                        endpoint: "/api/users/:id",
-                        desc: "Cập nhật user",
-                      },
-                      {
-                        method: "DELETE",
-                        endpoint: "/api/users/:id",
-                        desc: "Xóa user",
-                      },
-                    ].map((api, i) => (
-                      <div
-                        key={i}
-                        className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition"
+                {activeTab === "resources" && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {productVisitorDetail?.resources?.github && (
+                      <a
+                        href={productVisitorDetail.resources.github}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-5 rounded-xl border border-gray-200 hover:border-gray-400 hover:shadow-md transition"
                       >
-                        <span
-                          className={`px-2 py-1 rounded text-xs font-bold text-white ${
-                            api.method === "GET"
-                              ? "bg-green-500"
-                              : api.method === "POST"
-                                ? "bg-blue-500"
-                                : api.method === "PUT"
-                                  ? "bg-yellow-500"
-                                  : "bg-red-500"
-                          }`}
-                        >
-                          {api.method}
-                        </span>
-                        <code className="text-sm text-gray-700 flex-1">
-                          {api.endpoint}
-                        </code>
-                        <button
-                          onClick={() => copyToClipboard(api.endpoint)}
-                          className="text-gray-400 hover:text-gray-600"
-                        >
-                          📋
-                        </button>
-                      </div>
-                    ))}
+                        <div className="text-2xl mb-2">📦</div>
+                        <div className="font-semibold text-gray-800">Mã nguồn GitHub</div>
+                        <p className="text-sm text-gray-500 mt-1 break-all">
+                          {productVisitorDetail.resources.github}
+                        </p>
+                      </a>
+                    )}
+                    {productVisitorDetail?.resources?.demo && (
+                      <a
+                        href={productVisitorDetail.resources.demo}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-5 rounded-xl border border-gray-200 hover:border-blue-400 hover:shadow-md transition"
+                      >
+                        <div className="text-2xl mb-2">🚀</div>
+                        <div className="font-semibold text-gray-800">Bản chạy thử</div>
+                        <p className="text-sm text-gray-500 mt-1 break-all">
+                          {productVisitorDetail.resources.demo}
+                        </p>
+                      </a>
+                    )}
+                    {!productVisitorDetail?.resources?.github &&
+                      !productVisitorDetail?.resources?.demo && (
+                        <p className="md:col-span-2 text-center text-gray-500 py-8">
+                          Sản phẩm chưa cập nhật liên kết GitHub hoặc bản chạy thử.
+                        </p>
+                      )}
                   </div>
                 )}
 

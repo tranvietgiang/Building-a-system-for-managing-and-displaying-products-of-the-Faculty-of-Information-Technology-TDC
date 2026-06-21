@@ -385,9 +385,10 @@ const TeacherProductDetailScreen = () => {
                 </div>
               </div>
             )}
-
+            
 
             {/* Nhận xét */}
+            {(productData?.status === STATUS.PENDING || reviews.length > 0) && (
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
               <div className="p-6 border-b border-gray-100">
                 <h2
@@ -398,6 +399,7 @@ const TeacherProductDetailScreen = () => {
                 </h2>
               </div>
               <div className="p-6">
+                {productData?.status === STATUS.PENDING && (
                 <div className={`${theme.light} rounded-xl p-4 mb-6`}>
                   <textarea
                     rows={3}
@@ -417,6 +419,7 @@ const TeacherProductDetailScreen = () => {
                     </button>
                   </div>
                 </div>
+                )}
 
                 {reviews?.length > 0 ? (
                   <div>
@@ -493,6 +496,7 @@ const TeacherProductDetailScreen = () => {
                 )}
               </div>
             </div>
+            )}
           </div>
           {/* ✅ đóng Left Column */}
 
