@@ -17,7 +17,8 @@ class UploadService extends BaseRepository
         protected UploadRepository $upload_repository,
         protected CheckImage $Check_ai_image,
         protected NormalizeMajorCode $normalizeMajorCode,
-        protected ContentModeration $contentModeration
+        protected ContentModeration $contentModeration,
+        protected ProductDuplicateService $productDuplicateService
     ) {}
 
 
@@ -27,6 +28,16 @@ class UploadService extends BaseRepository
      */
     public function upload(array $data)
     {
+        $duplicate = $this->productDuplicateService->check($data);
+
+        if ($duplicate) {
+            return [
+                'error' => true,
+                'message' => 'Sản phẩm bị trùng với “'.$duplicate['title'].'” ('.$duplicate['similarity'].'%).',
+                'detail' => $duplicate,
+            ];
+        }
+
         $uploadedImages = [];
         $tags = $data['tags'] ?? [];
         $thumbnailIndex = $this->resolveThumbnailIndex($data['image_meta'] ?? []);

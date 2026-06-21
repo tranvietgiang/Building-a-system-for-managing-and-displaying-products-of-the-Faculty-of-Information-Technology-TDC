@@ -355,14 +355,8 @@ export default function VisitorScreen() {
     : loadingProductSearch;
 
   const handleViewDetail = useCallback(
-    async (id) => {
+    (id) => {
       if (!id) return;
-
-      try {
-        await productApi.incrementView(id);
-      } catch (error) {
-        console.error(error);
-      }
 
       navigate(`/chi-tiet-san-pham/${id}`, { state: { productId: id } });
     },

@@ -151,16 +151,6 @@ const ItDetail = ({ product, theme }) => {
                 </div>
               </div>
 
-              {product.status !== STATUS.REJECTED && (
-                <div className="flex items-center gap-2">
-                  <button className="p-2 bg-white/10 rounded-lg text-white hover:bg-white/20 transition">
-                    <Icons.Heart />
-                  </button>
-                  <button className="p-2 bg-white/10 rounded-lg text-white hover:bg-white/20 transition">
-                    <Icons.Share />
-                  </button>
-                </div>
-              )}
             </div>
 
             {/* Stats */}
@@ -170,6 +160,12 @@ const ItDetail = ({ product, theme }) => {
                   <Icons.Eye />
                   <span className="text-sm font-medium">
                     {product.activity_logs?.views || 0} lượt xem
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-white/90">
+                  <Icons.Heart />
+                  <span className="text-sm font-medium">
+                    {product.activity_logs?.likes || 0} lượt tim
                   </span>
                 </div>
                 <div className="flex items-center gap-2 text-white/90">

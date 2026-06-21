@@ -50,12 +50,17 @@ const NetworkDetailScreen = ({
     const shareUrl = `${window.location.origin}/chi-tiet-san-pham/${productId}`;
 
     try {
-      await shareVisitorProduct({
+      const shared = await shareVisitorProduct({
         title: productVisitorDetail?.title,
         description: productVisitorDetail?.description,
         url: shareUrl,
       });
+      if (!shared) return;
 
+      const res = await productApi.incrementShare(productId);
+      if (typeof res?.shares === "number") {
+        setShareCount(res.shares);
+      }
     } catch (error) {
       if (error?.name !== "AbortError") {
         console.error(error);

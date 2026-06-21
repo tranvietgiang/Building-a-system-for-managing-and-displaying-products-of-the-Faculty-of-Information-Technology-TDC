@@ -1091,6 +1091,9 @@ class ProductRepository extends BaseRepository
         return DB::table('products as p')
             ->join('majors as m', 'p.major_id', '=', 'm.major_id')
             ->leftJoin('product_ai as ai', 'p.product_id', '=', 'ai.product_id')
+            ->leftJoin('product_cntt as cntt', 'p.product_id', '=', 'cntt.product_id')
+            ->leftJoin('product_mmt as mmt', 'p.product_id', '=', 'mmt.product_id')
+            ->leftJoin('product_graphic as gr', 'p.product_id', '=', 'gr.product_id')
             ->leftJoin('users as u', 'p.user_id', '=', 'u.user_id')
             ->where('p.product_id', $productId)
             ->select(
@@ -1104,10 +1107,20 @@ class ProductRepository extends BaseRepository
                 'u.name as fullname',
                 'm.major_name',
                 'ai.model_used',
-                'ai.framework',
+                DB::raw('COALESCE(ai.framework, cntt.framework) as framework'),
                 'ai.language',
                 'ai.dataset_used',
-                'ai.accuracy_score'
+                'ai.accuracy_score',
+                'cntt.programming_language',
+                'cntt.database_used',
+                'mmt.simulation_tool',
+                'mmt.network_protocol',
+                'mmt.topology_type',
+                'mmt.config_file',
+                'gr.design_type',
+                'gr.tools_used',
+                'gr.drive_link',
+                'gr.behance_link'
             )
             ->first();
     }

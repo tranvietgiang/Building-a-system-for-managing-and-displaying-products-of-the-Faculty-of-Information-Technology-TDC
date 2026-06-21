@@ -41,10 +41,15 @@ class ProductComparisonCandidateTest extends TestCase
             'database_used' => 'PostgreSQL',
         ]);
 
-        $matches = app(ProductRepository::class)->findMatchingAiProducts($first->product_id);
+        $repository = app(ProductRepository::class);
+        $matches = $repository->findMatchingAiProducts($first->product_id);
+        $current = $repository->compareData($first->product_id);
 
         $this->assertCount(1, $matches);
         $this->assertSame($second->product_id, $matches[0]['product_id']);
+        $this->assertSame('PHP', $current->programming_language);
+        $this->assertSame('Laravel', $current->framework);
+        $this->assertSame('MySQL', $current->database_used);
     }
 
     private function createDistinctProducts(): array

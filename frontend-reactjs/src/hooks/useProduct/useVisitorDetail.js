@@ -13,6 +13,11 @@ export default function useVisitorProduct(id) {
     const getVisitorProducts = async () => {
       try {
         setLoading(true);
+        try {
+          await productApi.incrementView(id);
+        } catch (viewError) {
+          console.error(viewError);
+        }
         const res = await productApi.getVisitorProductById(id);
         toast.success("Tải dữ chi tiết thành công", { toastId });
         setProductAll(res || null);

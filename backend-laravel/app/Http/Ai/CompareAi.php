@@ -135,7 +135,8 @@ class CompareAi
             || str_contains($majorCode, 'computer')
             || str_contains($majorCode, 'công nghệ thông tin')
         ) {
-            return $currentProduct->programming_language || $currentProduct->framework ? 'CNTT' : null;
+            return ($currentProduct->programming_language ?? null)
+                || ($currentProduct->framework ?? null) ? 'CNTT' : null;
         }
 
         if (
@@ -143,7 +144,7 @@ class CompareAi
             || str_contains($majorCode, 'mmt')
             || str_contains($majorCode, 'đa phương tiện')
         ) {
-            return $currentProduct->simulation_tool ? 'Multimedia' : null;
+            return ($currentProduct->simulation_tool ?? null) ? 'Multimedia' : null;
         }
 
         if (
@@ -151,7 +152,8 @@ class CompareAi
             || str_contains($majorCode, 'đồ họa')
             || str_contains($majorCode, 'graphic design')
         ) {
-            return $currentProduct->design_type || $currentProduct->tools_used ? 'Graphics' : null;
+            return ($currentProduct->design_type ?? null)
+                || ($currentProduct->tools_used ?? null) ? 'Graphics' : null;
         }
 
         return null;
