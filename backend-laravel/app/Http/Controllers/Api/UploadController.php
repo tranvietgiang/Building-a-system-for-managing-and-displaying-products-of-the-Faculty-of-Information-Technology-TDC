@@ -25,7 +25,7 @@ class UploadController extends Controller
 
         if (!$return) {
             return response()->json([
-                'message' => "Đã xảy ra lỗi!",
+                'message' => 'Không thể tải số lượng sản phẩm.',
                 'uploadCount_result' => false
             ], 404);
         }
@@ -52,7 +52,9 @@ class UploadController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Tạo sản phẩm thành công',
+            'message' => $request->filled('replace_product_id')
+                ? 'Chỉnh sửa sản phẩm thành công'
+                : 'Đăng sản phẩm thành công',
             'data' => $product
         ], 200);
     }

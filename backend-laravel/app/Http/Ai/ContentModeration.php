@@ -125,7 +125,7 @@ class ContentModeration
                 return $this->blocked('Invalid AI response format');
             }
 
-            return $this->normalizeModerationResult($result);
+            return $this->normalizeModerationResult($result, $payload);
         } catch (\Throwable $e) {
             Log::error('AI moderation exception', [
                 'message' => $e->getMessage(),
@@ -217,7 +217,7 @@ class ContentModeration
                 return $this->blocked('Invalid AI response format');
             }
 
-            return $this->normalizeModerationResult($result);
+            return $this->normalizeModerationResult($result, $payload);
         } catch (\Throwable $e) {
             return $this->blocked($e->getMessage());
         }
@@ -270,7 +270,7 @@ class ContentModeration
         }, $violations)));
     }
 
-    private function normalizeModerationResult(array $result): array
+    private function normalizeModerationResult(array $result, array $payload = []): array
     {
         $approved = (bool) ($result['approved'] ?? false);
         $violations = $this->formatViolations($result['violations'] ?? []);
@@ -280,6 +280,15 @@ class ContentModeration
             return [
                 'approved' => true,
                 'reason' => 'Ảnh giao diện phần mềm giáo dục có dữ liệu minh họa hợp lệ',
+                'violations' => [],
+                'raw' => $result,
+            ];
+        }
+
+        if (!$approved && $this->isSafeCreativeDesignWork($result, $violations, $payload)) {
+            return [
+                'approved' => true,
+                'reason' => 'Ảnh minh họa thiết kế hoặc thời trang hợp lệ',
                 'violations' => [],
                 'raw' => $result,
             ];
@@ -309,7 +318,8 @@ class ContentModeration
 
         if (($checks['software_ui_or_prototype'] ?? false) !== true
             || ($checks['image_related'] ?? false) !== true
-            || ($checks['major_match'] ?? false) !== true) {
+            || ($checks['major_match'] ?? false) !== true
+        ) {
             return false;
         }
 
@@ -320,15 +330,75 @@ class ContentModeration
         }
 
         $allowedPrivacyTerms = [
-            'sinh viên', 'học viên', 'thí sinh', 'mssv', 'mã sinh viên',
-            'mã học viên', 'điểm số', 'bảng điểm', 'ngày sinh', 'địa chỉ',
-            'họ và tên', 'thông tin cá nhân', 'thông tin nhạy cảm',
+            'sinh viên',
+            'học viên',
+            'thí sinh',
+            'mssv',
+            'mã sinh viên',
+            'mã học viên',
+            'điểm số',
+            'bảng điểm',
+            'ngày sinh',
+            'địa chỉ',
+            'họ và tên',
+            'thông tin cá nhân',
+            'thông tin nhạy cảm',
         ];
 
         return count($violations) > 0 && collect($violations)->every(function ($violation) use ($allowedPrivacyTerms) {
             $text = Str::lower($violation);
-            return collect($allowedPrivacyTerms)->contains(fn ($term) => str_contains($text, $term));
+            return collect($allowedPrivacyTerms)->contains(fn($term) => str_contains($text, $term));
         });
+    }
+
+    private function isSafeCreativeDesignWork(array $result, array $violations, array $payload): bool
+    {
+        $major = Str::lower((string) ($payload['major'] ?? ''));
+        $isGraphicMajor = collect([
+            'tkdh',
+            'đồ họa',
+            'thiết kế',
+            'graphic',
+            'design',
+        ])->contains(fn($term) => str_contains($major, $term));
+
+        if (!$isGraphicMajor) {
+            return false;
+        }
+
+        $content = Str::lower(implode(' ', [
+            (string) ($result['reason'] ?? ''),
+            implode(' ', $violations),
+        ]));
+
+        $strongViolations = [
+            'khỏa thân',
+            'khoa than',
+            'nudity',
+            ' nude ',
+            'bộ phận sinh dục',
+            'lộ ngực',
+            'ngực trần',
+            'tình dục',
+            'sexual',
+            'porn',
+            'khiêu dâm',
+            'đồ lót gợi dục',
+            'lingerie',
+            'bikini',
+            'máu me',
+            'thi thể',
+            'chặt đầu',
+            'vũ khí',
+            'weapon',
+            'ma túy',
+            'drug',
+            'tự sát',
+            'suicide',
+        ];
+
+        return !collect($strongViolations)
+            ->contains(fn($term) => str_contains(" {$content} ", $term));
     }
 
     private function resolveImageUrl(Product $product, array $frontendContext): ?string
@@ -468,6 +538,10 @@ class ContentModeration
         - Tên, MSSV, mã học viên, ngày sinh, địa chỉ và điểm số xuất hiện bên trong giao diện phần mềm demo phải được xem là dữ liệu minh họa; KHÔNG từ chối chỉ vì các trường hoặc dữ liệu này.
         - Chỉ xem là vi phạm riêng tư khi đó rõ ràng là ảnh tài liệu/hồ sơ/bảng điểm thật (không phải UI phần mềm demo) hoặc lộ định danh rủi ro cao như CCCD/hộ chiếu, số điện thoại, email cá nhân hay tài khoản đăng nhập.
         - Đặt checks.software_ui_or_prototype=true khi ảnh là screenshot giao diện ứng dụng, website, desktop app, mockup hoặc prototype.
+        - Với ngành Thiết kế đồ họa/TKĐH/Graphic Design: logo, bộ nhận diện thương hiệu, bao bì, poster, mỹ phẩm, giày dép, túi xách, mannequin và minh họa người mẫu mặc trang phục thông thường là sản phẩm học thuật hợp lệ.
+        - KHÔNG đánh dấu adult_or_sensitive chỉ vì ảnh có người mẫu, váy, đường viền cổ áo, mỹ phẩm hoặc chủ đề thời trang/làm đẹp.
+        - Chữ thương hiệu nằm trong logo, poster hoặc bộ nhận diện do sinh viên trình bày không tự động được xem là watermark hay quảng cáo vi phạm.
+        - Chỉ chặn ảnh thời trang khi nhìn thấy khỏa thân, bộ phận sinh dục, tình dục rõ ràng hoặc trang phục gợi dục quá mức; violations phải mô tả cụ thể chi tiết nhìn thấy.
 
         Định dạng trả về:
 

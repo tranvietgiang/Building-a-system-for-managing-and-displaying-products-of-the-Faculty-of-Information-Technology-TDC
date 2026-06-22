@@ -31,8 +31,9 @@ class UploadRequest extends FormRequest
     {
         $rules = [
             // CHUNG
-            'title' => 'required|string|min:5|max:100',
+            'title' => 'required|string|min:5|max:250',
             'description' => 'nullable|string|min:10|max:300',
+            'team_members' => 'nullable|string|max:2000',
 
             'cate_id' => 'required|exists:categories,cate_id',
 
@@ -40,9 +41,14 @@ class UploadRequest extends FormRequest
             'major_code' => 'required|string',
 
             'major_id' => 'required',
+            'advisor_name' => 'nullable|string|max:100',
+            'replace_product_id' => 'nullable|integer|exists:products,product_id',
 
-            'images' => 'required|array|min:1|max:10',
+            'images' => 'required_without:existing_images|array|max:10',
             'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:5120',
+            'existing_images' => 'required_without:images|array|max:10',
+            'existing_images.*' => 'string|max:1000',
+            'existing_thumbnail_url' => 'nullable|string|max:1000',
             'image_meta' => 'nullable|array|max:10',
             'image_meta.*' => 'nullable|string',
 
@@ -80,16 +86,16 @@ class UploadRequest extends FormRequest
             case 'tkdh':
                 // DB: NOT NULL
                 $rules['design_type'] = 'required|string|max:50';
-                $rules['tools_used'] = 'required|string|max:150';
+                $rules['tools_used'] = 'nullable|string|max:2000';
+                $rules['color_palette'] = 'nullable|string|max:500';
 
                 // DB: NULLABLE
-                $rules['drive_link'] = 'nullable|url|max:255';
                 $rules['behance_link'] = 'nullable|url|max:255';
                 break;
 
             case 'mmt':
                 // DB: NOT NULL
-                $rules['network_protocol'] = 'required|string|max:100';
+                $rules['network_protocol'] = 'nullable|string|max:2000';
                 $rules['topology_type'] = 'required|string|max:50';
                 $rules['simulation_tool'] = 'required|string|max:100';
                 break;
@@ -104,11 +110,12 @@ class UploadRequest extends FormRequest
             // TITLE
             'title.required' => 'Vui lòng nhập tên sản phẩm',
             'title.min' => 'Tên phải ≥ 5 ký tự',
-            'title.max' => 'Tên tối đa 100 ký tự',
+            'title.max' => 'Tên tối đa 250 ký tự',
 
             // DESCRIPTION
             'description.min' => 'Mô tả phải ≥ 10 ký tự',
             'description.max' => 'Mô tả tối đa 300 ký tự',
+            'team_members.max' => 'Danh sách thành viên tối đa 2000 ký tự',
 
             // CATEGORY
             'cate_id.required' => 'Chọn danh mục',
@@ -116,9 +123,12 @@ class UploadRequest extends FormRequest
             // MAJOR
             'major_code.required' => 'Không xác định được ngành',
             'major_id.required' => 'Thiếu thông tin ngành',
+            'advisor_name.max' => 'Tên giảng viên hướng dẫn tối đa 100 ký tự',
 
             // IMAGES
             'images.required' => 'Cần ít nhất 1 ảnh',
+            'images.required_without' => 'Cần ít nhất 1 ảnh',
+            'existing_images.required_without' => 'Cần ít nhất 1 ảnh',
             'images.min' => 'Cần ít nhất 1 ảnh',
             'images.max' => 'Tối đa 10 ảnh',
             'images.*.image' => 'Tệp đã chọn phải là hình ảnh',
@@ -156,14 +166,12 @@ class UploadRequest extends FormRequest
             'database_used.max' => 'Database tối đa 100 ký tự',
 
             // ================= TKĐH =================
-            'design_type.required' => 'Chọn loại thiết kế',
-            'design_type.max' => 'Loại thiết kế tối đa 50 ký tự',
+            'design_type.required' => 'Nhập loại ấn phẩm',
+            'design_type.max' => 'Loại ấn phẩm tối đa 50 ký tự',
 
             'tools_used.required' => 'Nhập công cụ sử dụng',
-            'tools_used.max' => 'Công cụ tối đa 150 ký tự',
-
-            'drive_link.url' => 'Link drive không hợp lệ',
-            'drive_link.max' => 'Link drive tối đa 255 ký tự',
+            'tools_used.max' => 'Danh sách công cụ tối đa 2000 ký tự',
+            'color_palette.max' => 'Bảng màu tối đa 500 ký tự',
 
             'behance_link.url' => 'Link behance không hợp lệ',
             'behance_link.max' => 'Link behance tối đa 255 ký tự',
@@ -173,9 +181,9 @@ class UploadRequest extends FormRequest
             'simulation_tool.max' => 'Tối đa 100 ký tự',
 
             'network_protocol.required' => 'Nhập giao thức mạng',
-            'network_protocol.max' => 'Tối đa 100 ký tự',
+            'network_protocol.max' => 'Danh sách giao thức tối đa 2000 ký tự',
 
-            'topology_type.required' => 'Nhập topology',
+            'topology_type.required' => 'Nhập kiểu kết nối mạng',
             'topology_type.max' => 'Tối đa 50 ký tự',
         ];
     }

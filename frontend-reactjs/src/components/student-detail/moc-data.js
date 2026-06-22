@@ -196,7 +196,6 @@ export const mockGraphicProduct = {
   graphic_detail: {
     design_type: "Brand Identity, Packaging Design",
     tools_used: "Adobe Illustrator, Photoshop, After Effects",
-    drive_link: "https://drive.google.com/drive/folders/example",
     behance_link: "https://behance.net/gallery/example",
   },
 };

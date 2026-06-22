@@ -9,58 +9,38 @@ class ProductTagSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('product_tags')->truncate();
-
-        $rows = [];
+        DB::table('product_tags')->delete();
 
         $products = DB::table('products as p')
             ->join('majors as m', 'p.major_id', '=', 'm.major_id')
-            ->select('p.product_id', 'm.major_name')
+            ->leftJoin('product_ai as ai', 'p.product_id', '=', 'ai.product_id')
+            ->leftJoin('product_cntt as it', 'p.product_id', '=', 'it.product_id')
+            ->leftJoin('product_mmt as nw', 'p.product_id', '=', 'nw.product_id')
+            ->leftJoin('product_graphic as gr', 'p.product_id', '=', 'gr.product_id')
+            ->select(
+                'p.product_id', 'p.title', 'm.major_code',
+                'ai.model_used', 'ai.framework as ai_framework', 'ai.language',
+                'it.programming_language', 'it.framework as it_framework', 'it.database_used',
+                'nw.simulation_tool', 'nw.network_protocol', 'nw.topology_type',
+                'gr.design_type', 'gr.tools_used'
+            )
             ->get();
 
-        foreach ($products as $p) {
+        $rows = [];
 
-            $major = strtolower(trim($p->major_name ?? ''));
+        foreach ($products as $product) {
+            $tags = match (strtoupper($product->major_code)) {
+                'AI' => [$product->model_used, $product->ai_framework, $product->language, 'Machine Learning', $this->topicTag($product->title)],
+                'CNTT' => [$product->programming_language, $product->it_framework, $product->database_used, 'Web Application', $this->topicTag($product->title)],
+                'MMT' => [$product->simulation_tool, $product->topology_type, ...$this->splitValues($product->network_protocol)],
+                'TKDH' => [$product->design_type, ...$this->splitValues($product->tools_used), 'Thiết kế đồ họa'],
+                default => [],
+            };
 
-            // ================= JS STYLE DETECT =================
-            $isAI = $major === 'ai'
-                || str_contains($major, 'artificial intelligence')
-                || str_contains($major, 'trí tuệ nhân tạo');
-
-            $isCNTT = $major === 'cntt'
-                || str_contains($major, 'công nghệ thông tin')
-                || str_contains($major, 'information technology');
-
-            $isMMT = $major === 'mmt'
-                || str_contains($major, 'mạng máy tính')
-                || str_contains($major, 'network');
-
-            $isTKDH = $major === 'tkdh'
-                || str_contains($major, 'thiết kế đồ họa')
-                || str_contains($major, 'graphic');
-
-            // ================= SELECT POOL =================
-            $pool = [];
-
-            if ($isAI) {
-                $pool = $this->aiTags();
-            } elseif ($isCNTT) {
-                $pool = $this->cnttTags();
-            } elseif ($isMMT) {
-                $pool = $this->mmtTags();
-            } elseif ($isTKDH) {
-                $pool = $this->graphicTags();
-            }
-
-            // ================= GENERATE TAGS =================
-            $tags = collect($pool)
-                ->shuffle()
-                ->take(5);
-
-            foreach ($tags as $tag) {
+            foreach (array_slice(array_values(array_unique(array_filter($tags))), 0, 5) as $tag) {
                 $rows[] = [
-                    'product_id' => $p->product_id,
-                    'tag_name' => $tag,
+                    'product_id' => $product->product_id,
+                    'tag_name' => mb_substr(trim($tag), 0, 50),
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
@@ -68,71 +48,25 @@ class ProductTagSeeder extends Seeder
         }
 
         DB::table('product_tags')->insert($rows);
+        $this->command->info('Đã tạo tag theo đúng thông tin từng sản phẩm.');
     }
 
-    /* ================= POOLS ================= */
-
-    private function aiTags()
+    private function splitValues(?string $value): array
     {
-        return [
-            'Computer Vision',
-            'NLP',
-            'Deep Learning',
-            'AI Model',
-            'Detection',
-            'Chatbot',
-            'Recommendation',
-            'Prediction',
-            'Automation',
-            'Dataset'
-        ];
+        return array_values(array_filter(array_map('trim', preg_split('/[,;]/', (string) $value))));
     }
 
-    private function cnttTags()
+    private function topicTag(string $title): string
     {
-        return [
-            'API',
-            'System',
-            'Management',
-            'Database',
-            'Backend',
-            'Dashboard',
-            'Web App',
-            'Authentication',
-            'Realtime',
-            'Ecommerce'
-        ];
-    }
+        $title = mb_strtolower($title);
 
-    private function mmtTags()
-    {
-        return [
-            'Network',
-            'Security',
-            'Routing',
-            'Infrastructure',
-            'Server',
-            'Topology',
-            'Monitoring',
-            'Firewall',
-            'LAN',
-            'VPN'
-        ];
-    }
-
-    private function graphicTags()
-    {
-        return [
-            'UI Design',
-            'UX',
-            'Branding',
-            'Creative',
-            'Poster',
-            'Logo',
-            'Typography',
-            'Marketing',
-            'Banner',
-            'Social Media'
-        ];
+        return match (true) {
+            str_contains($title, 'quản lý') => 'Quản lý',
+            str_contains($title, 'nhận diện') => 'Nhận diện',
+            str_contains($title, 'phát hiện') => 'Phát hiện',
+            str_contains($title, 'dự báo'), str_contains($title, 'dự đoán') => 'Dự báo',
+            str_contains($title, 'ứng dụng') => 'Mobile App',
+            default => 'Ứng dụng thực tế',
+        };
     }
 }

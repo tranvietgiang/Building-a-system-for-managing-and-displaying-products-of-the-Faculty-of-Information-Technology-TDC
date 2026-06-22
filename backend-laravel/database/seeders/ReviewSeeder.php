@@ -4,73 +4,44 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 class ReviewSeeder extends Seeder
 {
     public function run(): void
     {
-        // COMMIT 1
-        Schema::disableForeignKeyConstraints();
         DB::table('reviews')->delete();
-        Schema::enableForeignKeyConstraints();
 
-        // COMMIT 2
-        $products = DB::table('products')->pluck('product_id')->toArray();
-        $teachers = DB::table('users')->pluck('user_id')->toArray();
+        $comments = [
+            'Sản phẩm xác định rõ bài toán, dữ liệu trình bày đầy đủ và kết quả có khả năng ứng dụng thực tế.',
+            'Nhóm xây dựng quy trình hợp lý, giao diện dễ theo dõi và phần kiểm thử được mô tả rõ ràng.',
+            'Nội dung chuyên ngành tốt, minh chứng trực quan và hướng phát triển tiếp theo phù hợp.',
+            'Sản phẩm hoàn thiện, thông tin nhất quán giữa phần mô tả, công nghệ và kết quả triển khai.',
+            'Giải pháp có tính thực tiễn, bố cục trình bày sạch và nhóm giải thích được các lựa chọn kỹ thuật.',
+        ];
 
-        // COMMIT 3
-        if (empty($products) || empty($teachers)) return;
-
+        $products = DB::table('products')->orderBy('product_id')->get();
         $rows = [];
 
-        foreach ($products as $productId) {
+        foreach ($products as $index => $product) {
+            $teacherId = DB::table('users')
+                ->where('role', 'teacher')
+                ->where('major_id', $product->major_id)
+                ->value('user_id');
 
-            $reviewCount = 1;
-            // $reviewCount = rand(2, 4);
-            $usedTeachers = [];
-
-            for ($i = 0; $i < $reviewCount; $i++) {
-
-                // COMMIT 4
-                do {
-                    $teacherId = $teachers[array_rand($teachers)];
-                } while (
-                    in_array($teacherId, $usedTeachers)
-                    && count($usedTeachers) < count($teachers)
-                );
-
-                $usedTeachers[] = $teacherId;
-
-                // COMMIT 5
-                $rows[] = [
-                    'product_id' => $productId,
-                    'teacher_id' => $teacherId,
-                    'comment' => $this->fakeComment(),
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ];
+            if (! $teacherId) {
+                continue;
             }
-        }
 
-        // COMMIT 6
-        foreach (array_chunk($rows, 500) as $chunk) {
-            DB::table('reviews')->insert($chunk);
+            $rows[] = [
+                'product_id' => $product->product_id,
+                'teacher_id' => $teacherId,
+                'comment' => $comments[$index % count($comments)],
+                'created_at' => now()->subDays(3),
+                'updated_at' => now()->subDays(3),
+            ];
         }
 
         DB::table('reviews')->insert($rows);
-        $this->command->info('✅ Đã insert ' . count($rows) . ' đánh giá cho 200 sản phẩm!');
-    }
-
-    private function fakeComment(): string
-    {
-        return collect([
-            'Sản phẩm có tính ứng dụng cao',
-            'Code rõ ràng, dễ hiểu',
-            'Giải pháp khá tốt',
-            'Giao diện đẹp và logic ổn',
-            'Đồ án chất lượng tốt',
-            'Có thể phát triển thêm'
-        ])->random();
+        $this->command->info('Đã tạo '.count($rows).' đánh giá từ giảng viên đúng chuyên ngành.');
     }
 }

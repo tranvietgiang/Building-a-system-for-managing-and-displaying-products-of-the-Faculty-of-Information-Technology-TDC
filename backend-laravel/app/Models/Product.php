@@ -17,18 +17,27 @@ class Product extends Model
     protected $fillable = [
         'title',
         'description',
+        'team_members',
         'thumbnail',
         'status',
         'user_id',
         'major_id',
         'cate_id',
         'approved_by',
+        'advisor_name',
         'awards',
         'github_link',
         'demo_link',
         'approved_at',
         'submitted_at'
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'team_members' => 'array',
+        ];
+    }
 
     public function toSearchableArray(): array
     {

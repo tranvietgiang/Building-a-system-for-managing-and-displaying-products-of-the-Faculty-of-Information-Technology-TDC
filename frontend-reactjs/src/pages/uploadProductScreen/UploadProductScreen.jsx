@@ -42,6 +42,10 @@ const UploadProductScreen = () => {
     return {
       title: editProduct.title || "",
       description: editProduct.description || "",
+      team_members: Array.isArray(editProduct.team_members)
+        ? editProduct.team_members.join("\n")
+        : editProduct.team_members || "",
+      advisor_name: editProduct.advisor_name || editProduct.advisor || "",
       cate_id: editProduct.cate_id || editProduct.category?.cate_id || "",
       awards: editProduct.awards || "",
       github_link: editProduct.github_link || "",
@@ -66,7 +70,9 @@ const UploadProductScreen = () => {
       config_file: editProduct.config_file || networkDetail.config_file || "",
       design_type: editProduct.design_type || graphicDetail.design_type || "",
       tools_used: editProduct.tools_used || graphicDetail.tools_used || "",
-      drive_link: editProduct.drive_link || graphicDetail.drive_link || "",
+      color_palette: Array.isArray(graphicDetail.color_palette)
+        ? graphicDetail.color_palette.join(",")
+        : graphicDetail.color_palette || "",
       behance_link:
         editProduct.behance_link || graphicDetail.behance_link || "",
     };
@@ -104,6 +110,7 @@ const UploadProductScreen = () => {
   const form = useHook({
     editData,
     editImages,
+    editProductId: isEditMode ? editProduct.product_id : null,
     editTags: Array.isArray(editProduct?.tags)
       ? editProduct.tags
           .map((tag) => (typeof tag === "string" ? tag : tag.tag_name))
@@ -295,6 +302,39 @@ const UploadProductScreen = () => {
         </div>
 
         {/* FORM */}
+        <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <label className="mb-2 block text-sm font-semibold text-slate-700">
+            Sinh viên cùng thực hiện{" "}
+            <span className="font-normal text-slate-400">(có thể bỏ qua)</span>
+          </label>
+          <textarea
+            name="team_members"
+            value={formData.team_members || ""}
+            onChange={handleChange}
+            rows={3}
+            maxLength={2000}
+            className="w-full rounded-xl border-2 border-slate-200 px-4 py-3 outline-none transition focus:border-slate-400"
+            placeholder={"Mỗi sinh viên một dòng, VD:\n23211TT0001 - Nguyễn Văn B"}
+          />
+          <p className="mt-2 text-xs text-slate-500">
+            Người đăng sản phẩm được ghi nhận tự động là nhóm trưởng.
+          </p>
+
+          <label className="mb-2 mt-5 block text-sm font-semibold text-slate-700">
+            Giảng viên hướng dẫn{" "}
+            <span className="font-normal text-slate-400">(có thể bỏ qua)</span>
+          </label>
+          <input
+            type="text"
+            name="advisor_name"
+            value={formData.advisor_name || ""}
+            onChange={handleChange}
+            maxLength={100}
+            className="w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-slate-400"
+            placeholder="VD: ThS. Nguyễn Văn A"
+          />
+        </div>
+
         <FormComponent
           formData={formData}
           handleChange={handleChange}

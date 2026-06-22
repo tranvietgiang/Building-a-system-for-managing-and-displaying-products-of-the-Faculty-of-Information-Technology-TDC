@@ -42,6 +42,28 @@ const UploadProductForm_Graphic = ({
 
   // State cho loading upload ảnh
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [selectedPaletteColor, setSelectedPaletteColor] = useState("#C084FC");
+  const paletteColors = String(formData.color_palette || "")
+    .split(",")
+    .map((color) => color.trim())
+    .filter(Boolean);
+
+  const updatePalette = (colors) => {
+    handleChange({
+      target: { name: "color_palette", value: colors.join(",") },
+    });
+  };
+
+  const addPaletteColor = () => {
+    const color = selectedPaletteColor.toUpperCase();
+    if (!/^#[0-9A-F]{6}$/.test(color) || paletteColors.includes(color)) return;
+    if (paletteColors.length >= 8) return;
+    updatePalette([...paletteColors, color]);
+  };
+
+  const removePaletteColor = (color) => {
+    updatePalette(paletteColors.filter((item) => item !== color));
+  };
 
   // State cho loading submit sản phẩm
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -190,53 +212,25 @@ const UploadProductForm_Graphic = ({
                   <label className="mb-2 block text-sm font-semibold text-gray-700">
                     Loại ấn phẩm <span className="text-red-500">*</span>
                   </label>
-                  <select
+                  <input
+                    type="text"
                     name="design_type"
-                    value={formData.design_type}
+                    value={formData.design_type || ""}
                     onChange={handleChange}
+                    maxLength={50}
+                    placeholder="VD: Logo, Poster, UI/UX, Motion Graphics..."
                     className={`w-full rounded-xl border-2 px-4 py-3 ${
                       errors.design_type
                         ? "border-red-300 bg-red-50"
                         : "border-gray-200"
                     }`}
-                  >
-                    <option value="">Chọn loại</option>
-                    <option value="logo">Logo / Brand Identity</option>
-                    <option value="poster">Poster / Banner</option>
-                    <option value="uiux">Giao diện UI/UX</option>
-                    <option value="video">Video / Motion Graphics</option>
-                    <option value="publication">Ấn phẩm truyền thông</option>
-                  </select>
+                  />
                   {errors.design_type && (
                     <p className="mt-2 text-sm text-red-600">
                       {errors.design_type}
                     </p>
                   )}
                 </div>
-              </div>
-
-              {/* Công cụ sử dụng */}
-              <div>
-                <label className="mb-2 block text-sm font-semibold text-gray-700">
-                  Công cụ sử dụng
-                </label>
-                <input
-                  type="text"
-                  name="tools_used"
-                  value={formData.tools_used}
-                  onChange={handleChange}
-                  className={`w-full rounded-xl border-2 px-4 py-3 ${
-                    errors.design_type
-                      ? "border-red-300 bg-red-50"
-                      : "border-gray-200"
-                  }`}
-                  placeholder="Photoshop, Illustrator, Figma, After Effects..."
-                />
-                {errors.tools_used && (
-                  <p className="mt-2 text-sm text-red-600">
-                    {errors.tools_used}
-                  </p>
-                )}
               </div>
 
               {/* Danh mục */}
@@ -462,7 +456,7 @@ const UploadProductForm_Graphic = ({
           >
             <div className="bg-gradient-to-r from-green-600 to-teal-600 px-6 py-4">
               <h2 className="flex items-center gap-2 text-xl font-semibold text-white">
-                <span>🔗</span> Tags & Liên kết
+                <span>🔗</span> Tags & Liên kết tham khảo
               </h2>
             </div>
 
@@ -470,8 +464,12 @@ const UploadProductForm_Graphic = ({
               {/* TAG */}
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
-                  Phong cách / kỹ thuật sử dụng
-                 {" "}<span className="ml-1 text-xs font-normal text-gray-400">(có thể bỏ qua)</span></label>
+                  Công cụ / Phong cách / Kỹ thuật
+                  {" "}
+                  <span className="ml-1 text-xs font-normal text-gray-400">
+                    (có thể bỏ qua)
+                  </span>
+                </label>
 
                 <input
                   type="text"
@@ -479,8 +477,12 @@ const UploadProductForm_Graphic = ({
                   onChange={(e) => setTagInput(e.target.value)}
                   onKeyDown={handleAddTag}
                   className="w-full rounded-xl border-2 border-gray-200 px-4 py-3"
-                  placeholder="Khuyến khích thêm tag để mô tả sản phẩm: Flat design, 3D, Typography..."
+                  placeholder="Nhập rồi nhấn Enter, VD: Figma, Photoshop, 3D, Typography..."
                 />
+
+                <p className="mt-2 text-xs text-gray-500">
+                  Nhập từng công cụ, phong cách hoặc kỹ thuật, sau đó nhấn Enter.
+                </p>
 
                 {tags.length > 0 && (
                   <div className="mt-4 flex flex-wrap gap-2">
@@ -503,6 +505,67 @@ const UploadProductForm_Graphic = ({
                 <p className="mt-2 text-sm text-red-600">{errors.tags}</p>
               )}
 
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-gray-700">
+                  Bảng màu sắc{" "}
+                  <span className="font-normal text-gray-400">(có thể bỏ qua)</span>
+                </label>
+                <div className="flex flex-wrap items-center gap-3">
+                  <input
+                    type="color"
+                    value={selectedPaletteColor}
+                    onChange={(event) => setSelectedPaletteColor(event.target.value.toUpperCase())}
+                    className="h-11 w-14 cursor-pointer rounded-lg border border-gray-200 bg-white p-1"
+                  />
+                  <input
+                    type="text"
+                    value={selectedPaletteColor}
+                    onChange={(event) => setSelectedPaletteColor(event.target.value.toUpperCase())}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                        addPaletteColor();
+                      }
+                    }}
+                    maxLength={7}
+                    className="w-32 rounded-xl border-2 border-gray-200 px-4 py-2.5 uppercase"
+                    placeholder="#C084FC"
+                  />
+                  <button
+                    type="button"
+                    onClick={addPaletteColor}
+                    disabled={paletteColors.length >= 8 || !/^#[0-9A-F]{6}$/i.test(selectedPaletteColor)}
+                    className="rounded-xl bg-gray-900 px-4 py-2.5 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Thêm màu
+                  </button>
+                </div>
+                <p className="mt-2 text-xs text-gray-500">
+                  Chọn tối đa 8 màu chủ đạo của thiết kế.
+                </p>
+
+                {paletteColors.length > 0 && (
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    {paletteColors.map((color) => (
+                      <button
+                        key={color}
+                        type="button"
+                        onClick={() => removePaletteColor(color)}
+                        className="group flex items-center gap-2 rounded-xl border border-gray-200 bg-white p-2 pr-3 text-sm text-gray-600"
+                        title="Bấm để xóa màu"
+                      >
+                        <span
+                          className="h-8 w-8 rounded-lg border border-black/10"
+                          style={{ backgroundColor: color }}
+                        />
+                        {color}
+                        <span className="text-gray-400 group-hover:text-red-500">×</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               {/* AWARDS */}
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
@@ -524,7 +587,7 @@ const UploadProductForm_Graphic = ({
                 {/* Behance */}
                 <div>
                   <label className="mb-2 block text-sm font-semibold text-gray-700">
-                    Behance / Dribbble
+                    Liên kết tham khảo Behance / Dribbble
                    {" "}<span className="ml-1 text-xs font-normal text-gray-400">(có thể bỏ qua)</span></label>
 
                   <input
@@ -539,32 +602,6 @@ const UploadProductForm_Graphic = ({
                     }`}
                     placeholder="https://behance.net/..."
                   />
-                </div>
-
-                {/* DRIVE */}
-                <div>
-                  <label className="mb-2 block text-sm font-semibold text-gray-700">
-                    Google Drive
-                   {" "}<span className="ml-1 text-xs font-normal text-gray-400">(có thể bỏ qua)</span></label>
-
-                  <input
-                    type="url"
-                    name="drive_link"
-                    value={formData.drive_link}
-                    onChange={handleChange}
-                    className={`w-full rounded-xl border-2 px-4 py-3 ${
-                      errors.drive_link
-                        ? "border-red-300 bg-red-50"
-                        : "border-gray-200"
-                    }`}
-                    placeholder="https://drive.google.com/..."
-                  />
-
-                  {errors.drive_link && (
-                    <p className="mt-2 text-sm text-red-600">
-                      {errors.drive_link}
-                    </p>
-                  )}
                 </div>
 
                 {/* GITHUB */}

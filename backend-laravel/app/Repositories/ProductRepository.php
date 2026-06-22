@@ -44,6 +44,7 @@ class ProductRepository extends BaseRepository
                 'p.product_id',
                 'p.title',
                 'p.description',
+                'p.team_members',
                 'p.thumbnail',
                 'p.status',
                 'p.awards',
@@ -64,6 +65,7 @@ class ProductRepository extends BaseRepository
                 'c.category_name',
 
                 'p.approved_by',
+                'p.advisor_name',
                 'approved_user.name as approved_by_fullname',
                 'approved_user.email as approved_by_email',
                 'approved_user.role as approved_by_role',
@@ -89,7 +91,7 @@ class ProductRepository extends BaseRepository
                 // TKDH
                 'gr.design_type',
                 'gr.tools_used',
-                'gr.drive_link',
+                'gr.color_palette',
                 'gr.behance_link',
             )
             ->where('p.user_id', $userId)
@@ -134,6 +136,9 @@ class ProductRepository extends BaseRepository
             'product_id' => $product->product_id,
             'title' => $product->title,
             'description' => $product->description,
+            'team_members' => is_string($product->team_members)
+                ? (json_decode($product->team_members, true) ?: [])
+                : ($product->team_members ?? []),
             'thumbnail' => $product->thumbnail,
             'status' => $product->status,
             'awards' => $product->awards,
@@ -147,6 +152,7 @@ class ProductRepository extends BaseRepository
 
             'user_id' => $product->user_id,
             'fullname' => $product->fullname,
+            'advisor_name' => $product->advisor_name,
 
             'major' => [
                 'major_id' => $product->major_id,
@@ -224,7 +230,7 @@ class ProductRepository extends BaseRepository
                 $result['graphic_detail'] = [
                     'design_type' => $product->design_type,
                     'tools_used' => $product->tools_used,
-                    'drive_link' => $product->drive_link,
+                    'color_palette' => $this->decodeColorPalette($product->color_palette),
                     'behance_link' => $product->behance_link,
                 ];
                 break;
@@ -475,6 +481,31 @@ class ProductRepository extends BaseRepository
             )
             ->get();
 
+        $product->team_members = is_string($product->team_members)
+            ? (json_decode($product->team_members, true) ?: [])
+            : ($product->team_members ?? []);
+
+        $major = mb_strtolower(trim(($product->major_code ?? '').' '.($product->major_name ?? '')), 'UTF-8');
+        $isGraphic = str_contains($major, 'tkdh')
+            || str_contains($major, 'graphic')
+            || str_contains($major, 'đồ họa')
+            || str_contains($major, 'thiết kế');
+
+        $graphicDetail = null;
+
+        if ($isGraphic) {
+            $graphic = DB::table('product_graphic')
+                ->where('product_id', $productId)
+                ->first();
+
+            $graphicDetail = [
+                'design_type' => $graphic->design_type ?? null,
+                'tools_used' => $graphic->tools_used ?? null,
+                'behance_link' => $graphic->behance_link ?? null,
+                'color_palette' => $this->decodeColorPalette($graphic->color_palette ?? null),
+            ];
+        }
+
         $author = [
             'name'  => $product->student_name,
             'email' => $product->student_email,
@@ -497,6 +528,7 @@ class ProductRepository extends BaseRepository
             'images'  => $images,
             'tags'    => $tags,
             'reviews' => $reviews,
+            'graphic_detail' => $graphicDetail,
         ];
     }
 
@@ -520,7 +552,6 @@ class ProductRepository extends BaseRepository
             ->leftJoin('product_statistics as s', 'p.product_id', '=', 's.product_id')
             ->leftJoin('categories as c', 'p.cate_id', '=', 'c.cate_id')
             ->leftJoin('users as u', 'p.user_id', '=', 'u.user_id')
-            ->leftJoin('users as gv', 'p.approved_by', '=', 'gv.user_id')
             ->where('p.status', 'approved');
 
         if ($majorId) {
@@ -545,7 +576,7 @@ class ProductRepository extends BaseRepository
                 'm.major_name as major',
                 'u.name as student',
                 'u.user_id as studentId',
-                'gv.name as advisor',
+                'p.advisor_name as advisor',
                 'c.category_name as type',
                 's.views',
                 's.likes',
@@ -603,7 +634,6 @@ class ProductRepository extends BaseRepository
             ->leftJoin('product_statistics as s', 'p.product_id', '=', 's.product_id')
             ->leftJoin('categories as c', 'p.cate_id', '=', 'c.cate_id')
             ->leftJoin('users as u', 'p.user_id', '=', 'u.user_id')
-            ->leftJoin('users as gv', 'p.approved_by', '=', 'gv.user_id')
             ->where('p.status', 'approved')
             ->orderByDesc('p.created_at')
             ->select(
@@ -620,7 +650,7 @@ class ProductRepository extends BaseRepository
                 'u.name as student',
                 'u.user_id as studentId',
 
-                'gv.name as advisor',
+                'p.advisor_name as advisor',
 
                 'c.category_name as type',
 
@@ -667,7 +697,6 @@ class ProductRepository extends BaseRepository
             ->leftJoin('product_statistics as s', 'p.product_id', '=', 's.product_id')
             ->leftJoin('categories as c', 'p.cate_id', '=', 'c.cate_id')
             ->leftJoin('users as u', 'p.user_id', '=', 'u.user_id')
-            ->leftJoin('users as gv', 'p.approved_by', '=', 'gv.user_id')
             ->where('p.product_id', $id)
             ->where('p.status', 'approved')
             ->select(
@@ -676,7 +705,7 @@ class ProductRepository extends BaseRepository
                 'm.major_code',
                 'u.name as student',
                 'u.user_id as studentId',
-                'gv.name as advisor',
+                'p.advisor_name as advisor',
                 'c.category_name as type',
                 's.views',
                 's.likes',
@@ -707,8 +736,14 @@ class ProductRepository extends BaseRepository
 
         // ================= 4. REVIEWS =================
         $reviews = DB::table('reviews')
+            ->leftJoin('users as teacher', 'reviews.teacher_id', '=', 'teacher.user_id')
             ->where('product_id', $productId)
-            ->select('comment', 'teacher_id')
+            ->select(
+                'reviews.comment',
+                'reviews.teacher_id',
+                'reviews.created_at',
+                'teacher.name as teacher_name'
+            )
             ->get()
             ->toArray();
 
@@ -755,6 +790,10 @@ class ProductRepository extends BaseRepository
             $detail = DB::table('product_graphic')
                 ->where('product_id', $productId)
                 ->first();
+
+            if ($detail) {
+                $detail->color_palette = $this->decodeColorPalette($detail->color_palette ?? null);
+            }
         }
 
         // ================= 6. TECHNOLOGIES =================
@@ -796,7 +835,6 @@ class ProductRepository extends BaseRepository
         $resources = [
             'github' => $product->github_link ?? null,
             'demo' => $product->demo_link ?? null,
-            'drive' => $detail->drive_link ?? null,
             'behance' => $detail->behance_link ?? null,
             'config_file' => $detail->config_file ?? null,
         ];
@@ -821,6 +859,10 @@ class ProductRepository extends BaseRepository
             'student' => $product->student ?? 'Ẩn danh',
             'studentId' => $product->studentId,
 
+            'team_members' => is_string($product->team_members)
+                ? (json_decode($product->team_members, true) ?: [])
+                : ($product->team_members ?? []),
+
             'major_id' => $product->major_id,
             'major' => $product->major,
             'major_code' => $product->major_code,
@@ -841,7 +883,12 @@ class ProductRepository extends BaseRepository
                 ? json_decode($product->awards, true)
                 : [],
 
-            'feedback' => array_map(fn($r) => $r->comment, $reviews),
+            'feedback' => array_map(fn($review) => [
+                'comment' => $review->comment,
+                'teacher_id' => $review->teacher_id,
+                'teacher_name' => $review->teacher_name,
+                'created_at' => $review->created_at,
+            ], $reviews),
 
             'tags' => $tags,
 
@@ -963,7 +1010,6 @@ class ProductRepository extends BaseRepository
                 'mmt.config_file',
                 'gr.design_type',
                 'gr.tools_used',
-                'gr.drive_link',
                 'gr.behance_link'
             )
             ->first();
@@ -981,44 +1027,6 @@ class ProductRepository extends BaseRepository
             ->leftJoin('product_graphic as gr', 'p.product_id', '=', 'gr.product_id')
             ->where('p.product_id', '!=', $productId)
             ->where('p.major_id', $current->major_id)
-            ->where(function ($q) use ($current) {
-                $comparableFields = [
-                    'p.title' => $current->title,
-                    'p.description' => $current->description,
-                    'p.thumbnail' => $current->thumbnail,
-                    'p.github_link' => $current->github_link,
-                    'p.demo_link' => $current->demo_link,
-                    'ai.model_used' => $current->model_used,
-                    'ai.framework' => $current->ai_framework,
-                    'ai.language' => $current->language,
-                    'ai.dataset_used' => $current->dataset_used,
-                    'cntt.programming_language' => $current->programming_language,
-                    'cntt.framework' => $current->cntt_framework,
-                    'cntt.database_used' => $current->database_used,
-                    'mmt.simulation_tool' => $current->simulation_tool,
-                    'mmt.network_protocol' => $current->network_protocol,
-                    'mmt.topology_type' => $current->topology_type,
-                    'mmt.config_file' => $current->config_file,
-                    'gr.design_type' => $current->design_type,
-                    'gr.tools_used' => $current->tools_used,
-                    'gr.drive_link' => $current->drive_link,
-                    'gr.behance_link' => $current->behance_link,
-                ];
-                $hasComparableValue = false;
-
-                foreach ($comparableFields as $column => $value) {
-                    if ($value === null || trim((string) $value) === '') {
-                        continue;
-                    }
-
-                    $hasComparableValue = true;
-                    $q->orWhere($column, $value);
-                }
-
-                if (!$hasComparableValue) {
-                    $q->whereRaw('1 = 0');
-                }
-            })
             ->select(
                 'p.product_id',
                 'p.title',
@@ -1047,12 +1055,15 @@ class ProductRepository extends BaseRepository
 
                 'gr.design_type',
                 'gr.tools_used',
-                'gr.drive_link',
                 'gr.behance_link'
             )
             ->orderByDesc('p.created_at')
-            ->limit(10)
+            ->limit(50)
             ->get()
+            ->filter(fn($product) => $this->isComparisonCandidate($current, $product))
+            ->unique('product_id')
+            ->take(10)
+            ->values()
             ->map(fn($p) => [
                 'product_id' => $p->product_id,
                 'title' => $p->title,
@@ -1080,10 +1091,80 @@ class ProductRepository extends BaseRepository
 
                 'design_type' => $p->design_type,
                 'tools_used' => $p->tools_used,
-                'drive_link' => $p->drive_link,
                 'behance_link' => $p->behance_link,
             ])
             ->toArray();
+    }
+
+    private function isComparisonCandidate(object $current, object $candidate): bool
+    {
+        $pairs = [
+            [$current->title ?? null, $candidate->title ?? null, 55],
+            [$current->description ?? null, $candidate->description ?? null, 70],
+            [$current->thumbnail ?? null, $candidate->thumbnail ?? null, 100],
+            [$current->github_link ?? null, $candidate->github_link ?? null, 100],
+            [$current->demo_link ?? null, $candidate->demo_link ?? null, 100],
+            [$current->model_used ?? null, $candidate->model_used ?? null, 70],
+            [$current->ai_framework ?? null, $candidate->framework ?? null, 70],
+            [$current->language ?? null, $candidate->language ?? null, 80],
+            [$current->dataset_used ?? null, $candidate->dataset_used ?? null, 70],
+            [$current->programming_language ?? null, $candidate->programming_language ?? null, 80],
+            [$current->cntt_framework ?? null, $candidate->cntt_framework ?? null, 70],
+            [$current->database_used ?? null, $candidate->database_used ?? null, 80],
+            [$current->simulation_tool ?? null, $candidate->simulation_tool ?? null, 70],
+            [$current->network_protocol ?? null, $candidate->network_protocol ?? null, 65],
+            [$current->topology_type ?? null, $candidate->topology_type ?? null, 65],
+            [$current->config_file ?? null, $candidate->config_file ?? null, 100],
+            [$current->design_type ?? null, $candidate->design_type ?? null, 70],
+            [$current->tools_used ?? null, $candidate->tools_used ?? null, 65],
+            [$current->behance_link ?? null, $candidate->behance_link ?? null, 100],
+        ];
+
+        foreach ($pairs as [$first, $second, $minimumSimilarity]) {
+            $first = $this->normalizeCandidateValue($first);
+            $second = $this->normalizeCandidateValue($second);
+
+            if ($first === '' || $second === '') {
+                continue;
+            }
+
+            if ($first === $second) {
+                return true;
+            }
+
+            similar_text($first, $second, $similarity);
+
+            if ($similarity >= $minimumSimilarity) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function normalizeCandidateValue(mixed $value): string
+    {
+        $value = mb_strtolower(trim((string) $value), 'UTF-8');
+        $value = preg_replace('/[^\p{L}\p{N}]+/u', ' ', $value) ?? '';
+
+        return trim(preg_replace('/\s+/u', ' ', $value) ?? '');
+    }
+
+    private function decodeColorPalette(mixed $value): array
+    {
+        if (is_array($value)) {
+            return array_values(array_filter($value));
+        }
+
+        if (! is_string($value) || trim($value) === '') {
+            return [];
+        }
+
+        $decoded = json_decode($value, true);
+
+        return is_array($decoded)
+            ? array_values(array_filter($decoded))
+            : [];
     }
 
     public function compareData(int $productId): ?object
@@ -1119,7 +1200,6 @@ class ProductRepository extends BaseRepository
                 'mmt.config_file',
                 'gr.design_type',
                 'gr.tools_used',
-                'gr.drive_link',
                 'gr.behance_link'
             )
             ->first();

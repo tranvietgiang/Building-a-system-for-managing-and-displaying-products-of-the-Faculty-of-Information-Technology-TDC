@@ -57,18 +57,10 @@ class TeacherController extends Controller
         try {
             $teacher_approve = $this->teacherService->updateStatus(
                 $product_id,
-                $status,
-                null,
-                array_merge(
-                    $request->only(['title', 'description', 'major', 'image', 'thumbnail']),
-                    ['force_approve' => $request->boolean('force_approve', false)]
-                )
+                $status
             );
 
-            return response()->json(
-                $teacher_approve,
-                ($teacher_approve['blocked_by_ai'] ?? false) ? 422 : 200
-            );
+            return response()->json($teacher_approve);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => $e->getMessage()

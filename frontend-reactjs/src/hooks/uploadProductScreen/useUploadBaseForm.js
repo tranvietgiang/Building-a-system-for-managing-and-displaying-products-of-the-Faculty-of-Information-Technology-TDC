@@ -13,6 +13,7 @@ export default function useUploadBaseForm({
   initialData,
   editData,
   editImages,
+  editProductId,
   editTags,
   validateStep,
   draftKey,
@@ -335,6 +336,10 @@ export default function useUploadBaseForm({
         payload.append("major_id", user?.major_id || "");
         payload.append("major_code", majorCode || "");
 
+        if (editProductId) {
+          payload.append("replace_product_id", editProductId);
+        }
+
         tags.forEach((tag) => payload.append("tags[]", tag));
 
         images.forEach((img, index) => {
@@ -347,6 +352,12 @@ export default function useUploadBaseForm({
                 is_thumbnail: index === thumbnailIndex,
               }),
             );
+          } else if (img.url) {
+            payload.append("existing_images[]", img.url);
+
+            if (index === thumbnailIndex) {
+              payload.append("existing_thumbnail_url", img.url);
+            }
           }
         });
 
@@ -399,6 +410,7 @@ export default function useUploadBaseForm({
       loadedDraftId,
       scopedDraftKey,
       draftKey,
+      editProductId,
     ],
   );
 

@@ -4,7 +4,9 @@ import BackButton from "../../../components/common/BackButton";
 import useImageViewer from "../../../shared/useImageViewer";
 import { Icons } from "../../../components/common/Icon";
 import { productApi } from "../../../api";
-import { shareVisitorProduct } from "../../../utils/shareProduct";
+import VisitorTeam from "../../../components/visitor/VisitorTeam";
+import VisitorReviews from "../../../components/visitor/VisitorReviews";
+import VisitorShareButton from "../../../components/visitor/VisitorShareButton";
 
 const AIDetailScreen = ({
   productVisitorDetail,
@@ -17,15 +19,13 @@ const AIDetailScreen = ({
   const [isLiked, setIsLiked] = useState(false);
 
   const [likeCount, setLikeCount] = useState(productVisitorDetail?.likes || 0);
-  const [shareCount, setShareCount] = useState(productVisitorDetail?.shares || 0);
   const { openViewer, ImageViewerModal } = useImageViewer();
 
   const majorDetail = productVisitorDetail?.major_detail || {};
 
   useEffect(() => {
     setLikeCount(productVisitorDetail?.likes || 0);
-    setShareCount(productVisitorDetail?.shares || 0);
-  }, [productVisitorDetail?.id, productVisitorDetail?.likes, productVisitorDetail?.shares]);
+  }, [productVisitorDetail?.id, productVisitorDetail?.likes]);
 
   const handleLike = async () => {
     if (isLiked) return;
@@ -42,31 +42,6 @@ const AIDetailScreen = ({
       console.error(error);
       setIsLiked(false);
       setLikeCount((prev) => Math.max(0, prev - 1));
-    }
-  };
-
-  const handleShare = async () => {
-    const productId = productVisitorDetail?.id;
-    if (!productId) return;
-
-    const shareUrl = `${window.location.origin}/chi-tiet-san-pham/${productId}`;
-
-    try {
-      const shared = await shareVisitorProduct({
-        title: productVisitorDetail?.title,
-        description: productVisitorDetail?.description,
-        url: shareUrl,
-      });
-      if (!shared) return;
-
-      const res = await productApi.incrementShare(productId);
-      if (typeof res?.shares === "number") {
-        setShareCount(res.shares);
-      }
-    } catch (error) {
-      if (error?.name !== "AbortError") {
-        console.error(error);
-      }
     }
   };
 
@@ -114,7 +89,7 @@ const AIDetailScreen = ({
               <span
                 className={`px-3 py-1.5 ${theme.badgeBg} backdrop-blur-sm rounded-full text-xs font-medium`}
               >
-                🤖 AI • {majorDetail.model_used || "Deep Learning"}
+                🤖 AI • {majorDetail.model_used || "Chưa cập nhật"}
               </span>
               <button
                 onClick={() => navigate("/dang-nhap")}
@@ -151,13 +126,7 @@ const AIDetailScreen = ({
                 )}
                 <span>{likeCount?.toLocaleString()} yêu thích</span>
               </button>
-              <button
-                onClick={handleShare}
-                className="flex items-center gap-2 transition-transform hover:scale-110"
-              >
-                <Icons.Share className="w-4 h-4" />
-                <span>{shareCount?.toLocaleString()} chia sẻ</span>
-              </button>
+              <VisitorShareButton product={productVisitorDetail} />
               <div className="flex items-center gap-2">
                 📅 {productVisitorDetail?.year}
               </div>
@@ -173,22 +142,26 @@ const AIDetailScreen = ({
           {[
             {
               icon: "🎯",
-              value: majorDetail.accuracy_score || "99.1%",
+              value:
+                majorDetail.accuracy_score !== null &&
+                majorDetail.accuracy_score !== undefined
+                  ? `${majorDetail.accuracy_score}%`
+                  : "Chưa cập nhật",
               label: "Độ chính xác",
             },
             {
               icon: "📊",
-              value: majorDetail.dataset_used || "SQuAD",
+              value: majorDetail.dataset_used || "Chưa cập nhật",
               label: "Dataset",
             },
             {
               icon: "⚡",
-              value: majorDetail.framework || "TensorFlow",
+              value: majorDetail.framework || "Chưa cập nhật",
               label: "Framework",
             },
             {
               icon: "💻",
-              value: majorDetail.language || "Python",
+              value: majorDetail.language || "Chưa cập nhật",
               label: "Ngôn ngữ",
             },
           ].map((stat, idx) => (
@@ -308,7 +281,7 @@ const AIDetailScreen = ({
                           Mô hình
                         </div>
                         <div className="font-semibold text-gray-800">
-                          {majorDetail.model_used || "LSTM"}
+                          {majorDetail.model_used || "Chưa cập nhật"}
                         </div>
                       </div>
                       <div className="p-4 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100">
@@ -316,7 +289,7 @@ const AIDetailScreen = ({
                           Framework
                         </div>
                         <div className="font-semibold text-gray-800">
-                          {majorDetail.framework || "TensorFlow"}
+                          {majorDetail.framework || "Chưa cập nhật"}
                         </div>
                       </div>
                       <div className="p-4 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100">
@@ -324,7 +297,7 @@ const AIDetailScreen = ({
                           Ngôn ngữ
                         </div>
                         <div className="font-semibold text-gray-800">
-                          {majorDetail.language || "Python"}
+                          {majorDetail.language || "Chưa cập nhật"}
                         </div>
                       </div>
                       <div className="p-4 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100">
@@ -332,7 +305,7 @@ const AIDetailScreen = ({
                           Dataset
                         </div>
                         <div className="font-semibold text-gray-800">
-                          {majorDetail.dataset_used || "SQuAD"}
+                          {majorDetail.dataset_used || "Chưa cập nhật"}
                         </div>
                       </div>
                     </div>
@@ -340,7 +313,10 @@ const AIDetailScreen = ({
                       className={`p-5 rounded-xl bg-gradient-to-r ${theme.lightBg} text-center`}
                     >
                       <div className={`text-4xl font-bold ${theme.textColor}`}>
-                        {majorDetail.accuracy_score || "99.1"}%
+                        {majorDetail.accuracy_score !== null &&
+                        majorDetail.accuracy_score !== undefined
+                          ? `${majorDetail.accuracy_score}%`
+                          : "Chưa cập nhật"}
                       </div>
                       <div className="text-sm text-gray-500 mt-1">
                         Độ chính xác của mô hình
@@ -354,15 +330,7 @@ const AIDetailScreen = ({
                     {[
                       {
                         label: "Dataset",
-                        value: majorDetail.dataset_used || "SQuAD",
-                      },
-                      { label: "Epochs", value: "50" },
-                      { label: "Batch Size", value: "32" },
-                      { label: "Learning Rate", value: "0.001" },
-                      { label: "Optimizer", value: "Adam" },
-                      {
-                        label: "Loss Function",
-                        value: "Categorical Cross-Entropy",
+                        value: majorDetail.dataset_used || "Chưa cập nhật",
                       },
                     ].map((item, i) => (
                       <div
@@ -379,69 +347,11 @@ const AIDetailScreen = ({
                 )}
 
                 {activeTab === "team" && (
-                  <div className="space-y-6">
-                    <div
-                      className={`flex items-center gap-5 p-5 rounded-xl bg-gradient-to-r ${theme.lightBg}`}
-                    >
-                      <div
-                        className={`w-16 h-16 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg ${theme.buttonBg}`}
-                      >
-                        {productVisitorDetail?.student?.charAt(0)}
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-lg text-gray-800">
-                          {productVisitorDetail?.student}
-                        </h3>
-                        <p className="text-sm text-gray-500">
-                          MSSV: {productVisitorDetail?.studentId}
-                        </p>
-                        <p className={`text-sm mt-1 ${theme.textColor}`}>
-                          🎓 Sinh viên thực hiện
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4 p-4 rounded-xl bg-gray-50">
-                      <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center text-xl">
-                        👨‍🏫
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-800">
-                          {productVisitorDetail?.advisor}
-                        </h3>
-                        <p className="text-sm text-gray-500">
-                          Giảng viên hướng dẫn
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                  <VisitorTeam product={productVisitorDetail} theme={theme} />
                 )}
 
                 {activeTab === "feedback" && (
-                  <div className="space-y-4">
-                    {productVisitorDetail?.feedback?.length > 0 ? (
-                      productVisitorDetail.feedback.map((fb, i) => (
-                        <div
-                          key={i}
-                          className="p-4 rounded-xl bg-gradient-to-r from-gray-50 to-gray-100"
-                        >
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="text-yellow-500">⭐</span>
-                            <span className="text-sm text-gray-500">
-                              Đánh giá
-                            </span>
-                          </div>
-                          <p className="text-gray-700 italic leading-relaxed">
-                            "{fb}"
-                          </p>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="text-center py-8 text-gray-400">
-                        <div className="text-4xl mb-2">💬</div>
-                        <p>Chưa có đánh giá nào</p>
-                      </div>
-                    )}
-                  </div>
+                  <VisitorReviews reviews={productVisitorDetail?.feedback} />
                 )}
               </div>
             </div>

@@ -4,7 +4,9 @@ import BackButton from "../../../components/common/BackButton";
 import useImageViewer from "../../../shared/useImageViewer";
 import { Icons } from "../../../components/common/Icon";
 import { productApi } from "../../../api";
-import { shareVisitorProduct } from "../../../utils/shareProduct";
+import VisitorTeam from "../../../components/visitor/VisitorTeam";
+import VisitorReviews from "../../../components/visitor/VisitorReviews";
+import VisitorShareButton from "../../../components/visitor/VisitorShareButton";
 
 const GraphicDetailScreen = ({
   productVisitorDetail,
@@ -13,21 +15,17 @@ const GraphicDetailScreen = ({
   theme, // theme từ file getTheme
 }) => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("showcase");
+  const [activeTab, setActiveTab] = useState("style");
   const [isLiked, setIsLiked] = useState(false);
   // ✅ Khởi tạo trực tiếp, không cần useEffect
   const [likeCount, setLikeCount] = useState(productVisitorDetail?.likes || 0);
-  const [shareCount, setShareCount] = useState(
-    productVisitorDetail?.shares || 0,
-  );
   const { openViewer, ImageViewerModal } = useImageViewer();
 
   const majorDetail = productVisitorDetail?.major_detail || {};
 
   useEffect(() => {
     setLikeCount(productVisitorDetail?.likes || 0);
-    setShareCount(productVisitorDetail?.shares || 0);
-  }, [productVisitorDetail?.id, productVisitorDetail?.likes, productVisitorDetail?.shares]);
+  }, [productVisitorDetail?.id, productVisitorDetail?.likes]);
 
   const handleLike = async () => {
     if (isLiked) return;
@@ -46,40 +44,6 @@ const GraphicDetailScreen = ({
       setLikeCount((prev) => Math.max(0, prev - 1));
     }
   };
-
-  const handleShare = async () => {
-    const productId = productVisitorDetail?.id;
-    if (!productId) return;
-
-    const shareUrl = `${window.location.origin}/chi-tiet-san-pham/${productId}`;
-
-    try {
-      const shared = await shareVisitorProduct({
-        title: productVisitorDetail?.title,
-        description: productVisitorDetail?.description,
-        url: shareUrl,
-      });
-      if (!shared) return;
-
-      const res = await productApi.incrementShare(productId);
-      if (typeof res?.shares === "number") {
-        setShareCount(res.shares);
-      }
-    } catch (error) {
-      if (error?.name !== "AbortError") {
-        console.error(error);
-      }
-    }
-  };
-
-  // Color palette từ theme
-  const colorPalette = [
-    theme.bgColor,
-    "#F472B6",
-    "#FB7185",
-    "#1F2937",
-    "#9CA3AF",
-  ];
 
   if (loadingVisitorDetail) {
     return (
@@ -125,7 +89,7 @@ const GraphicDetailScreen = ({
               <span
                 className={`px-3 py-1.5 ${theme.badgeBg} backdrop-blur-sm rounded-full text-xs font-medium`}
               >
-                🎨 {majorDetail.design_type || "Branding"} Design
+                🎨 {majorDetail.design_type || "Chưa cập nhật"} Design
               </span>
               <button
                 onClick={() => navigate("/dang-nhap")}
@@ -162,13 +126,7 @@ const GraphicDetailScreen = ({
                 )}
                 <span>{likeCount?.toLocaleString()} yêu thích</span>
               </button>
-              <button
-                onClick={handleShare}
-                className="flex items-center gap-2 transition-transform hover:scale-110"
-              >
-                <Icons.Share className="w-4 h-4" />
-                <span>{shareCount?.toLocaleString()} chia sẻ</span>
-              </button>
+              <VisitorShareButton product={productVisitorDetail} />
               <div className="flex items-center gap-2">
                 📅 {productVisitorDetail?.year}
               </div>
@@ -185,7 +143,7 @@ const GraphicDetailScreen = ({
             className={`inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold ${theme.lightBg} ${theme.textColor}`}
           >
             <span className="text-xl">🎯</span>{" "}
-            {majorDetail.design_type || "Branding Identity"} Design
+            {majorDetail.design_type || "Chưa cập nhật"} Design
           </span>
         </div>
 
@@ -240,31 +198,11 @@ const GraphicDetailScreen = ({
               </div>
             )}
 
-            {/* Color Palette */}
-            <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <span className="text-2xl">🎨</span> Bảng màu chủ đạo
-              </h3>
-              <div className="flex gap-3 flex-wrap">
-                {colorPalette.map((color, idx) => (
-                  <div key={idx} className="text-center">
-                    <div
-                      className="w-20 h-20 rounded-xl shadow-md transition-transform hover:scale-110 cursor-pointer"
-                      style={{ backgroundColor: color }}
-                    ></div>
-                    <div className="text-xs text-gray-500 mt-2 font-mono">
-                      {color}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
             {/* Tabs */}
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
               <div className="flex gap-1 p-2 bg-gray-50/80 border-b">
                 {[
-                  { id: "showcase", label: "🎨 Showcase" },
+                  { id: "style", label: "🎨 Phong cách & Màu sắc" },
                   { id: "tools", label: "🛠️ Tools" },
                   { id: "team", label: "👥 Đội ngũ" },
                   { id: "feedback", label: "💬 Đánh giá" },
@@ -289,25 +227,8 @@ const GraphicDetailScreen = ({
               </div>
 
               <div className="p-6">
-                {activeTab === "showcase" && (
+                {activeTab === "style" && (
                   <div className="space-y-6">
-                    <div className="grid grid-cols-2 gap-4">
-                      {productVisitorDetail?.images
-                        ?.slice(0, 4)
-                        .map((img, idx) => (
-                          <div
-                            key={idx}
-                            className="rounded-xl overflow-hidden shadow-md cursor-pointer hover:shadow-xl transition"
-                            onClick={() => openViewer(img.image_url)}
-                          >
-                            <img
-                              src={img.image_url}
-                              alt=""
-                              className="w-full h-40 object-cover"
-                            />
-                          </div>
-                        ))}
-                    </div>
                     <div
                       className={`p-4 rounded-xl bg-gradient-to-r ${theme.lightBg}`}
                     >
@@ -318,9 +239,30 @@ const GraphicDetailScreen = ({
                         </span>
                       </div>
                       <p className="text-gray-600">
-                        {majorDetail.design_type || "Modern Minimalist"} •
-                        Creative • Professional
+                        {majorDetail.design_type || "Chưa cập nhật"}
                       </p>
+                    </div>
+
+                    <div className="rounded-xl border border-gray-200 p-4">
+                      <div className="mb-3 flex items-center gap-2">
+                        <span className="text-xl">🎨</span>
+                        <span className="font-semibold text-gray-800">Bảng màu sắc</span>
+                      </div>
+                      {majorDetail.color_palette?.length > 0 ? (
+                        <div className="flex flex-wrap gap-3">
+                          {majorDetail.color_palette.map((color) => (
+                            <div key={color} className="text-center">
+                              <div
+                                className="h-14 w-14 rounded-xl border border-black/10 shadow-sm"
+                                style={{ backgroundColor: color }}
+                              />
+                              <span className="mt-1 block text-xs text-gray-500">{color}</span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-500">Chưa cập nhật bảng màu.</p>
+                      )}
                     </div>
                   </div>
                 )}
@@ -355,33 +297,10 @@ const GraphicDetailScreen = ({
                             <div
                               className={`font-medium text-gray-800 ${theme.hoverText} transition`}
                             >
-                              Behance Portfolio
+                              Tham khảo trên Behance
                             </div>
                             <div className="text-xs text-gray-400">
-                              Xem dự án trên Behance
-                            </div>
-                          </div>
-                          <span className="text-gray-400 group-hover:translate-x-1 transition">
-                            →
-                          </span>
-                        </a>
-                      )}
-                      {productVisitorDetail?.resources?.drive && (
-                        <a
-                          href={productVisitorDetail.resources.drive}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={`flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition group ${theme.hoverBg}`}
-                        >
-                          <span className="text-2xl">📁</span>
-                          <div className="flex-1">
-                            <div
-                              className={`font-medium text-gray-800 ${theme.hoverText} transition`}
-                            >
-                              Google Drive
-                            </div>
-                            <div className="text-xs text-gray-400">
-                              Tải xuống file thiết kế
+                              Mở liên kết tham khảo
                             </div>
                           </div>
                           <span className="text-gray-400 group-hover:translate-x-1 transition">
@@ -394,67 +313,11 @@ const GraphicDetailScreen = ({
                 )}
 
                 {activeTab === "team" && (
-                  <div className="space-y-6">
-                    <div
-                      className={`flex items-center gap-5 p-5 rounded-xl bg-gradient-to-r ${theme.lightBg}`}
-                    >
-                      <div
-                        className={`w-16 h-16 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg ${theme.buttonBg}`}
-                      >
-                        {productVisitorDetail?.student?.charAt(0)}
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-lg text-gray-800">
-                          {productVisitorDetail?.student}
-                        </h3>
-                        <p className="text-sm text-gray-500">
-                          MSSV: {productVisitorDetail?.studentId}
-                        </p>
-                        <p className={`text-sm mt-1 ${theme.textColor}`}>
-                          🎨 Graphic Designer
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4 p-4 rounded-xl bg-gray-50">
-                      <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center text-xl">
-                        <Icons.User />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-800">
-                          {productVisitorDetail?.advisor}
-                        </h3>
-                        <p className="text-sm text-gray-500">
-                          Giảng viên Duyệt
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                  <VisitorTeam product={productVisitorDetail} theme={theme} />
                 )}
 
                 {activeTab === "feedback" && (
-                  <div className="space-y-4">
-                    {productVisitorDetail?.feedback?.length > 0 ? (
-                      productVisitorDetail.feedback.map((fb, i) => (
-                        <div
-                          key={i}
-                          className="p-4 rounded-xl bg-gradient-to-r from-gray-50 to-gray-100"
-                        >
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="text-yellow-500">⭐</span>
-                            <span className="text-sm text-gray-500">
-                              Đánh giá
-                            </span>
-                          </div>
-                          <p className="text-gray-700 italic">"{fb}"</p>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="text-center py-8 text-gray-400">
-                        <div className="text-4xl mb-2">💬</div>
-                        <p>Chưa có đánh giá nào</p>
-                      </div>
-                    )}
-                  </div>
+                  <VisitorReviews reviews={productVisitorDetail?.feedback} />
                 )}
               </div>
             </div>

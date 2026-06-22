@@ -4,7 +4,9 @@ import BackButton from "../../../components/common/BackButton";
 import useImageViewer from "../../../shared/useImageViewer";
 import { Icons } from "../../../components/common/Icon";
 import { productApi } from "../../../api";
-import { shareVisitorProduct } from "../../../utils/shareProduct";
+import VisitorTeam from "../../../components/visitor/VisitorTeam";
+import VisitorReviews from "../../../components/visitor/VisitorReviews";
+import VisitorShareButton from "../../../components/visitor/VisitorShareButton";
 
 const NetworkDetailScreen = ({
   productVisitorDetail,
@@ -16,14 +18,12 @@ const NetworkDetailScreen = ({
   const [activeTab, setActiveTab] = useState("topology");
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(productVisitorDetail?.likes || 0);
-  const [shareCount, setShareCount] = useState(productVisitorDetail?.shares || 0);
   const { openViewer, ImageViewerModal } = useImageViewer();
   const majorDetail = productVisitorDetail?.major_detail || {};
 
   useEffect(() => {
     setLikeCount(productVisitorDetail?.likes || 0);
-    setShareCount(productVisitorDetail?.shares || 0);
-  }, [productVisitorDetail?.id, productVisitorDetail?.likes, productVisitorDetail?.shares]);
+  }, [productVisitorDetail?.id, productVisitorDetail?.likes]);
 
   const handleLike = async () => {
     if (isLiked) return;
@@ -40,31 +40,6 @@ const NetworkDetailScreen = ({
       console.error(error);
       setIsLiked(false);
       setLikeCount((prev) => Math.max(0, prev - 1));
-    }
-  };
-
-  const handleShare = async () => {
-    const productId = productVisitorDetail?.id;
-    if (!productId) return;
-
-    const shareUrl = `${window.location.origin}/chi-tiet-san-pham/${productId}`;
-
-    try {
-      const shared = await shareVisitorProduct({
-        title: productVisitorDetail?.title,
-        description: productVisitorDetail?.description,
-        url: shareUrl,
-      });
-      if (!shared) return;
-
-      const res = await productApi.incrementShare(productId);
-      if (typeof res?.shares === "number") {
-        setShareCount(res.shares);
-      }
-    } catch (error) {
-      if (error?.name !== "AbortError") {
-        console.error(error);
-      }
     }
   };
 
@@ -112,7 +87,7 @@ const NetworkDetailScreen = ({
               <span
                 className={`px-3 py-1.5 ${theme.badgeBg} backdrop-blur-sm rounded-full text-xs font-medium`}
               >
-                🌐 {majorDetail.topology_type || "Mesh"} Network
+                🌐 {majorDetail.topology_type || "Mạng máy tính"}
               </span>
               <button
                 onClick={() => navigate("/dang-nhap")}
@@ -149,13 +124,7 @@ const NetworkDetailScreen = ({
                 )}
                 <span>{likeCount?.toLocaleString()} yêu thích</span>
               </button>
-              <button
-                onClick={handleShare}
-                className="flex items-center gap-2 transition-transform hover:scale-110"
-              >
-                <Icons.Share className="w-4 h-4" />
-                <span>{shareCount?.toLocaleString()} chia sẻ</span>
-              </button>
+              <VisitorShareButton product={productVisitorDetail} />
               <div className="flex items-center gap-2">
                 📅 {productVisitorDetail?.year}
               </div>
@@ -171,20 +140,19 @@ const NetworkDetailScreen = ({
           {[
             {
               icon: "🌐",
-              value: majorDetail.topology_type || "Mesh",
+              value: majorDetail.topology_type || "Chưa cập nhật",
               label: "Topology",
             },
             {
               icon: "🔌",
-              value: majorDetail.network_protocol || "TCP/IP",
+              value: majorDetail.network_protocol || "Chưa cập nhật",
               label: "Protocol",
             },
             {
               icon: "🛠️",
-              value: majorDetail.simulation_tool || "Wireshark",
+              value: majorDetail.simulation_tool || "Chưa cập nhật",
               label: "Tool",
             },
-            { icon: "📡", value: "24/7", label: "Uptime" },
           ].map((stat, idx) => (
             <div
               key={idx}
@@ -250,57 +218,6 @@ const NetworkDetailScreen = ({
               </div>
             )}
 
-            {/* Network Topology Visualization */}
-            <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <span className="text-2xl">🗺️</span> Mô hình mạng{" "}
-                {majorDetail.topology_type || "Mesh"}
-              </h3>
-              <div className="relative h-80 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl flex items-center justify-center">
-                <div className="relative w-full h-full">
-                  {/* Center Node */}
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                    <div
-                      className={`w-20 h-20 rounded-full flex items-center justify-center text-white shadow-lg ${theme.buttonBg}`}
-                    >
-                      <span className="text-2xl">🌐</span>
-                    </div>
-                    <div className="text-center text-xs mt-2 font-semibold">
-                      Gateway
-                    </div>
-                  </div>
-                  {/* Node 1 */}
-                  <div className="absolute top-1/4 left-1/4">
-                    <div className="w-14 h-14 rounded-full bg-gray-300 flex items-center justify-center shadow-md">
-                      <span className="text-2xl">🖥️</span>
-                    </div>
-                    <div className="text-center text-xs mt-1">Server 1</div>
-                  </div>
-                  {/* Node 2 */}
-                  <div className="absolute top-1/4 right-1/4">
-                    <div className="w-14 h-14 rounded-full bg-gray-300 flex items-center justify-center shadow-md">
-                      <span className="text-2xl">🖥️</span>
-                    </div>
-                    <div className="text-center text-xs mt-1">Server 2</div>
-                  </div>
-                  {/* Node 3 */}
-                  <div className="absolute bottom-1/4 left-1/3">
-                    <div className="w-14 h-14 rounded-full bg-gray-300 flex items-center justify-center shadow-md">
-                      <span className="text-2xl">💻</span>
-                    </div>
-                    <div className="text-center text-xs mt-1">Client</div>
-                  </div>
-                  {/* Node 4 */}
-                  <div className="absolute bottom-1/4 right-1/3">
-                    <div className="w-14 h-14 rounded-full bg-gray-300 flex items-center justify-center shadow-md">
-                      <span className="text-2xl">📱</span>
-                    </div>
-                    <div className="text-center text-xs mt-1">Mobile</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
             {/* Tabs */}
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
               <div className="flex gap-1 p-2 bg-gray-50/80 border-b">
@@ -336,13 +253,13 @@ const NetworkDetailScreen = ({
                       <div className="p-4 rounded-xl bg-gray-50">
                         <div className="text-sm text-gray-500">Kiến trúc</div>
                         <div className="font-semibold text-gray-800">
-                          {majorDetail.topology_type || "Mesh"}
+                          {majorDetail.topology_type || "Chưa cập nhật"}
                         </div>
                       </div>
                       <div className="p-4 rounded-xl bg-gray-50">
                         <div className="text-sm text-gray-500">Giao thức</div>
                         <div className="font-semibold text-gray-800">
-                          {majorDetail.network_protocol || "TCP/IP"}
+                          {majorDetail.network_protocol || "Chưa cập nhật"}
                         </div>
                       </div>
                       <div className="p-4 rounded-xl bg-gray-50">
@@ -350,15 +267,7 @@ const NetworkDetailScreen = ({
                           Công cụ mô phỏng
                         </div>
                         <div className="font-semibold text-gray-800">
-                          {majorDetail.simulation_tool || "Wireshark"}
-                        </div>
-                      </div>
-                      <div className="p-4 rounded-xl bg-gray-50">
-                        <div className="text-sm text-gray-500">
-                          Số lượng node
-                        </div>
-                        <div className="font-semibold text-gray-800">
-                          24 devices
+                          {majorDetail.simulation_tool || "Chưa cập nhật"}
                         </div>
                       </div>
                     </div>
@@ -398,89 +307,15 @@ const NetworkDetailScreen = ({
                           </span>
                         ))}
                     </div>
-                    <div className="grid grid-cols-1 gap-3">
-                      <div className="flex items-center gap-3 p-3 rounded-xl bg-green-50">
-                        <span className="text-xl">✅</span>
-                        <span className="text-sm">Tường lửa Layer 7</span>
-                      </div>
-                      <div className="flex items-center gap-3 p-3 rounded-xl bg-green-50">
-                        <span className="text-xl">✅</span>
-                        <span className="text-sm">IDS/IPS Detection</span>
-                      </div>
-                      <div className="flex items-center gap-3 p-3 rounded-xl bg-green-50">
-                        <span className="text-xl">✅</span>
-                        <span className="text-sm">DDoS Protection</span>
-                      </div>
-                      <div className="flex items-center gap-3 p-3 rounded-xl bg-green-50">
-                        <span className="text-xl">✅</span>
-                        <span className="text-sm">VPN Support</span>
-                      </div>
-                    </div>
                   </div>
                 )}
 
                 {activeTab === "team" && (
-                  <div className="space-y-6">
-                    <div
-                      className={`flex items-center gap-5 p-5 rounded-xl bg-gradient-to-r ${theme.lightBg}`}
-                    >
-                      <div
-                        className={`w-16 h-16 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg ${theme.buttonBg}`}
-                      >
-                        {productVisitorDetail?.student?.charAt(0)}
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-lg text-gray-800">
-                          {productVisitorDetail?.student}
-                        </h3>
-                        <p className="text-sm text-gray-500">
-                          MSSV: {productVisitorDetail?.studentId}
-                        </p>
-                        <p className={`text-sm mt-1 ${theme.textColor}`}>
-                          🌐 Network Engineer
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4 p-4 rounded-xl bg-gray-50">
-                      <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center text-xl">
-                        👨‍🏫
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-800">
-                          {productVisitorDetail?.advisor}
-                        </h3>
-                        <p className="text-sm text-gray-500">
-                          Giảng viên hướng dẫn
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                  <VisitorTeam product={productVisitorDetail} theme={theme} />
                 )}
 
                 {activeTab === "feedback" && (
-                  <div className="space-y-4">
-                    {productVisitorDetail?.feedback?.length > 0 ? (
-                      productVisitorDetail.feedback.map((fb, i) => (
-                        <div
-                          key={i}
-                          className="p-4 rounded-xl bg-gradient-to-r from-gray-50 to-gray-100"
-                        >
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="text-yellow-500">⭐</span>
-                            <span className="text-sm text-gray-500">
-                              Đánh giá
-                            </span>
-                          </div>
-                          <p className="text-gray-700 italic">"{fb}"</p>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="text-center py-8 text-gray-400">
-                        <div className="text-4xl mb-2">💬</div>
-                        <p>Chưa có đánh giá nào</p>
-                      </div>
-                    )}
-                  </div>
+                  <VisitorReviews reviews={productVisitorDetail?.feedback} />
                 )}
               </div>
             </div>
@@ -519,31 +354,6 @@ const NetworkDetailScreen = ({
                 >
                   🔍 Scan Network
                 </button>
-              </div>
-            </div>
-
-            {/* Network Stats */}
-            <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h3 className="font-bold text-lg mb-3 flex items-center gap-2">
-                <span>📊</span> Network Stats
-              </h3>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center p-3 rounded-xl bg-gray-50">
-                  <span className="text-gray-600">Bandwidth</span>
-                  <span className="font-semibold text-gray-800">1 Gbps</span>
-                </div>
-                <div className="flex justify-between items-center p-3 rounded-xl bg-gray-50">
-                  <span className="text-gray-600">Latency</span>
-                  <span className="font-semibold text-gray-800">&lt; 10ms</span>
-                </div>
-                <div className="flex justify-between items-center p-3 rounded-xl bg-gray-50">
-                  <span className="text-gray-600">Packet Loss</span>
-                  <span className="font-semibold text-green-600">0.01%</span>
-                </div>
-                <div className="flex justify-between items-center p-3 rounded-xl bg-gray-50">
-                  <span className="text-gray-600">Active Nodes</span>
-                  <span className="font-semibold text-gray-800">24/7</span>
-                </div>
               </div>
             </div>
 

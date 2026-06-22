@@ -16,8 +16,8 @@ const buildQuery = (params = {}) => {
 const teacherApi = {
   getStatistic: () => axiosClient.get("/teacher/statistic"),
   getData: (params) => axiosClient.get(`/teacher${buildQuery(params)}`),
-  approve: (productId, data = {}) =>
-    axiosClient.post(`/teacher/product/${productId}/approve`, data),
+  approve: (productId) =>
+    axiosClient.post(`/teacher/product/${productId}/approve`),
   reject: (data) => axiosClient.post("/teacher/product/reject", data),
   submitReview: (productId, comment) =>
     axiosClient.post(`/teacher/product/${productId}/reviews`, { comment }),

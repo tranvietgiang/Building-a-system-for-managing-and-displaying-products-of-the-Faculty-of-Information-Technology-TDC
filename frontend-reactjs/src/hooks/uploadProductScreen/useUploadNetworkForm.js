@@ -12,6 +12,7 @@ export default function useUploadNetworkForm(options = {}) {
     initialData: initialNetworkFormData,
     editData: options.editData,
     editImages: options.editImages,
+    editProductId: options.editProductId,
     editTags: options.editTags,
     stepsConfig: [
       { id: 1, name: "Thông tin hệ thống", icon: "🌐" },
