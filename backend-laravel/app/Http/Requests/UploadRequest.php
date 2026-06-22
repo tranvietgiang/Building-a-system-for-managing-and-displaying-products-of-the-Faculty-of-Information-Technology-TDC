@@ -86,16 +86,16 @@ class UploadRequest extends FormRequest
             case 'tkdh':
                 // DB: NOT NULL
                 $rules['design_type'] = 'required|string|max:50';
-                $rules['tools_used'] = 'required|string|max:150';
+                $rules['tools_used'] = 'nullable|string|max:2000';
+                $rules['color_palette'] = 'nullable|string|max:500';
 
                 // DB: NULLABLE
-                $rules['drive_link'] = 'nullable|url|max:255';
                 $rules['behance_link'] = 'nullable|url|max:255';
                 break;
 
             case 'mmt':
                 // DB: NOT NULL
-                $rules['network_protocol'] = 'required|string|max:100';
+                $rules['network_protocol'] = 'nullable|string|max:2000';
                 $rules['topology_type'] = 'required|string|max:50';
                 $rules['simulation_tool'] = 'required|string|max:100';
                 break;
@@ -166,14 +166,12 @@ class UploadRequest extends FormRequest
             'database_used.max' => 'Database tối đa 100 ký tự',
 
             // ================= TKĐH =================
-            'design_type.required' => 'Chọn loại thiết kế',
-            'design_type.max' => 'Loại thiết kế tối đa 50 ký tự',
+            'design_type.required' => 'Nhập loại ấn phẩm',
+            'design_type.max' => 'Loại ấn phẩm tối đa 50 ký tự',
 
             'tools_used.required' => 'Nhập công cụ sử dụng',
-            'tools_used.max' => 'Công cụ tối đa 150 ký tự',
-
-            'drive_link.url' => 'Link drive không hợp lệ',
-            'drive_link.max' => 'Link drive tối đa 255 ký tự',
+            'tools_used.max' => 'Danh sách công cụ tối đa 2000 ký tự',
+            'color_palette.max' => 'Bảng màu tối đa 500 ký tự',
 
             'behance_link.url' => 'Link behance không hợp lệ',
             'behance_link.max' => 'Link behance tối đa 255 ký tự',
@@ -183,9 +181,9 @@ class UploadRequest extends FormRequest
             'simulation_tool.max' => 'Tối đa 100 ký tự',
 
             'network_protocol.required' => 'Nhập giao thức mạng',
-            'network_protocol.max' => 'Tối đa 100 ký tự',
+            'network_protocol.max' => 'Danh sách giao thức tối đa 2000 ký tự',
 
-            'topology_type.required' => 'Nhập topology',
+            'topology_type.required' => 'Nhập kiểu kết nối mạng',
             'topology_type.max' => 'Tối đa 50 ký tự',
         ];
     }

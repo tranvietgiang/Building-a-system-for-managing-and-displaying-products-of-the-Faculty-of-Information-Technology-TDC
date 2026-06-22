@@ -39,7 +39,7 @@ const steps = [
   {
     title: "Bổ sung tài nguyên minh chứng",
     description:
-      "Tải ảnh đại diện, hình ảnh sản phẩm, file báo cáo và thêm liên kết demo, GitHub, Drive hoặc Behance nếu có.",
+      "Tải ảnh đại diện, hình ảnh sản phẩm, file báo cáo và thêm liên kết demo, GitHub hoặc Behance nếu có.",
     icon: Image,
   },
   {
@@ -61,7 +61,7 @@ const checklist = [
   "Mô tả nêu rõ mục tiêu, công nghệ sử dụng và điểm nổi bật.",
   "Ảnh đại diện rõ nét, đúng sản phẩm, không dùng ảnh không liên quan.",
   "File báo cáo hoặc tài liệu minh chứng đã đặt đúng định dạng.",
-  "Các link demo, GitHub, Drive hoặc Behance mở được ở chế độ phù hợp.",
+  "Các link demo, GitHub hoặc Behance mở được ở chế độ phù hợp.",
   "Thông tin giảng viên hướng dẫn và danh mục sản phẩm đã chọn đúng.",
 ];
 

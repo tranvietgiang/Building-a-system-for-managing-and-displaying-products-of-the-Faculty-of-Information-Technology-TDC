@@ -143,6 +143,8 @@ class CompareAi
             str_contains($majorCode, 'multimedia')
             || str_contains($majorCode, 'mmt')
             || str_contains($majorCode, 'đa phương tiện')
+            || str_contains($majorCode, 'mạng máy tính')
+            || str_contains($majorCode, 'network')
         ) {
             return ($currentProduct->simulation_tool ?? null) ? 'Multimedia' : null;
         }
@@ -151,9 +153,10 @@ class CompareAi
             str_contains($majorCode, 'graphics')
             || str_contains($majorCode, 'đồ họa')
             || str_contains($majorCode, 'graphic design')
+            || str_contains($majorCode, 'thiết kế')
+            || str_contains($majorCode, 'tkdh')
         ) {
-            return ($currentProduct->design_type ?? null)
-                || ($currentProduct->tools_used ?? null) ? 'Graphics' : null;
+            return 'Graphics';
         }
 
         return null;
@@ -277,19 +280,19 @@ class CompareAi
             return $commonPrompt . "
         Dự án A (Đồ họa):
         Tiêu đề: {$a->title}
+        Mô tả: {$a->description}
         Loại thiết kế: {$a->design_type}
         Công cụ sử dụng: {$a->tools_used}
-        Link Drive: {$a->drive_link}
         Link Behance: {$a->behance_link}
 
         Dự án B (Đồ họa):
         Tiêu đề: {$b['title']}
+        Mô tả: {$b['description']}
         Loại thiết kế: {$b['design_type']}
         Công cụ sử dụng: {$b['tools_used']}
-        Link Drive: {$b['drive_link']}
         Link Behance: {$b['behance_link']}
 
-        So sánh dựa trên: Loại thiết kế, Công cụ sử dụng, Phong cách thiết kế.
+        So sánh dựa trên: Tiêu đề, Mô tả, Loại thiết kế, Công cụ sử dụng và Phong cách thiết kế.
         ";
         }
 
@@ -335,9 +338,9 @@ class CompareAi
 
             'Graphics' => [
                 'title' => 'Tiêu đề',
+                'description' => 'Mô tả',
                 'design_type' => 'Loại thiết kế',
                 'tools_used' => 'Công cụ sử dụng',
-                'drive_link' => 'Link Drive',
                 'behance_link' => 'Link Behance',
             ],
         ];
@@ -396,7 +399,6 @@ class CompareAi
             // Graphics fields
             'design_type' => $p->design_type ?? null,
             'tools_used' => $p->tools_used ?? null,
-            'drive_link' => $p->drive_link ?? null,
             'behance_link' => $p->behance_link ?? null,
             // Common fields
             'framework' => $p->framework ?? null,

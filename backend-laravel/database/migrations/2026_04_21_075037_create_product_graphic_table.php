@@ -19,9 +19,9 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
             $table->string('design_type', 50);
-            $table->string('tools_used', 150);
+            $table->text('tools_used')->nullable();
+            $table->json('color_palette')->nullable();
 
-            $table->string('drive_link', 255)->nullable();
             $table->string('behance_link', 255)->nullable();
 
             $table->timestamps();

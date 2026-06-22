@@ -32,8 +32,8 @@ export const initialGraphicFormData = {
   // riêng đồ họa
   design_type: "",
   tools_used: "",
+  color_palette: "",
   behance_link: "",
-  drive_link: "",
 };
 
 export const initialAIFormData = {
@@ -163,24 +163,15 @@ export const validateGraphicStep = ({ step, formData, images = [] }) => {
     validateBasicInfo(formData, errors);
 
     if (!formData.design_type?.trim()) {
-      errors.design_type = "Chọn loại thiết kế";
+      errors.design_type = "Nhập loại ấn phẩm";
     } else if (formData.design_type.length > 50) {
       errors.design_type = "≤ 50 ký tự";
-    }
-
-    if (!formData.tools_used?.trim()) {
-      errors.tools_used = "Nhập công cụ";
-    } else if (formData.tools_used.length > 150) {
-      errors.tools_used = "≤ 150 ký tự";
     }
 
     if (formData.behance_link && !isValidUrl(formData.behance_link)) {
       errors.behance_link = "Link sai";
     }
 
-    if (formData.drive_link && !isValidUrl(formData.drive_link)) {
-      errors.drive_link = "Link sai";
-    }
   }
 
   if (step === 2) validateMedia(images, errors);
@@ -244,16 +235,9 @@ export const validateNetworkStep = ({ step, formData, images = [] }) => {
   if (step === 1) {
     validateBasicInfo(formData, errors);
 
-    // ✅ Giao thức mạng
-    if (!formData.network_protocol?.trim()) {
-      errors.network_protocol = "Nhập giao thức mạng";
-    } else if (formData.network_protocol.length > 100) {
-      errors.network_protocol = "≤ 100 ký tự";
-    }
-
     // ✅ Topology
     if (!formData.topology_type?.trim()) {
-      errors.topology_type = "Nhập topology";
+      errors.topology_type = "Nhập kiểu kết nối mạng";
     } else if (formData.topology_type.length > 50) {
       errors.topology_type = "≤ 50 ký tự";
     }

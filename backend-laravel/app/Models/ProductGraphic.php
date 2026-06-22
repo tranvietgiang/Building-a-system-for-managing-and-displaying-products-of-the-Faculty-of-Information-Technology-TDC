@@ -16,7 +16,14 @@ class ProductGraphic extends Model
         'product_id',
         'design_type',
         'tools_used',
-        'drive_link',
+        'color_palette',
         'behance_link',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'color_palette' => 'array',
+        ];
+    }
 }

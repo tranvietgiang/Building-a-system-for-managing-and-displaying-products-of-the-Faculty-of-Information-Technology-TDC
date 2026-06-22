@@ -163,7 +163,7 @@ const UploadProductForm_Network = ({
                 )}
               </div>
 
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-6">
                 {/* Chuyên ngành */}
                 <div className="space-y-2">
                   <label className="flex items-center gap-1 text-sm font-semibold text-gray-700">
@@ -184,86 +184,30 @@ const UploadProductForm_Network = ({
                   </div>
                 </div>
 
-                {/* Loại hệ thống mạng */}
-                <div>
-                  <label className="mb-2 block text-sm font-semibold text-gray-700">
-                    Loại hệ thống mạng <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    name="network_type"
-                    value={formData.network_type}
-                    onChange={handleChange}
-                    className={`w-full rounded-xl border-2 px-4 py-3 ${
-                      errors.network_type
-                        ? "border-red-300 bg-red-50"
-                        : "border-gray-200"
-                    }`}
-                  >
-                    <option value="">Chọn loại</option>
-                    <option value="LAN">LAN - Mạng cục bộ</option>
-                    <option value="WAN">WAN - Mạng diện rộng</option>
-                    <option value="VLAN">VLAN - Mạng ảo</option>
-                    <option value="WiFi">WiFi / Mạng không dây</option>
-                    <option value="SDN">
-                      SDN - Mạng định nghĩa bằng phần mềm
-                    </option>
-                    <option value="Cloud">Cloud Network</option>
-                    <option value="Security">An ninh mạng</option>
-                  </select>
-                  {errors.network_type && (
-                    <p className="mt-2 text-sm text-red-600">
-                      {errors.network_type}
-                    </p>
-                  )}
-                </div>
               </div>
 
-              {/* Công nghệ sử dụng */}
-              <div>
-                <label className="mb-2 block text-sm font-semibold text-gray-700">
-                  Công nghệ / Giao thức sử dụng
-                </label>
-                <input
-                  type="text"
-                  name="network_protocol"
-                  value={formData.network_protocol}
-                  onChange={handleChange}
-                  className={`w-full rounded-xl border-2 px-4 py-3 ${
-                    errors.network_protocol
-                      ? "border-red-300 bg-red-50"
-                      : "border-gray-200"
-                  }`}
-                  placeholder="VD: OSPF, BGP, SMTP, HTTP/HTTPS..."
-                />
-                {errors.network_protocol && (
-                  <p className="mt-2 text-sm text-red-600">
-                    {errors.network_protocol}
-                  </p>
-                )}
-              </div>
               {/* Topology */}
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
-                  Loại topology <span className="text-red-500">*</span>
+                  Kiểu kết nối mạng (Topology){" "}
+                  <span className="text-red-500">*</span>
                 </label>
-                <select
+                <input
+                  type="text"
                   name="topology_type"
-                  value={formData.topology_type}
+                  value={formData.topology_type || ""}
                   onChange={handleChange}
+                  maxLength={50}
+                  placeholder="VD: Hình sao (Star), lưới (Mesh), cây (Tree)..."
                   className={`w-full rounded-xl border-2 px-4 py-3 ${
                     errors.topology_type
                       ? "border-red-300 bg-red-50"
                       : "border-gray-200"
-                  }`}
-                >
-                  <option value="">Chọn topology</option>
-                  <option value="Star">Star</option>
-                  <option value="Mesh">Mesh</option>
-                  <option value="Tree">Tree</option>
-                  <option value="Hybrid">Hybrid</option>
-                  <option value="Bus">Bus</option>
-                  <option value="Ring">Ring</option>
-                </select>
+                    }`}
+                />
+                <p className="mt-2 text-xs text-gray-500">
+                  Topology là cách các thiết bị được bố trí và kết nối với nhau.
+                </p>
                 {errors.topology_type && (
                   <p className="mt-2 text-sm text-red-600">
                     {errors.topology_type}
@@ -501,7 +445,11 @@ const UploadProductForm_Network = ({
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
                   Công nghệ / Giao thức
-                 {" "}<span className="ml-1 text-xs font-normal text-gray-400">(có thể bỏ qua)</span></label>
+                  {" "}
+                  <span className="ml-1 text-xs font-normal text-gray-400">
+                    (có thể bỏ qua)
+                  </span>
+                </label>
                 <input
                   type="text"
                   value={tagInput}
@@ -510,6 +458,9 @@ const UploadProductForm_Network = ({
                   className="w-full rounded-xl border-2 border-gray-200 px-4 py-3"
                   placeholder="Nhập công nghệ và nhấn Enter (VD: OSPF, VLAN, MPLS, VPN...)"
                 />
+                <p className="mt-2 text-xs text-gray-500">
+                  Nhập từng công nghệ hoặc giao thức, sau đó nhấn Enter.
+                </p>
                 {tags.length > 0 && (
                   <div className="mt-4 flex flex-wrap gap-2">
                     {tags.map((tag) => (
@@ -547,25 +498,19 @@ const UploadProductForm_Network = ({
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
                   Công cụ mô phỏng <span className="text-red-500">*</span>
                 </label>
-                <select
+                <input
+                  type="text"
                   name="simulation_tool"
-                  value={formData.simulation_tool}
+                  value={formData.simulation_tool || ""}
                   onChange={handleChange}
+                  maxLength={100}
+                  placeholder="VD: Cisco Packet Tracer, GNS3, EVE-NG, Wireshark..."
                   className={`w-full rounded-xl border-2 px-4 py-3 ${
                     errors.simulation_tool
                       ? "border-red-300 bg-red-50"
                       : "border-gray-200"
-                  }`}
-                >
-                  <option value="">Chọn công cụ</option>
-                  <option value="Cisco Packet Tracer">
-                    Cisco Packet Tracer
-                  </option>
-                  <option value="GNS3">GNS3</option>
-                  <option value="EVE-NG">EVE-NG</option>
-                  <option value="Wireshark">Wireshark</option>
-                  <option value="Nmap">Nmap</option>
-                </select>
+                    }`}
+                />
                 {errors.simulation_tool && (
                   <p className="mt-2 text-sm text-red-600">
                     {errors.simulation_tool}

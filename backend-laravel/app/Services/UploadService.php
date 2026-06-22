@@ -138,14 +138,18 @@ class UploadService extends BaseRepository
 
                 case 'mmt':
                     $dbData['simulation_tool'] = $data['simulation_tool'] ?? null;
-                    $dbData['network_protocol'] = $data['network_protocol'] ?? null;
+                    $dbData['network_protocol'] = trim((string) ($data['network_protocol'] ?? ''))
+                        ?: (implode(', ', $tags) ?: null);
                     $dbData['topology_type'] = $data['topology_type'] ?? null;
                     $dbData['config_file'] = $data['config_file'] ?? null;
                     break;
 
                 case 'tkdh':
                     $dbData['design_type'] = $data['design_type'] ?? null;
-                    $dbData['tools_used'] = $data['tools_used'] ?? null;
+                    $dbData['tools_used'] = trim((string) ($data['tools_used'] ?? ''))
+                        ?: (implode(', ', $tags) ?: null);
+                    $dbData['color_palette'] = $data['color_palette'] ?? null;
+                    $dbData['behance_link'] = $data['behance_link'] ?? null;
                     break;
 
                 default:

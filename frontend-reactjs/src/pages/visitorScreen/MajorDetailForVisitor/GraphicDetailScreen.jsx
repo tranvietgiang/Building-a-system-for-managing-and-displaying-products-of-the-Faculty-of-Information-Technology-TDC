@@ -15,7 +15,7 @@ const GraphicDetailScreen = ({
   theme, // theme từ file getTheme
 }) => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("showcase");
+  const [activeTab, setActiveTab] = useState("style");
   const [isLiked, setIsLiked] = useState(false);
   // ✅ Khởi tạo trực tiếp, không cần useEffect
   const [likeCount, setLikeCount] = useState(productVisitorDetail?.likes || 0);
@@ -202,7 +202,7 @@ const GraphicDetailScreen = ({
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
               <div className="flex gap-1 p-2 bg-gray-50/80 border-b">
                 {[
-                  { id: "showcase", label: "🎨 Showcase" },
+                  { id: "style", label: "🎨 Phong cách & Màu sắc" },
                   { id: "tools", label: "🛠️ Tools" },
                   { id: "team", label: "👥 Đội ngũ" },
                   { id: "feedback", label: "💬 Đánh giá" },
@@ -227,25 +227,8 @@ const GraphicDetailScreen = ({
               </div>
 
               <div className="p-6">
-                {activeTab === "showcase" && (
+                {activeTab === "style" && (
                   <div className="space-y-6">
-                    <div className="grid grid-cols-2 gap-4">
-                      {productVisitorDetail?.images
-                        ?.slice(0, 4)
-                        .map((img, idx) => (
-                          <div
-                            key={idx}
-                            className="rounded-xl overflow-hidden shadow-md cursor-pointer hover:shadow-xl transition"
-                            onClick={() => openViewer(img.image_url)}
-                          >
-                            <img
-                              src={img.image_url}
-                              alt=""
-                              className="w-full h-40 object-cover"
-                            />
-                          </div>
-                        ))}
-                    </div>
                     <div
                       className={`p-4 rounded-xl bg-gradient-to-r ${theme.lightBg}`}
                     >
@@ -258,6 +241,28 @@ const GraphicDetailScreen = ({
                       <p className="text-gray-600">
                         {majorDetail.design_type || "Chưa cập nhật"}
                       </p>
+                    </div>
+
+                    <div className="rounded-xl border border-gray-200 p-4">
+                      <div className="mb-3 flex items-center gap-2">
+                        <span className="text-xl">🎨</span>
+                        <span className="font-semibold text-gray-800">Bảng màu sắc</span>
+                      </div>
+                      {majorDetail.color_palette?.length > 0 ? (
+                        <div className="flex flex-wrap gap-3">
+                          {majorDetail.color_palette.map((color) => (
+                            <div key={color} className="text-center">
+                              <div
+                                className="h-14 w-14 rounded-xl border border-black/10 shadow-sm"
+                                style={{ backgroundColor: color }}
+                              />
+                              <span className="mt-1 block text-xs text-gray-500">{color}</span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-500">Chưa cập nhật bảng màu.</p>
+                      )}
                     </div>
                   </div>
                 )}
@@ -292,33 +297,10 @@ const GraphicDetailScreen = ({
                             <div
                               className={`font-medium text-gray-800 ${theme.hoverText} transition`}
                             >
-                              Behance Portfolio
+                              Tham khảo trên Behance
                             </div>
                             <div className="text-xs text-gray-400">
-                              Xem dự án trên Behance
-                            </div>
-                          </div>
-                          <span className="text-gray-400 group-hover:translate-x-1 transition">
-                            →
-                          </span>
-                        </a>
-                      )}
-                      {productVisitorDetail?.resources?.drive && (
-                        <a
-                          href={productVisitorDetail.resources.drive}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={`flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition group ${theme.hoverBg}`}
-                        >
-                          <span className="text-2xl">📁</span>
-                          <div className="flex-1">
-                            <div
-                              className={`font-medium text-gray-800 ${theme.hoverText} transition`}
-                            >
-                              Google Drive
-                            </div>
-                            <div className="text-xs text-gray-400">
-                              Tải xuống file thiết kế
+                              Mở liên kết tham khảo
                             </div>
                           </div>
                           <span className="text-gray-400 group-hover:translate-x-1 transition">

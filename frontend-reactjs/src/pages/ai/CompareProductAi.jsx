@@ -178,9 +178,8 @@ export default function CompareProductAi() {
     ) {
       return [
         { key: "title", label: "Tiêu đề", getValue: (p) => p.title },
-        { key: "design_type", label: "Loại thiết kế", getValue: (p) => p.design_type },
+        { key: "design_type", label: "Loại ấn phẩm", getValue: (p) => p.design_type },
         { key: "tools_used", label: "Công cụ sử dụng", getValue: (p) => p.tools_used },
-        { key: "drive_link", label: "Link Drive", getValue: (p) => p.drive_link },
         { key: "behance_link", label: "Link Behance", getValue: (p) => p.behance_link },
       ];
     }

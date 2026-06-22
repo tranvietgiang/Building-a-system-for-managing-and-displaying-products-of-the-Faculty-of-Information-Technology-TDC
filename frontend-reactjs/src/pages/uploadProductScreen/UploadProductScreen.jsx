@@ -70,7 +70,9 @@ const UploadProductScreen = () => {
       config_file: editProduct.config_file || networkDetail.config_file || "",
       design_type: editProduct.design_type || graphicDetail.design_type || "",
       tools_used: editProduct.tools_used || graphicDetail.tools_used || "",
-      drive_link: editProduct.drive_link || graphicDetail.drive_link || "",
+      color_palette: Array.isArray(graphicDetail.color_palette)
+        ? graphicDetail.color_palette.join(",")
+        : graphicDetail.color_palette || "",
       behance_link:
         editProduct.behance_link || graphicDetail.behance_link || "",
     };

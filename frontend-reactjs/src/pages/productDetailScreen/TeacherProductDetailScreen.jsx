@@ -53,6 +53,34 @@ const TeacherProductDetailScreen = () => {
   const images = useMemo(() => product?.images || [], [product]);
   const productData = useMemo(() => product?.product || {}, [product]);
   const reviews = useMemo(() => product?.reviews || [], [product]);
+  const teamMembers = useMemo(() => {
+    const members = productData?.team_members;
+
+    if (Array.isArray(members)) return members.filter(Boolean);
+    if (typeof members !== "string" || !members.trim()) return [];
+
+    try {
+      const parsed = JSON.parse(members);
+      if (Array.isArray(parsed)) return parsed.filter(Boolean);
+    } catch {
+      // Dữ liệu cũ có thể đang lưu dạng mỗi thành viên một dòng.
+    }
+
+    return members
+      .split(/\r?\n/)
+      .map((member) => member.trim())
+      .filter(Boolean);
+  }, [productData?.team_members]);
+  const isGraphic = useMemo(() => {
+    const major = `${productData?.major_code || ""} ${productData?.major_name || ""}`.toLowerCase();
+    return (
+      major.includes("tkdh") ||
+      major.includes("graphic") ||
+      major.includes("đồ họa") ||
+      major.includes("thiết kế")
+    );
+  }, [productData?.major_code, productData?.major_name]);
+  const graphicDetail = product?.graphic_detail || {};
   const theme = useMemo(
     () => getMajorTheme(productData?.major_code),
     [productData?.major_code],
@@ -377,7 +405,92 @@ const TeacherProductDetailScreen = () => {
                 </div>
               </div>
             )}
-            
+
+            {/* Nhóm thực hiện và giảng viên hướng dẫn */}
+            <div className="overflow-hidden rounded-2xl bg-white shadow-lg">
+              <div className="border-b border-gray-100 p-6">
+                <h2 className={`flex items-center gap-2 text-lg font-bold ${theme.text}`}>
+                  <Icons.Users className="h-5 w-5" />
+                  Nhóm thực hiện
+                </h2>
+              </div>
+              <div className="space-y-5 p-6">
+                <div className="flex items-center justify-between gap-4 rounded-xl bg-gray-50 p-4">
+                  <div className="flex items-center gap-3">
+                    <div className={`flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-r ${theme.gradient} font-bold text-white`}>
+                      {product.author?.name?.charAt(0) || "U"}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900">
+                        {product.author?.name || "Chưa cập nhật"}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {product.author?.mssv ? `MSSV: ${product.author.mssv}` : "Sinh viên thực hiện"}
+                      </p>
+                    </div>
+                  </div>
+                  <span className={`${theme.light} ${theme.text} rounded-full px-3 py-1 text-xs font-semibold`}>
+                    Nhóm trưởng
+                  </span>
+                </div>
+
+                {teamMembers.length > 0 && (
+                  <div>
+                    <p className="mb-2 text-sm font-semibold text-gray-700">
+                      Sinh viên cùng thực hiện
+                    </p>
+                    <div className="space-y-2">
+                      {teamMembers.map((member, index) => (
+                        <div key={`${member}-${index}`} className="flex items-center gap-3 rounded-lg border border-gray-100 px-4 py-3 text-sm text-gray-700">
+                          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 font-medium text-gray-600">
+                            {index + 1}
+                          </span>
+                          {member}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="border-t border-gray-100 pt-4">
+                  <p className="text-sm text-gray-500">Giảng viên hướng dẫn</p>
+                  <p className="mt-1 font-semibold text-gray-900">
+                    {productData?.advisor_name || "Chưa cập nhật"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Bảng màu chỉ áp dụng cho ngành Thiết kế đồ họa */}
+            {isGraphic && (
+              <div className="overflow-hidden rounded-2xl bg-white shadow-lg">
+                <div className="border-b border-gray-100 p-6">
+                  <h2 className={`flex items-center gap-2 text-lg font-bold ${theme.text}`}>
+                    <Icons.Palette className="h-5 w-5" />
+                    Bảng màu sắc
+                  </h2>
+                </div>
+                <div className="p-6">
+                  {graphicDetail.color_palette?.length > 0 ? (
+                    <div className="flex flex-wrap gap-4">
+                      {graphicDetail.color_palette.map((color) => (
+                        <div key={color} className="text-center">
+                          <div
+                            className="h-14 w-14 rounded-xl border border-black/10 shadow-sm"
+                            style={{ backgroundColor: color }}
+                          />
+                          <span className="mt-1 block text-xs text-gray-500">
+                            {color}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500">Chưa cập nhật bảng màu.</p>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Nhận xét */}
             {(productData?.status === STATUS.PENDING || reviews.length > 0) && (

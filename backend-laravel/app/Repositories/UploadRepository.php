@@ -114,11 +114,16 @@ class UploadRepository extends BaseRepository
                     break;
 
                 case 'tkdh':
+                    $palette = array_slice(array_values(array_unique(array_filter(array_map(
+                        fn (string $color) => strtoupper(trim($color)),
+                        preg_split('/\s*,\s*/', (string) ($data['color_palette'] ?? ''))
+                    ), fn (string $color) => preg_match('/^#[0-9A-F]{6}$/', $color) === 1))), 0, 8);
+
                     ProductGraphic::create([
                         'product_id' => $product->product_id,
                         'design_type' => $data['design_type'] ?? null,
                         'tools_used' => $data['tools_used'] ?? null,
-                        'drive_link' => $data['drive_link'] ?? null,
+                        'color_palette' => $palette ?: null,
                         'behance_link' => $data['behance_link'] ?? null,
                     ]);
                     break;

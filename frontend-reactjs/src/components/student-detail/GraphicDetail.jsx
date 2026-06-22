@@ -254,7 +254,7 @@ const GraphicDetail = ({ product, theme }) => {
                     {/* Thay Icons.Brush bằng Icons.Image hoặc bỏ icon */}
                     <Icons.Image className="text-pink-600" />
                     <span className="text-sm font-medium text-pink-600">
-                      Loại thiết kế
+                      Loại ấn phẩm
                     </span>
                   </div>
                   <p className="text-gray-900 font-semibold">
@@ -272,6 +272,31 @@ const GraphicDetail = ({ product, theme }) => {
                   <p className="text-gray-900 font-semibold">
                     {graphicDetail.tools_used || "Chưa cập nhật"}
                   </p>
+                </div>
+                <div className="rounded-lg bg-pink-50 p-4 md:col-span-2">
+                  <div className="mb-3 flex items-center gap-2">
+                    <Icons.Palette className="text-pink-600" />
+                    <span className="text-sm font-medium text-pink-600">
+                      Bảng màu sắc
+                    </span>
+                  </div>
+                  {graphicDetail.color_palette?.length > 0 ? (
+                    <div className="flex flex-wrap gap-3">
+                      {graphicDetail.color_palette.map((color) => (
+                        <div key={color} className="text-center">
+                          <div
+                            className="h-12 w-12 rounded-lg border border-black/10 shadow-sm"
+                            style={{ backgroundColor: color }}
+                          />
+                          <span className="mt-1 block text-xs text-gray-500">
+                            {color}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500">Chưa cập nhật bảng màu.</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -416,30 +441,15 @@ const GraphicDetail = ({ product, theme }) => {
               </div>
             )}
 
-            {/* Links Card - ĐÃ SỬA: bỏ GoogleDrive và Behance nếu không có */}
-            {(graphicDetail.drive_link || graphicDetail.behance_link) && (
+            {graphicDetail.behance_link && (
               <div className="bg-white rounded-2xl shadow-lg p-6">
                 <h2
                   className={`text-lg font-bold mb-4 ${theme.text} flex items-center gap-2`}
                 >
                   <Icons.Link />
-                  Liên kết Portfolio
+                  Liên kết tham khảo
                 </h2>
                 <div className="space-y-3">
-                  {graphicDetail.drive_link && (
-                    <a
-                      href={graphicDetail.drive_link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition group"
-                    >
-                      <Icons.Link />
-                      <span className="flex-1 text-sm font-medium group-hover:underline">
-                        Google Drive
-                      </span>
-                      <Icons.ExternalLink />
-                    </a>
-                  )}
                   {graphicDetail.behance_link && (
                     <a
                       href={graphicDetail.behance_link}
@@ -449,7 +459,7 @@ const GraphicDetail = ({ product, theme }) => {
                     >
                       <Icons.Link />
                       <span className="flex-1 text-sm font-medium group-hover:underline">
-                        Behance Portfolio
+                        Tham khảo trên Behance
                       </span>
                       <Icons.ExternalLink />
                     </a>

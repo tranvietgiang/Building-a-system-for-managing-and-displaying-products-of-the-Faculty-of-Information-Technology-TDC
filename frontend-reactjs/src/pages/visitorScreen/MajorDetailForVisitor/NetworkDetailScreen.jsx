@@ -87,7 +87,7 @@ const NetworkDetailScreen = ({
               <span
                 className={`px-3 py-1.5 ${theme.badgeBg} backdrop-blur-sm rounded-full text-xs font-medium`}
               >
-                🌐 {majorDetail.topology_type || "Chưa cập nhật"} Network
+                🌐 {majorDetail.topology_type || "Mạng máy tính"}
               </span>
               <button
                 onClick={() => navigate("/dang-nhap")}
