@@ -201,16 +201,17 @@ export const validateAIStep = ({ step, formData, images = [] }) => {
       errors.model_used = "≤ 100 ký tự";
     }
 
-    if (!formData.framework?.trim()) {
-      errors.framework = "Nhập framework";
-    } else if (formData.framework.length > 100) {
-      errors.framework = "≤ 100 ký tự";
-    }
   }
 
   if (step === 2) validateMedia(images, errors);
 
   if (step === 3) {
+    if (!formData.framework?.trim()) {
+      errors.framework = "Nhập framework";
+    } else if (formData.framework.length > 100) {
+      errors.framework = "≤ 100 ký tự";
+    }
+
     if (!formData.dataset_used?.trim()) {
       errors.dataset_used = "Nhập dataset";
     } else if (formData.dataset_used.length > 100) {

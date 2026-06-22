@@ -252,55 +252,6 @@ const UploadProductForm_AI = ({
                 </div>
               </div>
 
-              {/* Framework / Thư viện */}
-              <div>
-                <label className="mb-2 block text-sm font-semibold text-gray-700">
-                  Framework / Thư viện
-                </label>
-                <input
-                  type="text"
-                  name="framework"
-                  value={frameworkInput}
-                  onChange={(e) => setFrameworkInput(e.target.value)}
-                  onKeyDown={handleFrameworkKeyDown}
-                  onBlur={addFramework}
-                  className={`w-full rounded-xl border-2 border-gray-200 px-4 py-3 ${
-                    errors.framework
-                      ? "border-red-300 bg-red-50"
-                      : "border-gray-200"
-                  }`}
-                  placeholder="Nhập TensorFlow, PyTorch... rồi nhấn Enter"
-                />
-                <p className="mt-2 text-xs text-gray-500">
-                  Nhập từng framework hoặc thư viện và nhấn Enter để thêm.
-                </p>
-                {frameworkItems.length > 0 && (
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {frameworkItems.map((item) => (
-                      <span
-                        key={item}
-                        className="inline-flex items-center gap-2 rounded-xl bg-purple-600 px-3 py-1 text-sm text-white"
-                      >
-                        {item}
-                        <button
-                          type="button"
-                          onClick={() => removeFramework(item)}
-                          className="font-bold hover:text-purple-100"
-                          aria-label={`Xóa ${item}`}
-                        >
-                          ×
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                )}
-                {errors.framework && (
-                  <p className="mt-2 text-sm text-red-600">
-                    {errors.framework}
-                  </p>
-                )}
-              </div>
-
               {/* Danh mục */}
               {isLoadingCategories ? (
                 <div className="flex items-center justify-center p-4">
@@ -528,6 +479,55 @@ const UploadProductForm_AI = ({
               </h2>
             </div>
             <div className="space-y-6 p-6">
+              {/* Framework / Thư viện */}
+              <div>
+                <label className="mb-2 block text-sm font-semibold text-gray-700">
+                  Framework / Thư viện
+                </label>
+                <input
+                  type="text"
+                  name="framework"
+                  value={frameworkInput}
+                  onChange={(e) => setFrameworkInput(e.target.value)}
+                  onKeyDown={handleFrameworkKeyDown}
+                  onBlur={addFramework}
+                  className={`w-full rounded-xl border-2 border-gray-200 px-4 py-3 ${
+                    errors.framework
+                      ? "border-red-300 bg-red-50"
+                      : "border-gray-200"
+                  }`}
+                  placeholder="Nhập TensorFlow, PyTorch... rồi nhấn Enter"
+                />
+                <p className="mt-2 text-xs text-gray-500">
+                  Nhập từng framework hoặc thư viện và nhấn Enter để thêm.
+                </p>
+                {frameworkItems.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {frameworkItems.map((item) => (
+                      <span
+                        key={item}
+                        className="inline-flex items-center gap-2 rounded-xl bg-purple-600 px-3 py-1 text-sm text-white"
+                      >
+                        {item}
+                        <button
+                          type="button"
+                          onClick={() => removeFramework(item)}
+                          className="font-bold hover:text-purple-100"
+                          aria-label={`Xóa ${item}`}
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {errors.framework && (
+                  <p className="mt-2 text-sm text-red-600">
+                    {errors.framework}
+                  </p>
+                )}
+              </div>
+
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
                   Ngôn ngữ lập trình
