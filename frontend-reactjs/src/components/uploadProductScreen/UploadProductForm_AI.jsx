@@ -582,10 +582,11 @@ const UploadProductForm_AI = ({
               </div>
 
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                {/* Google Colab / GitHub */}
+                {/* Google Colab */}
                 <div>
                   <label className="mb-2 block text-sm font-semibold text-gray-700">
-                    Google Colab / GitHub
+                    Google Colab
+                    {" "}<span className="ml-1 text-xs font-normal text-gray-400">(có thể bỏ qua)</span>
                   </label>
                   <input
                     type="url"

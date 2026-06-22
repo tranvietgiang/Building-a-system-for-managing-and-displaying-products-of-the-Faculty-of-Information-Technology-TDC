@@ -18,10 +18,6 @@ const UploadProductForm_CNTT = ({
   thumbnailIndex,
   removeImage,
   setAsThumbnail,
-  tagInput,
-  setTagInput,
-  handleAddTag,
-  tags,
   handlePrevStep,
   handleNextStep,
   loading,
@@ -46,6 +42,40 @@ const UploadProductForm_CNTT = ({
 
   // State cho loading submit sản phẩm
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [frameworkInput, setFrameworkInput] = useState("");
+
+  const frameworkItems = (formData.framework || "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  const updateFramework = (items) => {
+    handleChange({
+      target: { name: "framework", value: items.join(", ") },
+    });
+  };
+
+  const addFramework = () => {
+    const value = frameworkInput.trim();
+    if (!value) return;
+
+    const exists = frameworkItems.some(
+      (item) => item.toLowerCase() === value.toLowerCase(),
+    );
+    if (!exists) updateFramework([...frameworkItems, value]);
+    setFrameworkInput("");
+  };
+
+  const handleFrameworkKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addFramework();
+    }
+  };
+
+  const removeFramework = (itemToRemove) => {
+    updateFramework(frameworkItems.filter((item) => item !== itemToRemove));
+  };
 
   // Wrap handleImageUpload để hiển thị loading
   const handleImageUploadWithLoading = async (e) => {
@@ -438,34 +468,6 @@ const UploadProductForm_CNTT = ({
             </div>
 
             <div className="space-y-6 p-6">
-              {/* Tags */}
-              <div>
-                <label className="mb-2 block text-sm font-semibold text-gray-700">
-                  Công nghệ sử dụng
-                 {" "}<span className="ml-1 text-xs font-normal text-gray-400">(có thể bỏ qua)</span></label>
-                <input
-                  type="text"
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  onKeyDown={handleAddTag}
-                  className="w-full rounded-xl border-2 border-gray-200 px-4 py-3"
-                  placeholder="Nhập công nghệ và nhấn Enter"
-                />
-
-                {tags.length > 0 && (
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="rounded-xl bg-green-500 px-3 py-1 text-sm text-white"
-                      >
-                        #{tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-
               {/* Trường riêng CNTT */}
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <div>
@@ -489,16 +491,41 @@ const UploadProductForm_CNTT = ({
 
                 <div>
                   <label className="mb-2 block text-sm font-semibold text-gray-700">
-                    Framework
+                    Framework / Thư viện
                   </label>
                   <input
                     type="text"
                     name="framework"
-                    value={formData.framework || ""}
-                    onChange={handleChange}
+                    value={frameworkInput}
+                    onChange={(e) => setFrameworkInput(e.target.value)}
+                    onKeyDown={handleFrameworkKeyDown}
+                    onBlur={addFramework}
                     className="w-full rounded-xl border-2 border-gray-200 px-4 py-3"
-                    placeholder="VD: React, Laravel"
+                    placeholder="Nhập React, Laravel... rồi nhấn Enter"
                   />
+                  <p className="mt-2 text-xs text-gray-500">
+                    Nhập từng framework hoặc thư viện và nhấn Enter để thêm.
+                  </p>
+                  {frameworkItems.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {frameworkItems.map((item) => (
+                        <span
+                          key={item}
+                          className="inline-flex items-center gap-2 rounded-xl bg-green-500 px-3 py-1 text-sm text-white"
+                        >
+                          {item}
+                          <button
+                            type="button"
+                            onClick={() => removeFramework(item)}
+                            className="font-bold hover:text-green-100"
+                            aria-label={`Xóa ${item}`}
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   {errors.framework && (
                     <p className="mt-2 text-sm text-red-600">
                       {errors.framework}
