@@ -25,7 +25,7 @@ class ProductController extends Controller
 
         if (!$result) {
             return response()->json([
-                'message' => 'KhÃ´ng tÃ¬m tháº¥y sáº£n pháº©m cáº§n tÃ¬m!',
+                'message' => 'Không tìm thấy sản phẩm cần tìm!',
                 'product_result' => false,
             ], 404);
         }
@@ -58,7 +58,7 @@ class ProductController extends Controller
     {
         if (!$this->settings->enabled(SystemSettingService::PRODUCT_SEARCH)) {
             return response()->json([
-                'message' => 'TÃ­nh nÄƒng tÃ¬m kiáº¿m sáº£n pháº©m hiá»‡n Ä‘ang bá»‹ quáº£n trá»‹ viÃªn táº¯t.',
+                'message' => 'Tính năng tìm kiếm sản phẩm hiện đang bị quản trị viên tắt.',
                 'count' => 0,
                 'products' => [],
                 'data' => [
@@ -80,22 +80,22 @@ class ProductController extends Controller
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
             'sort_by' => ['nullable', 'in:newest,most_viewed,most_liked'],
         ], [
-            'q.string' => 'Ná»™i dung tÃ¬m kiáº¿m khÃ´ng há»£p lá»‡.',
-            'q.max' => 'Ná»™i dung tÃ¬m kiáº¿m khÃ´ng Ä‘Æ°á»£c vÆ°á»£t quÃ¡ 300 kÃ½ tá»±.',
-            'status.in' => 'Tráº¡ng thÃ¡i tÃ¬m kiáº¿m khÃ´ng há»£p lá»‡.',
-            'major_id.integer' => 'NgÃ nh há»c khÃ´ng há»£p lá»‡.',
-            'per_page.integer' => 'Sá»‘ lÆ°á»£ng sáº£n pháº©m má»—i trang khÃ´ng há»£p lá»‡.',
-            'per_page.min' => 'Sá»‘ lÆ°á»£ng sáº£n pháº©m má»—i trang pháº£i lá»›n hÆ¡n 0.',
-            'per_page.max' => 'Sá»‘ lÆ°á»£ng sáº£n pháº©m má»—i trang khÃ´ng Ä‘Æ°á»£c vÆ°á»£t quÃ¡ 100.',
+            'q.string' => 'Nội dung tìm kiếm không hợp lệ.',
+            'q.max' => 'Nội dung tìm kiếm không được vượt quá 300 ký tự.',
+            'status.in' => 'Trạng thái tìm kiếm không hợp lệ.',
+            'major_id.integer' => 'Ngành học không hợp lệ.',
+            'per_page.integer' => 'Số lượng sản phẩm mỗi trang không hợp lệ.',
+            'per_page.min' => 'Số lượng sản phẩm mỗi trang phải lớn hơn 0.',
+            'per_page.max' => 'Số lượng sản phẩm mỗi trang không được vượt quá 100.',
         ]);
 
         $keyword = trim((string) $request->query('q', ''));
 
         if ($this->containsUnsafeInput($keyword)) {
             return response()->json([
-                'message' => 'Ná»™i dung tÃ¬m kiáº¿m chá»©a kÃ½ tá»± khÃ´ng há»£p lá»‡.',
+                'message' => 'Nội dung tìm kiếm chứa ký tự không hợp lệ.',
                 'errors' => [
-                    'q' => ['Ná»™i dung tÃ¬m kiáº¿m chá»©a kÃ½ tá»± khÃ´ng há»£p lá»‡.'],
+                    'q' => ['Nội dung tìm kiếm chứa ký tự không hợp lệ.'],
                 ],
             ], 422);
         }
@@ -122,7 +122,7 @@ class ProductController extends Controller
                     $searchKeyword = '';
                 } else {
                     return response()->json([
-                        'message' => 'TÃ¬m kiáº¿m thÆ°á»ng thÃ nh cÃ´ng.',
+                        'message' => 'Tìm kiếm thường thành công.',
                         'query' => $keyword,
                         'search_keyword' => $searchKeyword,
                         'major_code' => $detectedMajorCode,
@@ -186,7 +186,7 @@ class ProductController extends Controller
         $paginator = $query->paginate($perPage);
 
         return response()->json([
-            'message' => 'TÃ¬m kiáº¿m thÆ°á»ng thÃ nh cÃ´ng.',
+            'message' => 'Tìm kiếm thường thành công.',
             'query' => $keyword,
             'search_keyword' => $searchKeyword,
             'major_code' => $detectedMajorCode,
@@ -326,7 +326,7 @@ class ProductController extends Controller
     {
         $value = mb_strtolower($value, 'UTF-8');
         $value = str_replace(
-            ['Ã ', 'Ã¡', 'áº¡', 'áº£', 'Ã£', 'Ã¢', 'áº§', 'áº¥', 'áº­', 'áº©', 'áº«', 'Äƒ', 'áº±', 'áº¯', 'áº·', 'áº³', 'áºµ', 'Ã¨', 'Ã©', 'áº¹', 'áº»', 'áº½', 'Ãª', 'á»', 'áº¿', 'á»‡', 'á»ƒ', 'á»…', 'Ã¬', 'Ã­', 'á»‹', 'á»‰', 'Ä©', 'Ã²', 'Ã³', 'á»', 'á»', 'Ãµ', 'Ã´', 'á»“', 'á»‘', 'á»™', 'á»•', 'á»—', 'Æ¡', 'á»', 'á»›', 'á»£', 'á»Ÿ', 'á»¡', 'Ã¹', 'Ãº', 'á»¥', 'á»§', 'Å©', 'Æ°', 'á»«', 'á»©', 'á»±', 'á»­', 'á»¯', 'á»³', 'Ã½', 'á»µ', 'á»·', 'á»¹', 'Ä‘'],
+            ['à', 'á', 'ạ', 'ả', 'ã', 'â', 'ầ', 'ấ', 'ậ', 'ẩ', 'ẫ', 'ă', 'ằ', 'ắ', 'ặ', 'ẳ', 'ẵ', 'è', 'é', 'ẹ', 'ẻ', 'ẽ', 'ê', 'ề', 'ế', 'ệ', 'ể', 'ễ', 'ì', 'í', 'ị', 'ỉ', 'ĩ', 'ò', 'ó', 'ọ', 'ỏ', 'õ', 'ô', 'ồ', 'ố', 'ộ', 'ổ', 'ỗ', 'ơ', 'ờ', 'ớ', 'ợ', 'ở', 'ỡ', 'ù', 'ú', 'ụ', 'ủ', 'ũ', 'ư', 'ừ', 'ứ', 'ự', 'ử', 'ữ', 'ỳ', 'ý', 'ỵ', 'ỷ', 'ỹ', 'đ'],
             ['a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'a', 'e', 'e', 'e', 'e', 'e', 'e', 'e', 'e', 'e', 'e', 'e', 'i', 'i', 'i', 'i', 'i', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'u', 'y', 'y', 'y', 'y', 'y', 'd'],
             $value
         );
@@ -349,7 +349,7 @@ class ProductController extends Controller
 
         if (!$result) {
             return response()->json([
-                'message' => 'KhÃ´ng tÃ¬m tháº¥y sáº£n pháº©m hoáº·c báº¡n khÃ´ng cÃ³ quyá»n xem sáº£n pháº©m nÃ y.',
+                'message' => 'Không tìm thấy sản phẩm hoặc bạn không có quyền xem sản phẩm này.',
                 'product_result' => false,
             ], 404);
         }
@@ -365,13 +365,13 @@ class ProductController extends Controller
 
         if (!$deleted) {
             return response()->json([
-                'message' => 'Khong tim thay san pham hoac ban khong co quyen xoa san pham nay.',
+                'message' => 'Không tìm thấy sản phẩm hoặc bạn không có quyền xóa sản phẩm này.',
                 'deleted' => false,
             ], 404);
         }
 
         return response()->json([
-            'message' => 'XÃ³a sáº£n pháº©m thÃ nh cÃ´ng',
+            'message' => 'Xóa sản phẩm thành công',
             'deleted' => true,
         ]);
     }

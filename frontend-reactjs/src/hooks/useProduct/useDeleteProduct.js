@@ -13,7 +13,7 @@ export default function useDeleteProduct() {
       setLoading(true);
       const res = await productApi.deleteProduct(productId);
       setStatus(Boolean(res?.deleted ?? res?.status));
-      toast.success(res?.message || "Xóa sản phẩm thành công", { toastId });
+      toast.success("Xóa sản phẩm thành công", { toastId });
       return true;
     } catch (error) {
       console.error(error);
