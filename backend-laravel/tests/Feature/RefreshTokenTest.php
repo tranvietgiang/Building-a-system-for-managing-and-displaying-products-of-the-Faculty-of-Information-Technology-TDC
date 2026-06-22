@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\RefreshToken;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -55,10 +54,16 @@ class RefreshTokenTest extends TestCase
             'refresh_token' => $oldRefreshToken,
         ])->assertOk();
 
-        $this->assertNotSame($oldRefreshToken, $refresh->json('refresh_token'));
-        $this->assertNotNull(
-            RefreshToken::where('token_hash', hash('sha256', $oldRefreshToken))->value('revoked_at')
-        );
+        $newRefreshToken = $refresh->json('refresh_token');
+
+        $this->assertNotSame($oldRefreshToken, $newRefreshToken);
+        $this->assertDatabaseMissing('refresh_tokens', [
+            'token_hash' => hash('sha256', $oldRefreshToken),
+        ]);
+        $this->assertDatabaseHas('refresh_tokens', [
+            'user_id' => $user->user_id,
+            'token_hash' => hash('sha256', $newRefreshToken),
+        ]);
 
         $this->postJson('/api/v1/refresh', [
             'refresh_token' => $oldRefreshToken,
