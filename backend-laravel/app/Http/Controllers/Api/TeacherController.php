@@ -21,7 +21,7 @@ class TeacherController extends Controller
 
         if (!$return) {
             return response()->json([
-                'message' => "ÄÃ£ sáº£y ra lá»—i!",
+                'message' => "Đã xảy ra lỗi!",
                 'teacher_result' => false
             ]);
         }
@@ -90,7 +90,7 @@ class TeacherController extends Controller
             $statusCode = 200;
             if (!($teacher_reject['result'] ?? false)) {
                 $message = (string) ($teacher_reject['message'] ?? '');
-                $statusCode = str_contains($message, 'khÃ´ng tá»“n táº¡i') ? 404 : 422;
+                $statusCode = str_contains($message, 'không tồn tại') ? 404 : 422;
             }
 
             return response()->json(
