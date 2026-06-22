@@ -698,7 +698,7 @@ const UploadProductForm_CNTT = ({
           {/* Warning messages */}
           {currentStep === 3 && !isAllStepsCompleted() && (
             <p className="mt-2 text-sm text-red-600">
-              ⚠️ Vui lòng hoàn thành bước 1 và 2 trước khi gửi duyệt
+              ⚠️ Vui lòng nhập đầy đủ thông tin trước khi gửi duyệt
             </p>
           )}
 
