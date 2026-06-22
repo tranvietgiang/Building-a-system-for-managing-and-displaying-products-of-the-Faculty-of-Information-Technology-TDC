@@ -483,7 +483,7 @@ const GraphicDetail = ({ product, theme }) => {
                     {formatDate(product.updated_at)}
                   </span>
                 </div>
-                {product.approved_at && (
+                {product.status === "approved" && product.approved_at && (
                   <div className="flex justify-between py-2 border-b border-gray-100">
                     <span className="text-gray-500 flex items-center gap-1">
                       <Icons.CheckCircle /> Ngày duyệt:
