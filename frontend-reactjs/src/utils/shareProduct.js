@@ -1,27 +1,15 @@
 export const shareVisitorProduct = async ({ title, description, url }) => {
-  if (navigator.share) {
+  if (typeof navigator.share !== "function") return "unsupported";
+
+  try {
     await navigator.share({
-      title,
-      text: description,
+      title: title || "Sản phẩm sinh viên",
+      text: description || "",
       url,
     });
-    return true;
+    return "shared";
+  } catch (error) {
+    if (error?.name === "AbortError") return "cancelled";
+    return "unsupported";
   }
-
-  if (navigator.clipboard?.writeText) {
-    await navigator.clipboard.writeText(url);
-    return true;
-  }
-
-  const input = document.createElement("textarea");
-  input.value = url;
-  input.setAttribute("readonly", "");
-  input.style.position = "fixed";
-  input.style.opacity = "0";
-  document.body.appendChild(input);
-  input.select();
-  const copied = document.execCommand("copy");
-  document.body.removeChild(input);
-
-  return copied;
 };

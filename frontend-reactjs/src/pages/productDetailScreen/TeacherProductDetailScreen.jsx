@@ -86,13 +86,8 @@ const TeacherProductDetailScreen = () => {
   );
 
   const handleApprove = useCallback(async () => {
-    handleApproveOriginal.handleApprove(id, productData?.title, {
-      title: productData?.title,
-      description: productData?.description,
-      major: productData?.major_name || productData?.major_code,
-      image: productData?.thumbnail || images?.[0]?.image_url,
-    });
-  }, [id, productData, images, handleApproveOriginal]);
+    handleApproveOriginal.handleApprove(id);
+  }, [id, handleApproveOriginal]);
 
   const handleSubmitReview = useCallback(async () => {
     setIsSubmitting(true);
@@ -241,9 +236,6 @@ const TeacherProductDetailScreen = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <ImageViewerModal />
-
-      {/* Modal lỗi duyệt từ AI */}
-      {handleApproveOriginal.errorModalComponent}
 
       {/* Modal từ chối */}
       {showFeedbackModal && (

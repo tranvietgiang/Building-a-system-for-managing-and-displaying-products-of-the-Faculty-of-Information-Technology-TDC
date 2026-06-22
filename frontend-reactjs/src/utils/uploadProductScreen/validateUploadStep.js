@@ -7,6 +7,8 @@ export const initialCNTTFormData = {
   // chung
   title: "",
   description: "",
+  team_members: "",
+  advisor_name: "",
   cate_id: "",
   awards: "",
   github_link: "",
@@ -22,6 +24,8 @@ export const initialGraphicFormData = {
   // chung
   title: "",
   description: "",
+  team_members: "",
+  advisor_name: "",
   cate_id: "",
   awards: "",
 
@@ -36,6 +40,8 @@ export const initialAIFormData = {
   // chung
   title: "",
   description: "",
+  team_members: "",
+  advisor_name: "",
   cate_id: "",
   awards: "",
   github_link: "",
@@ -53,6 +59,8 @@ export const initialNetworkFormData = {
   // chung
   title: "",
   description: "",
+  team_members: "",
+  advisor_name: "",
   cate_id: "",
   awards: "",
 
@@ -82,8 +90,8 @@ const validateBasicInfo = (formData, errors) => {
     errors.title = "Nhập tên sản phẩm";
   } else if (formData.title.length < 5) {
     errors.title = "Tên ≥ 5 ký tự";
-  } else if (formData.title.length > 100) {
-    errors.title = "Tên ≤ 100 ký tự";
+  } else if (formData.title.length > 250) {
+    errors.title = "Tên ≤ 250 ký tự";
   }
 
   // DESCRIPTION
@@ -118,11 +126,7 @@ const validateMedia = (images = [], errors) => {
 };
 
 /* ================= CNTT ================= */
-export const validateCNTTStep = ({
-  step,
-  formData,
-  images = [],
-}) => {
+export const validateCNTTStep = ({ step, formData, images = [] }) => {
   const errors = {};
 
   if (step === 1) validateBasicInfo(formData, errors);
@@ -152,11 +156,7 @@ export const validateCNTTStep = ({
 };
 
 /* ================= ĐỒ HỌA ================= */
-export const validateGraphicStep = ({
-  step,
-  formData,
-  images = [],
-}) => {
+export const validateGraphicStep = ({ step, formData, images = [] }) => {
   const errors = {};
 
   if (step === 1) {
@@ -200,7 +200,6 @@ export const validateAIStep = ({ step, formData, images = [] }) => {
     } else if (formData.model_used.length > 100) {
       errors.model_used = "≤ 100 ký tự";
     }
-
   }
 
   if (step === 2) validateMedia(images, errors);
@@ -239,11 +238,7 @@ export const validateAIStep = ({ step, formData, images = [] }) => {
 };
 
 /* ================= NETWORK ================= */
-export const validateNetworkStep = ({
-  step,
-  formData,
-  images = [],
-}) => {
+export const validateNetworkStep = ({ step, formData, images = [] }) => {
   const errors = {};
 
   if (step === 1) {

@@ -12,6 +12,7 @@ export default function useUploadGraphicForm(options = {}) {
     initialData: initialGraphicFormData,
     editData: options.editData,
     editImages: options.editImages,
+    editProductId: options.editProductId,
     editTags: options.editTags,
     stepsConfig: [
       { id: 1, name: "Thiết kế", icon: "🎨" },

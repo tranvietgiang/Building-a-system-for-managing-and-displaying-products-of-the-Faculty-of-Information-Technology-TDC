@@ -12,6 +12,7 @@ class ProductDuplicateService
     {
         $majorId = (int) ($data['major_id'] ?? 0);
         $title = trim((string) ($data['title'] ?? ''));
+        $excludedProductId = (int) ($data['replace_product_id'] ?? 0);
 
         if (!$majorId || $title === '') {
             return null;
@@ -19,6 +20,7 @@ class ProductDuplicateService
 
         $exactMatch = DB::table('products')
             ->where('major_id', $majorId)
+            ->when($excludedProductId, fn ($query) => $query->where('product_id', '!=', $excludedProductId))
             ->whereIn('status', ['pending', 'approved'])
             ->whereRaw('LOWER(TRIM(title)) = ?', [mb_strtolower($title)])
             ->latest('product_id')
@@ -34,10 +36,10 @@ class ProductDuplicateService
             ];
         }
 
-        return $this->checkWithAi($data, $majorId);
+        return $this->checkWithAi($data, $majorId, $excludedProductId);
     }
 
-    private function checkWithAi(array $data, int $majorId): ?array
+    private function checkWithAi(array $data, int $majorId, int $excludedProductId = 0): ?array
     {
         $apiKey = config('services.openai.key');
 
@@ -47,6 +49,7 @@ class ProductDuplicateService
 
         $candidates = DB::table('products')
             ->where('major_id', $majorId)
+            ->when($excludedProductId, fn ($query) => $query->where('product_id', '!=', $excludedProductId))
             ->whereIn('status', ['pending', 'approved'])
             ->latest('product_id')
             ->limit(10)

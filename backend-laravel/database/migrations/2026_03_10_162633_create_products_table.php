@@ -19,6 +19,8 @@ return new class extends Migration
 
             $table->text('description')->nullable();
 
+            $table->json('team_members')->nullable();
+
             $table->string('thumbnail');
 
             $table->enum('status', ['pending', 'approved', 'rejected'])
@@ -36,6 +38,8 @@ return new class extends Migration
             $table->foreignId("cate_id")->constrained("categories", "cate_id")->onDelete("cascade");
 
             $table->string("approved_by", 15)->nullable();
+
+            $table->string("advisor_name", 100)->nullable();
 
             $table->string("awards", 255)->nullable();
 

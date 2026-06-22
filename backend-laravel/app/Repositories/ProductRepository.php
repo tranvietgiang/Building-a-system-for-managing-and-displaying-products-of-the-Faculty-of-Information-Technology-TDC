@@ -44,6 +44,7 @@ class ProductRepository extends BaseRepository
                 'p.product_id',
                 'p.title',
                 'p.description',
+                'p.team_members',
                 'p.thumbnail',
                 'p.status',
                 'p.awards',
@@ -64,6 +65,7 @@ class ProductRepository extends BaseRepository
                 'c.category_name',
 
                 'p.approved_by',
+                'p.advisor_name',
                 'approved_user.name as approved_by_fullname',
                 'approved_user.email as approved_by_email',
                 'approved_user.role as approved_by_role',
@@ -134,6 +136,9 @@ class ProductRepository extends BaseRepository
             'product_id' => $product->product_id,
             'title' => $product->title,
             'description' => $product->description,
+            'team_members' => is_string($product->team_members)
+                ? (json_decode($product->team_members, true) ?: [])
+                : ($product->team_members ?? []),
             'thumbnail' => $product->thumbnail,
             'status' => $product->status,
             'awards' => $product->awards,
@@ -147,6 +152,7 @@ class ProductRepository extends BaseRepository
 
             'user_id' => $product->user_id,
             'fullname' => $product->fullname,
+            'advisor_name' => $product->advisor_name,
 
             'major' => [
                 'major_id' => $product->major_id,
@@ -520,7 +526,6 @@ class ProductRepository extends BaseRepository
             ->leftJoin('product_statistics as s', 'p.product_id', '=', 's.product_id')
             ->leftJoin('categories as c', 'p.cate_id', '=', 'c.cate_id')
             ->leftJoin('users as u', 'p.user_id', '=', 'u.user_id')
-            ->leftJoin('users as gv', 'p.approved_by', '=', 'gv.user_id')
             ->where('p.status', 'approved');
 
         if ($majorId) {
@@ -545,7 +550,7 @@ class ProductRepository extends BaseRepository
                 'm.major_name as major',
                 'u.name as student',
                 'u.user_id as studentId',
-                'gv.name as advisor',
+                'p.advisor_name as advisor',
                 'c.category_name as type',
                 's.views',
                 's.likes',
@@ -603,7 +608,6 @@ class ProductRepository extends BaseRepository
             ->leftJoin('product_statistics as s', 'p.product_id', '=', 's.product_id')
             ->leftJoin('categories as c', 'p.cate_id', '=', 'c.cate_id')
             ->leftJoin('users as u', 'p.user_id', '=', 'u.user_id')
-            ->leftJoin('users as gv', 'p.approved_by', '=', 'gv.user_id')
             ->where('p.status', 'approved')
             ->orderByDesc('p.created_at')
             ->select(
@@ -620,7 +624,7 @@ class ProductRepository extends BaseRepository
                 'u.name as student',
                 'u.user_id as studentId',
 
-                'gv.name as advisor',
+                'p.advisor_name as advisor',
 
                 'c.category_name as type',
 
@@ -667,7 +671,6 @@ class ProductRepository extends BaseRepository
             ->leftJoin('product_statistics as s', 'p.product_id', '=', 's.product_id')
             ->leftJoin('categories as c', 'p.cate_id', '=', 'c.cate_id')
             ->leftJoin('users as u', 'p.user_id', '=', 'u.user_id')
-            ->leftJoin('users as gv', 'p.approved_by', '=', 'gv.user_id')
             ->where('p.product_id', $id)
             ->where('p.status', 'approved')
             ->select(
@@ -676,7 +679,7 @@ class ProductRepository extends BaseRepository
                 'm.major_code',
                 'u.name as student',
                 'u.user_id as studentId',
-                'gv.name as advisor',
+                'p.advisor_name as advisor',
                 'c.category_name as type',
                 's.views',
                 's.likes',
@@ -707,8 +710,14 @@ class ProductRepository extends BaseRepository
 
         // ================= 4. REVIEWS =================
         $reviews = DB::table('reviews')
+            ->leftJoin('users as teacher', 'reviews.teacher_id', '=', 'teacher.user_id')
             ->where('product_id', $productId)
-            ->select('comment', 'teacher_id')
+            ->select(
+                'reviews.comment',
+                'reviews.teacher_id',
+                'reviews.created_at',
+                'teacher.name as teacher_name'
+            )
             ->get()
             ->toArray();
 
@@ -821,6 +830,10 @@ class ProductRepository extends BaseRepository
             'student' => $product->student ?? 'Ẩn danh',
             'studentId' => $product->studentId,
 
+            'team_members' => is_string($product->team_members)
+                ? (json_decode($product->team_members, true) ?: [])
+                : ($product->team_members ?? []),
+
             'major_id' => $product->major_id,
             'major' => $product->major,
             'major_code' => $product->major_code,
@@ -841,7 +854,12 @@ class ProductRepository extends BaseRepository
                 ? json_decode($product->awards, true)
                 : [],
 
-            'feedback' => array_map(fn($r) => $r->comment, $reviews),
+            'feedback' => array_map(fn($review) => [
+                'comment' => $review->comment,
+                'teacher_id' => $review->teacher_id,
+                'teacher_name' => $review->teacher_name,
+                'created_at' => $review->created_at,
+            ], $reviews),
 
             'tags' => $tags,
 

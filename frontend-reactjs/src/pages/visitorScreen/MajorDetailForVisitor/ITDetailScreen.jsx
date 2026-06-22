@@ -4,7 +4,9 @@ import BackButton from "../../../components/common/BackButton";
 import useImageViewer from "../../../shared/useImageViewer";
 import { Icons } from "../../../components/common/Icon";
 import { productApi } from "../../../api";
-import { shareVisitorProduct } from "../../../utils/shareProduct";
+import VisitorTeam from "../../../components/visitor/VisitorTeam";
+import VisitorReviews from "../../../components/visitor/VisitorReviews";
+import VisitorShareButton from "../../../components/visitor/VisitorShareButton";
 
 const ITDetailScreen = ({
   productVisitorDetail,
@@ -16,15 +18,13 @@ const ITDetailScreen = ({
   const [activeTab, setActiveTab] = useState("overview");
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(productVisitorDetail?.likes || 0);
-  const [shareCount, setShareCount] = useState(productVisitorDetail?.shares || 0);
   const { openViewer, ImageViewerModal } = useImageViewer();
 
   const majorDetail = productVisitorDetail?.major_detail || {};
 
   useEffect(() => {
     setLikeCount(productVisitorDetail?.likes || 0);
-    setShareCount(productVisitorDetail?.shares || 0);
-  }, [productVisitorDetail?.id, productVisitorDetail?.likes, productVisitorDetail?.shares]);
+  }, [productVisitorDetail?.id, productVisitorDetail?.likes]);
 
   const handleLike = async () => {
     if (isLiked) return;
@@ -41,31 +41,6 @@ const ITDetailScreen = ({
       console.error(error);
       setIsLiked(false);
       setLikeCount((prev) => Math.max(0, prev - 1));
-    }
-  };
-
-  const handleShare = async () => {
-    const productId = productVisitorDetail?.id;
-    if (!productId) return;
-
-    const shareUrl = `${window.location.origin}/chi-tiet-san-pham/${productId}`;
-
-    try {
-      const shared = await shareVisitorProduct({
-        title: productVisitorDetail?.title,
-        description: productVisitorDetail?.description,
-        url: shareUrl,
-      });
-      if (!shared) return;
-
-      const res = await productApi.incrementShare(productId);
-      if (typeof res?.shares === "number") {
-        setShareCount(res.shares);
-      }
-    } catch (error) {
-      if (error?.name !== "AbortError") {
-        console.error(error);
-      }
     }
   };
 
@@ -113,7 +88,7 @@ const ITDetailScreen = ({
               <span
                 className={`px-3 py-1.5 ${theme.badgeBg} backdrop-blur-sm rounded-full text-xs font-medium`}
               >
-                💻 {majorDetail.programming_language || "CNTT"}
+                💻 {majorDetail.programming_language || "Chưa cập nhật"}
               </span>
               <button
                 onClick={() => navigate("/dang-nhap")}
@@ -150,13 +125,7 @@ const ITDetailScreen = ({
                 )}
                 <span>{likeCount?.toLocaleString()} yêu thích</span>
               </button>
-              <button
-                onClick={handleShare}
-                className="flex items-center gap-2 transition-transform hover:scale-110"
-              >
-                <Icons.Share className="w-4 h-4" />
-                <span>{shareCount?.toLocaleString()} chia sẻ</span>
-              </button>
+              <VisitorShareButton product={productVisitorDetail} />
               <div className="flex items-center gap-2">
                 📅 {productVisitorDetail?.year}
               </div>
@@ -243,6 +212,7 @@ const ITDetailScreen = ({
                   { id: "technical", label: "🛠️ Kỹ thuật" },
                   { id: "resources", label: "🔗 Tài nguyên" },
                   { id: "team", label: "👥 Đội ngũ" },
+                  { id: "feedback", label: "💬 Đánh giá" },
                 ].map((tab) => (
                   <button
                     key={tab.id}
@@ -342,41 +312,11 @@ const ITDetailScreen = ({
                 )}
 
                 {activeTab === "team" && (
-                  <div className="space-y-6">
-                    <div
-                      className={`flex items-center gap-5 p-5 rounded-xl bg-gradient-to-r ${theme.lightBg}`}
-                    >
-                      <div
-                        className={`w-16 h-16 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg ${theme.buttonBg}`}
-                      >
-                        {productVisitorDetail?.student?.charAt(0)}
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-lg text-gray-800">
-                          {productVisitorDetail?.student}
-                        </h3>
-                        <p className="text-sm text-gray-500">
-                          MSSV: {productVisitorDetail?.studentId}
-                        </p>
-                        <p className={`text-sm mt-1 ${theme.textColor}`}>
-                          💻 Developer
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4 p-4 rounded-xl bg-gray-50">
-                      <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center text-xl">
-                        👨‍🏫
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-800">
-                          {productVisitorDetail?.advisor}
-                        </h3>
-                        <p className="text-sm text-gray-500">
-                          Giảng viên duyệt
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                  <VisitorTeam product={productVisitorDetail} theme={theme} />
+                )}
+
+                {activeTab === "feedback" && (
+                  <VisitorReviews reviews={productVisitorDetail?.feedback} />
                 )}
               </div>
             </div>

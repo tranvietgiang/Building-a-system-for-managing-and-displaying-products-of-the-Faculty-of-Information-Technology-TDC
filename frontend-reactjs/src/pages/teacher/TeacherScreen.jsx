@@ -15,15 +15,16 @@ import { STATUS } from "../../utils/constants";
 import { ROUTES } from "../../utils/routes";
 import ChatBoxAi from "../chatBoxAi/ChatBoxAi";
 import SearchAi from "../ai/SearchAi";
+import { getMajorTheme } from "../../utils/uploadProductScreen/uploadRegistry";
 // ========== Extracted components ==========
 
 const ProductCard = React.memo(
-  ({ product, type, onViewDetail, onOpenImageViewer, index }) => {
+  ({ product, type, onViewDetail, onOpenImageViewer, index, theme }) => {
     const statusColor = getStatusColor(type);
     const statusText = getStatusText(type);
 
     return (
-      <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-100">
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
         <div className="flex flex-col sm:flex-row gap-4 p-4">
           <div className="relative w-full sm:w-32 h-32 flex-shrink-0">
             {index && (
@@ -77,7 +78,7 @@ const ProductCard = React.memo(
             </div>
 
             <div className="flex flex-wrap items-center gap-2 mt-2">
-              <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs">
+              <span className={`rounded-full px-2 py-1 text-xs ${theme.light} ${theme.text}`}>
                 {product.category_name}
               </span>
               <span className="text-xs text-gray-500">
@@ -93,7 +94,7 @@ const ProductCard = React.memo(
             <div className="flex flex-wrap items-center gap-3 mt-3">
               <button
                 onClick={() => onViewDetail(product.product_id)}
-                className="px-4 py-1.5 bg-gray-100 text-gray-700 text-sm rounded-lg hover:bg-gray-200 transition"
+                className={`rounded-lg px-4 py-1.5 text-sm text-white transition ${theme.buttonBg}`}
               >
                 Xem chi tiết
               </button>
@@ -187,6 +188,7 @@ const TeacherScreen = () => {
 
   const { user } = useContext(AuthContext);
   const { majorName } = useMajorName(user?.major_id);
+  const theme = getMajorTheme(majorName);
   const { teacherStatistic } = useTeacherStatistic();
   const teacherParams = useMemo(
     () => ({
@@ -218,23 +220,20 @@ const TeacherScreen = () => {
 
   const stats = useMemo(
     () => [
-      { label: "Tổng sản phẩm", value: counts.total ?? teacher.totalProducts, color: "purple" },
+      { label: "Tổng sản phẩm", value: counts.total ?? teacher.totalProducts },
       {
         label: "Chờ duyệt",
         value: counts.pending ?? 0,
-        color: "yellow",
         filter: STATUS.PENDING,
       },
       {
         label: "Đã duyệt",
         value: counts.approved ?? 0,
-        color: "green",
         filter: STATUS.APPROVED,
       },
       {
         label: "Từ chối",
         value: counts.rejected ?? 0,
-        color: "red",
         filter: STATUS.REJECTED,
       },
     ],
@@ -262,29 +261,6 @@ const TeacherScreen = () => {
     setFilter(tab);
     setCurrentPage(1);
   }, []);
-
-  const colorMap = {
-    purple: {
-      bg: "from-purple-50 to-purple-50/50",
-      label: "text-purple-600",
-      value: "text-purple-700",
-    },
-    yellow: {
-      bg: "from-yellow-50 to-yellow-50/50",
-      label: "text-yellow-600",
-      value: "text-yellow-700",
-    },
-    green: {
-      bg: "from-green-50 to-green-50/50",
-      label: "text-green-600",
-      value: "text-green-700",
-    },
-    red: {
-      bg: "from-red-50 to-red-50/50",
-      label: "text-red-600",
-      value: "text-red-700",
-    },
-  };
 
   const tabConfig = {
     pending: {
@@ -333,18 +309,18 @@ const TeacherScreen = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b sticky top-0 z-10">
+      <div className={`sticky top-0 z-10 bg-gradient-to-r ${theme.headerGradient} text-white shadow-md`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-3 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <button
                 onClick={handleToggleHeader}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                className="rounded-lg p-2 transition-colors hover:bg-white/15"
               >
                 <svg
-                  className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${isHeaderExpanded ? "" : "rotate-180"}`}
+                  className={`h-4 w-4 text-white/80 transition-transform duration-200 ${isHeaderExpanded ? "" : "rotate-180"}`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -358,7 +334,7 @@ const TeacherScreen = () => {
                 </svg>
               </button>
 
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/15 ring-1 ring-white/20">
                 <svg
                   className="w-4 h-4 text-white"
                   fill="none"
@@ -375,11 +351,11 @@ const TeacherScreen = () => {
               </div>
 
               <div>
-                <h1 className="text-base font-semibold text-gray-800">
-                  Giảng viên Dashboard
+                <h1 className="text-base font-semibold text-white">
+                  Trang giảng viên
                 </h1>
                 {!isHeaderExpanded && (
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-white/70">
                     Quản lý sản phẩm sinh viên
                   </p>
                 )}
@@ -387,18 +363,18 @@ const TeacherScreen = () => {
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="hidden md:flex items-center gap-3 px-3 py-1.5 bg-gray-50 rounded-full">
-                <div className="w-7 h-7 bg-gradient-to-r from-gray-600 to-gray-700 rounded-full flex items-center justify-center">
+              <div className="hidden items-center gap-3 rounded-full bg-white/10 px-3 py-1.5 ring-1 ring-white/15 md:flex">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20">
                   <span className="text-white text-xs font-medium">
                     {teacher.name?.charAt(0) || "G"}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <span className="font-medium text-gray-700">
+                  <span className="font-medium text-white">
                     {teacher.name}
                   </span>
-                  <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                  <span className="text-xs text-gray-500">{majorName}</span>
+                  <span className="h-1 w-1 rounded-full bg-white/40"></span>
+                  <span className="text-xs text-white/75">{majorName}</span>
                 </div>
               </div>
               <UserDropdown />
@@ -407,19 +383,23 @@ const TeacherScreen = () => {
 
           {isHeaderExpanded && (
             <div className="animate-fadeIn pb-4">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-gray-100">
+              <div className="grid grid-cols-2 gap-3 border-t border-white/15 pt-3 md:grid-cols-4">
                 {stats.map((stat) => {
-                  const c = colorMap[stat.color];
+                  const isActive = stat.filter && filter === stat.filter;
                   return (
                     <div
                       key={stat.label}
                       onClick={() => handleStatClick(stat.filter)}
-                      className={`bg-gradient-to-r ${c.bg} rounded-xl p-3 cursor-pointer hover:shadow-md transition-all`}
+                      className={`cursor-pointer rounded-lg border bg-white p-3 transition-colors ${
+                        isActive
+                          ? "border-slate-500"
+                          : "border-slate-200 hover:border-slate-300"
+                      }`}
                     >
-                      <p className={`text-xs font-medium ${c.label}`}>
+                      <p className="text-xs font-medium text-slate-500">
                         {stat.label}
                       </p>
-                      <p className={`text-xl font-bold mt-0.5 ${c.value}`}>
+                      <p className="mt-1 text-xl font-semibold text-slate-800">
                         {stat.value}
                       </p>
                     </div>
@@ -430,14 +410,14 @@ const TeacherScreen = () => {
               <div className="flex flex-wrap items-center gap-3 mt-4">
                 <div className="flex gap-1.5">
                   {Object.entries(tabConfig).map(
-                    ([tab, { label, color, count }]) => (
+                    ([tab, { label, count }]) => (
                       <button
                         key={tab}
                         onClick={() => handleTabChange(tab)}
                         className={`px-4 py-1.5 rounded-lg font-medium text-xs transition-all duration-200 ${
                           filter === tab
-                            ? `bg-${color}-500 text-white shadow-sm`
-                            : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
+                            ? "bg-white text-slate-900 shadow-sm"
+                            : "border border-white/20 bg-white/10 text-white hover:bg-white/20"
                         }`}
                       >
                         {label} ({count})
@@ -452,7 +432,7 @@ const TeacherScreen = () => {
       </div>
       {currentStudent && <ChatBoxAi user={currentStudent} />}
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <SearchAi embedded user={user} majorName={majorName} />
 
         {loading && <LoadingSkeleton />}
@@ -487,6 +467,7 @@ const TeacherScreen = () => {
                         index={(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}
                         onViewDetail={handleViewDetail}
                         onOpenImageViewer={openViewer}
+                        theme={theme}
                       />
                     ))}
                   </div>
@@ -518,6 +499,7 @@ const TeacherScreen = () => {
                         index={(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}
                         onViewDetail={handleViewDetail}
                         onOpenImageViewer={openViewer}
+                        theme={theme}
                       />
                     ))}
                   </div>
@@ -549,6 +531,7 @@ const TeacherScreen = () => {
                         index={(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}
                         onViewDetail={handleViewDetail}
                         onOpenImageViewer={openViewer}
+                        theme={theme}
                       />
                     ))}
                   </div>

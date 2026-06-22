@@ -8,6 +8,7 @@ use App\Http\Ai\CheckImage;
 use Illuminate\Support\Facades\DB;
 use App\Services\CloudinaryService;
 use Illuminate\Support\Facades\Log;
+use App\Models\Product;
 use App\Http\Common\NormalizeMajorCode;
 use App\Http\Ai\ContentModeration;
 
@@ -28,6 +29,17 @@ class UploadService extends BaseRepository
      */
     public function upload(array $data)
     {
+        $replaceProductId = (int) ($data['replace_product_id'] ?? 0);
+
+        if ($replaceProductId && ! Product::where('product_id', $replaceProductId)
+            ->where('user_id', $this->getCurrentUserId())
+            ->exists()) {
+            return [
+                'error' => true,
+                'message' => 'Không tìm thấy sản phẩm cần chỉnh sửa hoặc bạn không có quyền chỉnh sửa.',
+            ];
+        }
+
         $duplicate = $this->productDuplicateService->check($data);
 
         if ($duplicate) {
@@ -38,9 +50,12 @@ class UploadService extends BaseRepository
             ];
         }
 
-        $uploadedImages = [];
+        $uploadedImages = array_values($data['existing_images'] ?? []);
         $tags = $data['tags'] ?? [];
-        $thumbnailIndex = $this->resolveThumbnailIndex($data['image_meta'] ?? []);
+        $existingThumbnailUrl = $data['existing_thumbnail_url'] ?? null;
+        $thumbnailIndex = $existingThumbnailUrl
+            ? (int) (array_search($existingThumbnailUrl, $uploadedImages, true) ?: 0)
+            : 0;
 
         DB::beginTransaction();
 
@@ -48,7 +63,7 @@ class UploadService extends BaseRepository
 
             $cloudinary = new CloudinaryService();
 
-            foreach ($data['images'] as $index => $image) {
+            foreach (($data['images'] ?? []) as $index => $image) {
 
                 $result = $this->contentModeration->moderateUploadedImage($image, [
                     'title' => $data['title'] ?? '',
@@ -74,9 +89,16 @@ class UploadService extends BaseRepository
                 }
             }
 
-            foreach ($data['images'] as $image) {
+            $newThumbnailOffset = count($uploadedImages);
+            $newThumbnailIndex = $this->resolveThumbnailIndex($data['image_meta'] ?? []);
+
+            foreach (($data['images'] ?? []) as $image) {
                 $url = $cloudinary->upload($image);
                 $uploadedImages[] = $url;
+            }
+
+            if (! $existingThumbnailUrl && ($data['images'] ?? []) !== []) {
+                $thumbnailIndex = $newThumbnailOffset + $newThumbnailIndex;
             }
 
 
@@ -85,10 +107,13 @@ class UploadService extends BaseRepository
             $dbData = [
                 'title' => $data['title'],
                 'description' => $data['description'],
+                'team_members' => $data['team_members'] ?? null,
                 'user_id' => $this->getCurrentUserId(),
                 'cate_id' => $data['cate_id'],
                 'major_id' => $data['major_id'],
                 'major_code' => $data['major_code'] ?? null,
+                'advisor_name' => $data['advisor_name'] ?? null,
+                'replace_product_id' => $replaceProductId ?: null,
                 'github_link' => $data['github_link'] ?? null,
                 'demo_link' => $data['demo_link'] ?? null,
             ];

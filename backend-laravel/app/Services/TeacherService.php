@@ -8,7 +8,6 @@ use App\Repositories\TeacherRepository;
 use App\Repositories\UserRepository;
 use App\Repositories\ReviewRepository;
 use Illuminate\Support\Collection;
-use App\Http\Ai\ContentModeration;
 use App\Models\Product;
 use App\Repositories\common\CommonRepository as RepositoriesCommonRepository;
 use Carbon\Carbon;
@@ -21,8 +20,7 @@ class TeacherService extends BaseRepository
         protected ProductRepository $product_repo,
         protected UserRepository $user_repository,
         protected RepositoriesCommonRepository $common_repository,
-        protected ReviewRepository $review_repo,
-        protected ContentModeration $contentModerationService
+        protected ReviewRepository $review_repo
     ) {}
 
 
@@ -65,7 +63,7 @@ class TeacherService extends BaseRepository
         ];
     }
 
-    public function updateStatus($product_id, $status, $feedback = null, array $moderationContext = []): array
+    public function updateStatus($product_id, $status, $feedback = null): array
     {
         $productId = (int) $product_id;
         $userId = $this->getCurrentUserId();
@@ -88,29 +86,6 @@ class TeacherService extends BaseRepository
                 'message' => 'Sản phẩm không chờ duyệt!'
             ];
         }
-
-        $now = Product::where('product_id', $product_id)->first();
-
-        if ($status === 'approved') {
-            // Skip AI moderation if force_approve is true
-            $forceApprove = $moderationContext['force_approve'] ?? false;
-
-            if (!$forceApprove) {
-                $moderation = $this->contentModerationService->moderateProduct($product, $moderationContext);
-
-                if (!$moderation['approved']) {
-                    return [
-                        'result' => false,
-                        'blocked_by_ai' => true,
-                        'message' => 'AI đã chặn duyệt sản phẩm: ' . $moderation['reason'],
-                        'reason' => $moderation['reason'],
-                        'violations' => $moderation['violations'] ?? [],
-                        'moderation' => $moderation,
-                    ];
-                }
-            }
-        }
-
 
         // xử lý theo status
         if ($status === 'approved') {
