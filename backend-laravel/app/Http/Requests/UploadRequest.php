@@ -121,6 +121,9 @@ class UploadRequest extends FormRequest
             'images.required' => 'Cần ít nhất 1 ảnh',
             'images.min' => 'Cần ít nhất 1 ảnh',
             'images.max' => 'Tối đa 10 ảnh',
+            'images.*.image' => 'Tệp đã chọn phải là hình ảnh',
+            'images.*.mimes' => 'Ảnh chỉ hỗ trợ định dạng JPG, JPEG, PNG hoặc WEBP',
+            'images.*.max' => 'Mỗi ảnh không được vượt quá 5 MB',
 
             // LINKS
             'github_link.url' => 'Link GitHub không hợp lệ',

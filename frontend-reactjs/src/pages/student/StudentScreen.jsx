@@ -14,6 +14,7 @@ import ChatBoxAi from "../../pages/chatBoxAi/ChatBoxAi";
 import SearchAi from "../ai/SearchAi";
 import { confirmToast } from "../../components/common/ConfirmToast";
 import { toast } from "react-toastify";
+import { productApi } from "../../api";
 
 const StudentScreen = () => {
   const [activeTab, setActiveTab] = useState("all");
@@ -75,14 +76,31 @@ const StudentScreen = () => {
     navigate("/chi-tiet-cua-toi", { state: { productId: id } });
   };
 
-  const handleEdit = (product) => {
-    navigate("/chinh-sua-san-pham", {
-      state: {
-        product,
-        productId: product.product_id,
-        mode: "edit",
-      },
-    });
+  const handleEdit = async (product) => {
+    const toastId = "load-product-for-edit";
+
+    try {
+      toast.loading("Đang tải đầy đủ thông tin sản phẩm...", { toastId });
+      const productDetail = await productApi.getProductById(product.product_id);
+
+      toast.dismiss(toastId);
+      navigate("/chinh-sua-san-pham", {
+        state: {
+          product: productDetail,
+          productId: product.product_id,
+          mode: "edit",
+        },
+      });
+    } catch (error) {
+      toast.update(toastId, {
+        render:
+          error?.response?.data?.message ||
+          "Không tải được đầy đủ thông tin sản phẩm",
+        type: "error",
+        isLoading: false,
+        autoClose: 2500,
+      });
+    }
   };
 
   const handleDelete = (id) => {

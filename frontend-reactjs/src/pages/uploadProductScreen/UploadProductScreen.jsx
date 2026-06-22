@@ -34,48 +34,81 @@ const UploadProductScreen = () => {
   const editData = useMemo(() => {
     if (!isEditMode) return null;
 
+    const aiDetail = editProduct.ai_detail || {};
+    const itDetail = editProduct.it_detail || {};
+    const networkDetail = editProduct.network_detail || {};
+    const graphicDetail = editProduct.graphic_detail || {};
+
     return {
       title: editProduct.title || "",
       description: editProduct.description || "",
-      cate_id: editProduct.cate_id || "",
+      cate_id: editProduct.cate_id || editProduct.category?.cate_id || "",
       awards: editProduct.awards || "",
       github_link: editProduct.github_link || "",
       demo_link: editProduct.demo_link || "",
-      model_used: editProduct.model_used || "",
-      framework: editProduct.framework || "",
-      language: editProduct.language || "",
-      dataset_used: editProduct.dataset_used || "",
-      accuracy_score: editProduct.accuracy_score || "",
-      programming_language: editProduct.programming_language || "",
-      database_used: editProduct.database_used || "",
-      simulation_tool: editProduct.simulation_tool || "",
-      network_protocol: editProduct.network_protocol || "",
-      topology_type: editProduct.topology_type || "",
-      config_file: editProduct.config_file || "",
-      design_type: editProduct.design_type || "",
-      tools_used: editProduct.tools_used || "",
-      drive_link: editProduct.drive_link || "",
-      behance_link: editProduct.behance_link || "",
+      model_used: editProduct.model_used || aiDetail.model_used || "",
+      framework:
+        editProduct.framework || aiDetail.framework || itDetail.framework || "",
+      language: editProduct.language || aiDetail.language || "",
+      dataset_used: editProduct.dataset_used || aiDetail.dataset_used || "",
+      accuracy_score:
+        editProduct.accuracy_score || aiDetail.accuracy_score || "",
+      programming_language:
+        editProduct.programming_language || itDetail.programming_language || "",
+      database_used:
+        editProduct.database_used || itDetail.database_used || "",
+      simulation_tool:
+        editProduct.simulation_tool || networkDetail.simulation_tool || "",
+      network_protocol:
+        editProduct.network_protocol || networkDetail.network_protocol || "",
+      topology_type:
+        editProduct.topology_type || networkDetail.topology_type || "",
+      config_file: editProduct.config_file || networkDetail.config_file || "",
+      design_type: editProduct.design_type || graphicDetail.design_type || "",
+      tools_used: editProduct.tools_used || graphicDetail.tools_used || "",
+      drive_link: editProduct.drive_link || graphicDetail.drive_link || "",
+      behance_link:
+        editProduct.behance_link || graphicDetail.behance_link || "",
     };
   }, [editProduct, isEditMode]);
 
   const editImages = useMemo(() => {
-    if (!isEditMode || !editProduct.thumbnail) return [];
+    if (!isEditMode) return [];
 
-    return [
-      {
-        id: `thumbnail-${editProduct.product_id}`,
-        url: editProduct.thumbnail,
-        name: "Ảnh đại diện hiện tại",
-        size: "",
-      },
-    ];
+    const thumbnailImage = editProduct.thumbnail
+      ? [
+          {
+            id: `thumbnail-${editProduct.product_id}`,
+            url: editProduct.thumbnail,
+            name: "Ảnh đại diện hiện tại",
+            size: "",
+          },
+        ]
+      : [];
+
+    const detailImages = Array.isArray(editProduct.images)
+      ? editProduct.images.map((image, index) => ({
+          id: image.product_image_id || `existing-${index}`,
+          url: image.image_url,
+          name: `Ảnh sản phẩm ${index + 1}`,
+          size: "",
+        }))
+      : [];
+
+    return [...thumbnailImage, ...detailImages].filter(
+      (image, index, allImages) =>
+        image.url && allImages.findIndex((item) => item.url === image.url) === index,
+    );
   }, [editProduct, isEditMode]);
 
   const form = useHook({
     editData,
     editImages,
-    editTags: Array.isArray(editProduct?.tags) ? editProduct.tags : [],
+    editTags: Array.isArray(editProduct?.tags)
+      ? editProduct.tags
+          .map((tag) => (typeof tag === "string" ? tag : tag.tag_name))
+          .filter(Boolean)
+      : [],
   });
 
   const {
