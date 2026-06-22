@@ -116,7 +116,7 @@ class AuthService
             }
 
             $user = $refreshToken->user;
-            $refreshToken->update(['revoked_at' => now()]);
+            $refreshToken->delete();
 
             return $user ? $this->issueTokenPair($user) : null;
         });

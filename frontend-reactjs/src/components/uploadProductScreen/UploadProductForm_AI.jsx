@@ -216,39 +216,31 @@ const UploadProductForm_AI = ({
                   </div>
                 </div>
 
-                {/* Lĩnh vực AI */}
+                {/* Mô hình / Thuật toán AI */}
                 <div>
                   <label className="mb-2 block text-sm font-semibold text-gray-700">
-                    Lĩnh vực AI <span className="text-red-500">*</span>
+                    Mô hình / Thuật toán sử dụng{" "}
+                    <span className="text-red-500">*</span>
                   </label>
-                  <select
+                  <input
+                    type="text"
                     name="model_used"
                     value={formData.model_used}
                     onChange={handleChange}
+                    maxLength={100}
                     className={`w-full rounded-xl border-2 px-4 py-3 ${
                       errors.model_used
                         ? "border-red-300 bg-red-50"
                         : "border-gray-200"
                     }`}
-                  >
-                    <option value="">Chọn lĩnh vực</option>
-                    <option value="nlp">NLP - Xử lý ngôn ngữ tự nhiên</option>
-                    <option value="cv">
-                      Computer Vision - Thị giác máy tính
-                    </option>
-                    <option value="rl">
-                      Học tăng cường (Reinforcement Learning)
-                    </option>
-                    <option value="generative">
-                      Mô hình sinh (Generative AI)
-                    </option>
-                    <option value="recommend">
-                      Hệ gợi ý (Recommender System)
-                    </option>
-                  </select>
+                    placeholder="VD: FaceNet, YOLOv8, BERT, LSTM..."
+                  />
+                  <p className="mt-2 text-xs text-gray-500">
+                    Nhập tên mô hình hoặc thuật toán chính được dùng trong sản phẩm.
+                  </p>
                   {errors.model_used && (
                     <p className="mt-2 text-sm text-red-600">
-                      {errors.model_type}
+                      {errors.model_used}
                     </p>
                   )}
                 </div>

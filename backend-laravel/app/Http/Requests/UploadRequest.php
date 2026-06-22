@@ -130,8 +130,8 @@ class UploadRequest extends FormRequest
             'demo_link.url' => 'Link demo không hợp lệ',
 
             // ================= AI =================
-            'model_used.required' => 'Nhập model sử dụng',
-            'model_used.max' => 'Model tối đa 100 ký tự',
+            'model_used.required' => 'Nhập mô hình hoặc thuật toán sử dụng',
+            'model_used.max' => 'Mô hình hoặc thuật toán tối đa 100 ký tự',
 
             'framework.required' => 'Nhập framework',
             'framework.max' => 'Framework tối đa 100 ký tự',

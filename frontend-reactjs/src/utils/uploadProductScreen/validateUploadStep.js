@@ -196,7 +196,7 @@ export const validateAIStep = ({ step, formData, images = [] }) => {
     validateBasicInfo(formData, errors);
 
     if (!formData.model_used?.trim()) {
-      errors.model_used = "Nhập model";
+      errors.model_used = "Nhập mô hình hoặc thuật toán sử dụng";
     } else if (formData.model_used.length > 100) {
       errors.model_used = "≤ 100 ký tự";
     }
