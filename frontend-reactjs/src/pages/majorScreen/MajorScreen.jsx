@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   BrainCircuit,
@@ -7,10 +7,9 @@ import {
   Network,
   Palette,
 } from "lucide-react";
-import logoTdc from "../../assets/logo-tdc-orginal.webp";
 import useMajorAll from "../../hooks/common/useMajorAll";
-import useScrollControls from "../../hooks/common/useScrollControls";
 import ScrollButtons from "../../components/common/ScrollButtons";
+import PublicHeader from "../../layouts/PublicHeader";
 
 const majorMeta = {
   "Công nghệ thông tin": {
@@ -62,66 +61,12 @@ const getMajorMeta = (majorName) =>
 
 export default function MajorScreen() {
   const navigate = useNavigate();
-  const { handleTop, handleBottom } = useScrollControls();
   const { majorAll, loadingMajorAll } = useMajorAll();
   const majors = majorAll?.length ? majorAll : fallbackMajors;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900">
-      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:h-20 lg:px-8">
-          <Link to="/khach-tham-quan" className="flex items-center gap-3">
-            <img src={logoTdc} alt="TDC" className="h-12 w-auto" />
-            <div className="hidden sm:block">
-              <p className="text-lg font-bold leading-tight text-[#003087]">
-                Ngành học
-              </p>
-              <p className="text-xs text-slate-500">
-                Khoa Công Nghệ Thông Tin | TDC
-              </p>
-            </div>
-          </Link>
-
-          <nav className="hidden items-center gap-6 md:flex">
-            <button
-              type="button"
-              onClick={() => handleTop("/khach-tham-quan")}
-              className="text-sm font-medium text-slate-600 transition hover:text-[#003087]"
-            >
-              Trang chủ
-            </button>
-            <button
-              type="button"
-              onClick={() => handleBottom("/khach-tham-quan", "san-pham")}
-              className="text-sm font-medium text-slate-600 transition hover:text-[#003087]"
-            >
-              Sản phẩm
-            </button>
-            <Link to="/nganh-hoc" className="text-sm font-semibold text-[#003087]">
-              Ngành học
-            </Link>
-            <Link
-              to="/huong-dan"
-              className="text-sm font-medium text-slate-600 transition hover:text-[#003087]"
-            >
-              Hướng dẫn
-            </Link>
-            <Link
-              to="/lien-he"
-              className="text-sm font-medium text-slate-600 transition hover:text-[#003087]"
-            >
-              Liên hệ
-            </Link>
-          </nav>
-
-          <button
-            onClick={() => navigate("/dang-nhap")}
-            className="rounded-md border border-[#003087] px-4 py-2 text-sm font-semibold text-[#003087] transition hover:bg-[#003087] hover:text-white"
-          >
-            Đăng nhập
-          </button>
-        </div>
-      </header>
+      <PublicHeader title="Ngành học" />
 
       <main>
         <section className="bg-[#003087] text-white">
