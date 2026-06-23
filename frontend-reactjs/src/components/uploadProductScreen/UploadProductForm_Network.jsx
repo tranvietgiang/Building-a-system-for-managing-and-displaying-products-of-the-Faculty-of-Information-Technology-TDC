@@ -4,6 +4,7 @@ import { confirmToast } from "../common/ConfirmToast";
 import useMajorName from "../../hooks/common/useMajorName";
 import { AuthContext } from "../../contexts/AuthContext";
 import LoadingSpinner from "../common/LoadingOverlay";
+import { sanitizeTextInput } from "../../utils/sanitizeInput";
 
 const UploadProductForm_Network = ({
   formData,
@@ -453,7 +454,7 @@ const UploadProductForm_Network = ({
                 <input
                   type="text"
                   value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
+                  onChange={(e) => setTagInput(sanitizeTextInput(e.target.value))}
                   onKeyDown={handleAddTag}
                   className="w-full rounded-xl border-2 border-gray-200 px-4 py-3"
                   placeholder="Nhập công nghệ và nhấn Enter (VD: OSPF, VLAN, MPLS, VPN...)"

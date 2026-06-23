@@ -4,6 +4,7 @@ import useChatBoxAi from "../../hooks/ai/useChatBoxAi";
 import { useNavigate } from "react-router-dom";
 import { ROLE } from "../../utils/constants";
 import { systemSettingsApi } from "../../api";
+import { sanitizeTextInput } from "../../utils/sanitizeInput";
 
 const CHAT_DISABLED_MESSAGE =
   "Quản trị viên đã tắt tính năng chatbot AI. Vui lòng liên hệ quản trị viên hoặc thử lại sau.";
@@ -51,6 +52,19 @@ export default function ChatBoxAi({ user }) {
   useEffect(() => {
     if (!isOpen) return;
 
+    if (!chatEnabled) {
+      setInput("");
+      setIsTyping(false);
+      setMessages([
+        {
+          id: "bot_chat_disabled",
+          text: CHAT_DISABLED_MESSAGE,
+          sender: "bot",
+        },
+      ]);
+      return;
+    }
+
     // Guest không lưu cache
     if (!STORAGE_KEY) {
       setMessages([
@@ -86,7 +100,7 @@ export default function ChatBoxAi({ user }) {
         sender: "bot",
       },
     ]);
-  }, [isOpen, STORAGE_KEY]);
+  }, [chatEnabled, isOpen, STORAGE_KEY]);
 
   // =========================
   // RESET KHI ĐỔI USER (logout/login)
@@ -119,11 +133,12 @@ export default function ChatBoxAi({ user }) {
   // SEND MESSAGE
   // =========================
   const handleSend = async () => {
-    if (!input.trim() || loadingAi || isTyping) return;
+    const safeInput = sanitizeTextInput(input).trim();
+    if (!safeInput || loadingAi || isTyping || !chatEnabled) return;
 
     const userMessage = {
       id: `user_${Date.now()}_${Math.random()}`,
-      text: input,
+      text: safeInput,
       sender: "user",
     };
 
@@ -131,21 +146,8 @@ export default function ChatBoxAi({ user }) {
     setMessages(newMessages);
     saveToLocal(newMessages);
 
-    const messageToSend = input;
+    const messageToSend = safeInput;
     setInput("");
-
-    if (!chatEnabled) {
-      const disabledReply = {
-        id: `bot_${Date.now()}_${Math.random()}`,
-        text: CHAT_DISABLED_MESSAGE,
-        sender: "bot",
-      };
-
-      const updated = [...newMessages, disabledReply];
-      setMessages(updated);
-      saveToLocal(updated);
-      return;
-    }
 
     setIsTyping(true);
 
@@ -359,18 +361,22 @@ export default function ChatBoxAi({ user }) {
                 value={input}
                 onChange={(e) => {
                   if (e.target.value.length <= 1000) {
-                    setInput(e.target.value);
+                    setInput(sanitizeTextInput(e.target.value));
                   }
                 }}
                 onKeyPress={handleKeyPress}
-                placeholder="Nhập tin nhắn..."
-                disabled={isTyping}
+                placeholder={
+                  chatEnabled
+                    ? "Nhập tin nhắn..."
+                    : "Quản trị viên đã tắt chatbot AI"
+                }
+                disabled={isTyping || !chatEnabled}
                 maxLength={1000}
                 className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
               />
               <button
                 onClick={handleSend}
-                disabled={!input.trim() || isTyping}
+                disabled={!input.trim() || isTyping || !chatEnabled}
                 className="p-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <svg

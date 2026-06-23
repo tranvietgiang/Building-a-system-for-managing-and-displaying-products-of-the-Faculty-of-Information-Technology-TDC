@@ -4,6 +4,7 @@ import { confirmToast } from "../common/ConfirmToast";
 import useMajorName from "../../hooks/common/useMajorName";
 import { AuthContext } from "../../contexts/AuthContext";
 import LoadingSpinner from "../common/LoadingOverlay";
+import { sanitizeTextInput } from "../../utils/sanitizeInput";
 
 const UploadProductForm_Graphic = ({
   formData,
@@ -474,7 +475,7 @@ const UploadProductForm_Graphic = ({
                 <input
                   type="text"
                   value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
+                  onChange={(e) => setTagInput(sanitizeTextInput(e.target.value))}
                   onKeyDown={handleAddTag}
                   className="w-full rounded-xl border-2 border-gray-200 px-4 py-3"
                   placeholder="Nhập rồi nhấn Enter, VD: Figma, Photoshop, 3D, Typography..."
