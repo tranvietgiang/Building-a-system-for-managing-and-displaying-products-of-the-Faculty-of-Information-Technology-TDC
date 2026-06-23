@@ -4,6 +4,10 @@ import useChatBoxAi from "../../hooks/ai/useChatBoxAi";
 import { useNavigate } from "react-router-dom";
 import { ROLE } from "../../utils/constants";
 import { systemSettingsApi } from "../../api";
+
+const CHAT_DISABLED_MESSAGE =
+  "Quản trị viên đã tắt tính năng chatbot AI. Vui lòng liên hệ quản trị viên hoặc thử lại sau.";
+
 export default function ChatBoxAi({ user }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
@@ -129,6 +133,20 @@ export default function ChatBoxAi({ user }) {
 
     const messageToSend = input;
     setInput("");
+
+    if (!chatEnabled) {
+      const disabledReply = {
+        id: `bot_${Date.now()}_${Math.random()}`,
+        text: CHAT_DISABLED_MESSAGE,
+        sender: "bot",
+      };
+
+      const updated = [...newMessages, disabledReply];
+      setMessages(updated);
+      saveToLocal(updated);
+      return;
+    }
+
     setIsTyping(true);
 
     try {
@@ -187,8 +205,6 @@ export default function ChatBoxAi({ user }) {
 
   // Guest không hiển thị chatbox
   if (!userId) return null;
-  if (!chatEnabled) return null;
-
   return (
     <>
       {/* Nút chat nổi */}
