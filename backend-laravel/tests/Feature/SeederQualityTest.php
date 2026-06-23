@@ -5,8 +5,10 @@ namespace Tests\Feature;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use PHPUnit\Framework\Attributes\Group;
 use Tests\TestCase;
 
+#[Group('seeders')]
 class SeederQualityTest extends TestCase
 {
     use RefreshDatabase;
