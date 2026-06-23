@@ -1,6 +1,7 @@
 const DISALLOWED_TEXT_PATTERN = /[^\p{L}\p{N}\s]/gu;
 const DISALLOWED_SINGLE_LINE_PATTERN = /[^\p{L}\p{N} ]/gu;
-const DISALLOWED_NAME_LIST_PATTERN = /[^\p{L}\p{N} ,\-\n]/gu;
+const DISALLOWED_NAME_LIST_PATTERN = /[^\p{L}\p{N} ,\n-]/gu;
+const DISALLOWED_PERSON_NAME_PATTERN = /[^\p{L}\p{N} .,-]/gu;
 
 const SKIP_SANITIZE_FIELD_NAMES = new Set([
   "email",
@@ -36,6 +37,10 @@ export const sanitizeNamedInput = (name, value, { multiline = false } = {}) => {
   if (!shouldSanitizeField(name)) return value;
   if (name === "team_members") {
     return String(value ?? "").replace(DISALLOWED_NAME_LIST_PATTERN, "");
+  }
+
+  if (name === "advisor_name") {
+    return String(value ?? "").replace(DISALLOWED_PERSON_NAME_PATTERN, "");
   }
   return sanitizeTextInput(value, { multiline });
 };
