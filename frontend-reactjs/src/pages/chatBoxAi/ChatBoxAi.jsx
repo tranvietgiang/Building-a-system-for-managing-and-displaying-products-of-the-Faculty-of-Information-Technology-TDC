@@ -4,7 +4,7 @@ import useChatBoxAi from "../../hooks/ai/useChatBoxAi";
 import { useNavigate } from "react-router-dom";
 import { ROLE } from "../../utils/constants";
 import { systemSettingsApi } from "../../api";
-import { sanitizeTextInput } from "../../utils/sanitizeInput";
+import { getInvalidCharacterMessage } from "../../utils/sanitizeInput";
 
 const CHAT_DISABLED_MESSAGE =
   "Quản trị viên đã tắt tính năng chatbot AI. Vui lòng liên hệ quản trị viên hoặc thử lại sau.";
@@ -133,12 +133,29 @@ export default function ChatBoxAi({ user }) {
   // SEND MESSAGE
   // =========================
   const handleSend = async () => {
-    const safeInput = sanitizeTextInput(input).trim();
-    if (!safeInput || loadingAi || isTyping || !chatEnabled) return;
+    const messageToSend = input.trim();
+    if (!messageToSend || loadingAi || isTyping || !chatEnabled) return;
+
+    const characterError = getInvalidCharacterMessage("chat", messageToSend, {
+      label: "Tin nhắn",
+    });
+
+    if (characterError) {
+      const errorMsg = {
+        id: `bot_${Date.now()}_${Math.random()}`,
+        text: characterError,
+        sender: "bot",
+      };
+
+      const updated = [...messages, errorMsg];
+      setMessages(updated);
+      saveToLocal(updated);
+      return;
+    }
 
     const userMessage = {
       id: `user_${Date.now()}_${Math.random()}`,
-      text: safeInput,
+      text: messageToSend,
       sender: "user",
     };
 
@@ -146,7 +163,6 @@ export default function ChatBoxAi({ user }) {
     setMessages(newMessages);
     saveToLocal(newMessages);
 
-    const messageToSend = safeInput;
     setInput("");
 
     setIsTyping(true);
@@ -361,7 +377,7 @@ export default function ChatBoxAi({ user }) {
                 value={input}
                 onChange={(e) => {
                   if (e.target.value.length <= 1000) {
-                    setInput(sanitizeTextInput(e.target.value));
+                    setInput(e.target.value);
                   }
                 }}
                 onKeyPress={handleKeyPress}

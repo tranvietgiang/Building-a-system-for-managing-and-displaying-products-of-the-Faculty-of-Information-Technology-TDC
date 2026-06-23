@@ -5,7 +5,7 @@ import useMajorName from "../../hooks/common/useMajorName";
 import { AuthContext } from "../../contexts/AuthContext";
 import LoadingSpinner from "../common/LoadingOverlay";
 import { Icons } from "../../components/common/Icon";
-import { sanitizeTextInput } from "../../utils/sanitizeInput";
+import CustomCategoryInput from "./CustomCategoryInput";
 
 const UploadProductForm_CNTT = ({
   formData,
@@ -216,6 +216,12 @@ const UploadProductForm_CNTT = ({
                       </div>
                     </div>
                   </div>
+                  <CustomCategoryInput
+                    formData={formData}
+                    handleChange={handleChange}
+                    errors={errors}
+                    focusClass="focus:border-indigo-500 focus:ring-indigo-100"
+                  />
                 </div>
 
                 {/* select category */}
@@ -280,7 +286,6 @@ const UploadProductForm_CNTT = ({
                         );
                       })}
                     </div>
-
                     {errors.cate_id && (
                       <p className="mt-2 text-sm text-red-600">
                         {errors.cate_id}
@@ -499,7 +504,7 @@ const UploadProductForm_CNTT = ({
                     name="framework"
                     value={frameworkInput}
                     onChange={(e) =>
-                      setFrameworkInput(sanitizeTextInput(e.target.value))
+                      setFrameworkInput(e.target.value)
                     }
                     onKeyDown={handleFrameworkKeyDown}
                     onBlur={addFramework}

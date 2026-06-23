@@ -19,7 +19,7 @@ import useScrollControls from "../../hooks/common/useScrollControls";
 import ScrollButtons from "../../components/common/ScrollButtons";
 import { productApi, systemSettingsApi } from "../../api";
 import PublicHeader from "../../layouts/PublicHeader";
-import { sanitizeTextInput } from "../../utils/sanitizeInput";
+import { getInvalidCharacterMessage } from "../../utils/sanitizeInput";
 
 const MAX_SEARCH_KEYWORD_LENGTH = 300;
 const VisitorHeroScene = React.lazy(
@@ -138,6 +138,7 @@ export default function VisitorScreen() {
 
   // giữ UI input
   const [searchTerm, setSearchTerm] = useState("");
+  const [localSearchError, setLocalSearchError] = useState("");
 
   // pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -282,7 +283,17 @@ export default function VisitorScreen() {
 
   const handleSearchSubmit = async (e) => {
     e.preventDefault();
-    const keyword = sanitizeTextInput(searchTerm).trim();
+    const keyword = searchTerm.trim();
+    const characterError = getInvalidCharacterMessage("search", keyword, {
+      label: "Nội dung tìm kiếm",
+    });
+
+    if (characterError) {
+      setLocalSearchError(characterError);
+      return;
+    }
+
+    setLocalSearchError("");
     const useAiSearch = effectiveAiEnabled;
     const searchKey = `${useAiSearch ? "ai" : "normal"}:${keyword}`;
     if (!keyword || lastSearchRef.current === searchKey) return;
@@ -299,6 +310,7 @@ export default function VisitorScreen() {
 
   const handleClearSearch = () => {
     setSearchTerm("");
+    setLocalSearchError("");
     lastSearchRef.current = "";
     clearSearch();
     clearProductSearch();
@@ -306,26 +318,27 @@ export default function VisitorScreen() {
   };
 
   const handleSuggestionSearch = async (suggestion) => {
-    const safeSuggestion = sanitizeTextInput(suggestion);
-    setSearchTerm(safeSuggestion);
+    setSearchTerm(suggestion);
+    setLocalSearchError("");
     const useAiSearch = effectiveAiEnabled;
-    const searchKey = `${useAiSearch ? "ai" : "normal"}:${safeSuggestion}`;
+    const searchKey = `${useAiSearch ? "ai" : "normal"}:${suggestion}`;
     if (lastSearchRef.current === searchKey) return;
 
     lastSearchRef.current = searchKey;
     setCurrentPage(1);
     if (useAiSearch) {
-      await searchAi(safeSuggestion);
+      await searchAi(suggestion);
       return;
     }
 
-    await searchProducts(getSearchParams(safeSuggestion, 1));
+    await searchProducts(getSearchParams(suggestion, 1));
   };
 
   useEffect(() => {
     const keyword = debouncedSearchTerm.trim();
 
     if (!keyword) {
+      setLocalSearchError("");
       if (lastSearchRef.current) {
         lastSearchRef.current = "";
         clearSearch();
@@ -333,6 +346,17 @@ export default function VisitorScreen() {
       }
       return;
     }
+
+    const characterError = getInvalidCharacterMessage("search", keyword, {
+      label: "Nội dung tìm kiếm",
+    });
+
+    if (characterError) {
+      setLocalSearchError(characterError);
+      return;
+    }
+
+    setLocalSearchError("");
 
     const useAiSearch = effectiveAiEnabled;
     const searchKey = `${useAiSearch ? "ai" : "normal"}:${keyword}`;
@@ -362,6 +386,15 @@ export default function VisitorScreen() {
     const keyword = searchTerm.trim();
     if (keyword.length < 2) return;
 
+    const characterError = getInvalidCharacterMessage("search", keyword, {
+      label: "Nội dung tìm kiếm",
+    });
+
+    if (characterError) {
+      setLocalSearchError(characterError);
+      return;
+    }
+
     const useAiSearch = effectiveAiEnabled;
     lastSearchRef.current = `${useAiSearch ? "ai" : "normal"}:${keyword}`;
     if (useAiSearch) {
@@ -381,7 +414,8 @@ export default function VisitorScreen() {
   }, [currentPage, selectedMajor, sortBy]);
 
   const activeSearchResult = effectiveAiEnabled ? searchResult : productSearchResult;
-  const activeSearchError = effectiveAiEnabled ? searchError : productSearchError;
+  const activeSearchError =
+    localSearchError || (effectiveAiEnabled ? searchError : productSearchError);
   const activeSearchLoading = effectiveAiEnabled
     ? loadingSearchAi
     : loadingProductSearch;
@@ -651,7 +685,8 @@ export default function VisitorScreen() {
                 className="flex-1 bg-transparent outline-none text-gray-700 text-sm"
                 value={searchTerm}
                 onChange={(e) => {
-                  setSearchTerm(sanitizeTextInput(e.target.value));
+                  setSearchTerm(e.target.value);
+                  setLocalSearchError("");
                   setCurrentPage(1);
                 }}
               />

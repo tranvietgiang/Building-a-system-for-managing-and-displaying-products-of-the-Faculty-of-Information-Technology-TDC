@@ -8,7 +8,26 @@ import {
   restoreDraftImages,
   saveDrafts,
 } from "../../utils/uploadProductScreen/draftStorage";
-import { sanitizeNamedInput } from "../../utils/sanitizeInput";
+import { getInvalidCharacterMessage } from "../../utils/sanitizeInput";
+
+const FIELD_LABELS = {
+  title: "Tên sản phẩm",
+  description: "Mô tả",
+  team_members: "Sinh viên cùng thực hiện",
+  advisor_name: "Giảng viên hướng dẫn",
+  awards: "Giải thưởng",
+  custom_category_name: "Danh mục khác",
+  programming_language: "Ngôn ngữ lập trình",
+  database_used: "Cơ sở dữ liệu",
+  model_used: "Mô hình hoặc thuật toán",
+  language: "Ngôn ngữ",
+  dataset_used: "Dataset",
+  topology_type: "Kiểu kết nối mạng",
+  simulation_tool: "Công cụ mô phỏng",
+  network_protocol: "Giao thức mạng",
+  design_type: "Loại ấn phẩm",
+  tools_used: "Công cụ thiết kế",
+};
 
 export default function useUploadBaseForm({
   initialData,
@@ -60,23 +79,47 @@ export default function useUploadBaseForm({
     });
   };
 
+  const getCharacterErrors = useCallback(() => {
+    const nextErrors = {};
+
+    Object.entries(formData).forEach(([name, value]) => {
+      const message = getInvalidCharacterMessage(name, value, {
+        label: FIELD_LABELS[name] || name,
+        multiline: name === "description" || name === "awards",
+      });
+
+      if (message) nextErrors[name] = message;
+    });
+
+    const hasInvalidTag = tags.some((tag) =>
+      getInvalidCharacterMessage("tag", tag, { label: "Tag" }),
+    );
+
+    if (hasInvalidTag) {
+      nextErrors.tags = "Tag không được chứa ký tự đặc biệt.";
+    }
+
+    return nextErrors;
+  }, [formData, tags]);
+
   /* ================= FORM ================= */
   const handleChange = useCallback(
     (e) => {
       const { name, value } = e.target;
-      const nextValue = sanitizeNamedInput(name, value, {
-        multiline: e.target.tagName === "TEXTAREA",
-      });
 
       setFormData((prev) => ({
         ...prev,
-        [name]: nextValue,
+        [name]: value,
+        ...(name === "custom_category_name" && value.trim()
+          ? { cate_id: "" }
+          : {}),
       }));
 
       if (errors[name]) {
         setErrors((prev) => ({
           ...prev,
           [name]: null,
+          ...(name === "custom_category_name" ? { cate_id: null } : {}),
         }));
       }
     },
@@ -88,12 +131,14 @@ export default function useUploadBaseForm({
       setFormData((prev) => ({
         ...prev,
         cate_id: id,
+        custom_category_name: "",
       }));
 
       if (errors.cate_id) {
         setErrors((prev) => ({
           ...prev,
           cate_id: null,
+          custom_category_name: null,
         }));
       }
     },
@@ -214,7 +259,15 @@ export default function useUploadBaseForm({
       if (e.key === "Enter" && tagInput.trim()) {
         e.preventDefault();
 
-        const newTag = sanitizeNamedInput("tag", tagInput).trim();
+        const newTag = tagInput.trim();
+        const tagError = getInvalidCharacterMessage("tag", newTag, {
+          label: "Tag",
+        });
+
+        if (tagError) {
+          toast.error(tagError, { autoClose: 2000 });
+          return;
+        }
 
         if (!tags.includes(newTag)) {
           setTags((prev) => [...prev, newTag]);
@@ -319,7 +372,10 @@ export default function useUploadBaseForm({
         return;
       }
 
-      const allErrors = validateAllSteps();
+      const allErrors = {
+        ...validateAllSteps(),
+        ...getCharacterErrors(),
+      };
 
       if (Object.keys(allErrors).length > 0) {
         setErrors(allErrors);
@@ -334,13 +390,7 @@ export default function useUploadBaseForm({
         const payload = new FormData();
 
         Object.keys(formData).forEach((key) => {
-          const value = formData[key] || "";
-          payload.append(
-            key,
-            sanitizeNamedInput(key, value, {
-              multiline: key === "description" || key === "awards",
-            }),
-          );
+          payload.append(key, formData[key] || "");
         });
 
         payload.append("major_id", user?.major_id || "");
@@ -350,9 +400,7 @@ export default function useUploadBaseForm({
           payload.append("replace_product_id", editProductId);
         }
 
-        tags.forEach((tag) =>
-          payload.append("tags[]", sanitizeNamedInput("tag", tag)),
-        );
+        tags.forEach((tag) => payload.append("tags[]", tag));
 
         images.forEach((img, index) => {
           if (img.file) {
@@ -423,6 +471,7 @@ export default function useUploadBaseForm({
       scopedDraftKey,
       draftKey,
       editProductId,
+      getCharacterErrors,
     ],
   );
 

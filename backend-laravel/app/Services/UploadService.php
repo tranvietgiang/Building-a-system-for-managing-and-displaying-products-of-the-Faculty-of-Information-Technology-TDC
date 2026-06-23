@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use App\Services\CloudinaryService;
 use Illuminate\Support\Facades\Log;
 use App\Models\Product;
+use App\Models\Category;
 use App\Http\Common\NormalizeMajorCode;
 use App\Http\Ai\ContentModeration;
 
@@ -30,6 +31,16 @@ class UploadService extends BaseRepository
     public function upload(array $data)
     {
         $replaceProductId = (int) ($data['replace_product_id'] ?? 0);
+        $customCategoryName = trim((string) ($data['custom_category_name'] ?? ''));
+
+        if ($customCategoryName !== '') {
+            $category = Category::firstOrCreate(
+                ['category_name' => $customCategoryName],
+                ['description' => 'Danh mục do sinh viên nhập khi đăng sản phẩm']
+            );
+
+            $data['cate_id'] = $category->cate_id;
+        }
 
         if ($replaceProductId && ! Product::where('product_id', $replaceProductId)
             ->where('user_id', $this->getCurrentUserId())

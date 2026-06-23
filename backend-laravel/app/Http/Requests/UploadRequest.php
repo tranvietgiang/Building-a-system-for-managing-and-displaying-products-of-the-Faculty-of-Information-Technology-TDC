@@ -35,7 +35,8 @@ class UploadRequest extends FormRequest
             'description' => 'nullable|string|min:10|max:300',
             'team_members' => 'nullable|string|max:2000',
 
-            'cate_id' => 'required|exists:categories,cate_id',
+            'cate_id' => 'required_without:custom_category_name|nullable|exists:categories,cate_id',
+            'custom_category_name' => 'required_without:cate_id|nullable|string|max:100',
 
             // đổi từ major_id → major_code
             'major_code' => 'required|string',
@@ -118,7 +119,9 @@ class UploadRequest extends FormRequest
             'team_members.max' => 'Danh sách thành viên tối đa 2000 ký tự',
 
             // CATEGORY
-            'cate_id.required' => 'Chọn danh mục',
+            'cate_id.required_without' => 'Chọn danh mục hoặc nhập danh mục khác',
+            'custom_category_name.required_without' => 'Chọn danh mục hoặc nhập danh mục khác',
+            'custom_category_name.max' => 'Danh mục khác tối đa 100 ký tự',
 
             // MAJOR
             'major_code.required' => 'Không xác định được ngành',

@@ -304,12 +304,97 @@ class ContentModeration
             ];
         }
 
+        if (!$approved && !$this->hasStrongModerationViolation($result, $violations)) {
+            return [
+                'approved' => true,
+                'reason' => 'Auto-approved (no strong safety violations)',
+                'violations' => [],
+                'raw' => $result,
+            ];
+        }
+
         return [
             'approved' => $approved,
             'reason' => $reason ?: ($approved ? 'OK' : 'Rejected by AI'),
             'violations' => $violations,
             'raw' => $result,
         ];
+    }
+
+    private function hasStrongModerationViolation(array $result, array $violations): bool
+    {
+        $checks = $result['checks'] ?? [];
+
+        foreach ([
+            'adult_or_sensitive',
+            'violence_or_danger',
+            'spam_or_meme',
+            'illegal_or_unethical',
+            'discrimination_or_incitation',
+            'clickbait_or_ads',
+            'low_quality_or_unprofessional',
+        ] as $key) {
+            if (($checks[$key] ?? false) === true) {
+                return true;
+            }
+        }
+
+        $content = Str::lower(implode(' ', [
+            (string) ($result['reason'] ?? ''),
+            implode(' ', $violations),
+        ]));
+
+        $strongTerms = [
+            '18+',
+            'khỏa thân',
+            'khoa than',
+            'nudity',
+            'tình dục',
+            'tinh duc',
+            'sexual',
+            'porn',
+            'khiêu dâm',
+            'khieu dam',
+            'bạo lực',
+            'bao luc',
+            'violence',
+            'máu me',
+            'mau me',
+            'vũ khí',
+            'vu khi',
+            'weapon',
+            'nguy hiểm',
+            'nguy hiem',
+            'danger',
+            'phản cảm',
+            'phan cam',
+            'spam',
+            'ảnh chế',
+            'anh che',
+            'meme',
+            'câu view',
+            'cau view',
+            'clickbait',
+            'quảng cáo',
+            'quang cao',
+            'bất hợp pháp',
+            'bat hop phap',
+            'illegal',
+            'vi phạm pháp luật',
+            'vi pham phap luat',
+            'đạo đức học thuật',
+            'dao duc hoc thuat',
+            'phân biệt đối xử',
+            'phan biet doi xu',
+            'kích động',
+            'kich dong',
+            'thù ghét',
+            'thu ghet',
+            'hate',
+        ];
+
+        return collect($strongTerms)
+            ->contains(fn($term) => str_contains(" {$content} ", $term));
     }
 
     private function isSafeEducationalSoftwareScreenshot(array $result, array $violations): bool
@@ -494,57 +579,40 @@ class ContentModeration
         $json = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
         return <<<PROMPT
-        Bạn là hệ thống AI kiểm duyệt nội dung cho nền tảng nghiên cứu khoa học sinh viên.
+        Bạn là hệ thống AI kiểm duyệt nội dung khi sinh viên đăng sản phẩm nghiên cứu.
+
+        Mục tiêu của bước này là kiểm tra an toàn nội dung cơ bản. KHÔNG đánh giá trùng lặp sản phẩm, KHÔNG chấm quá kỹ chất lượng học thuật, KHÔNG từ chối chỉ vì sản phẩm đơn giản, ảnh UI chưa đẹp, ảnh demo chưa hoàn hảo hoặc nội dung chưa thật chuyên sâu. Chức năng so sánh trùng sẽ do giáo viên và module so sánh riêng xử lý.
 
         Vai trò người dùng: {$role}
 
-        QUY TẮC THEO VAI TRÒ:
-        - student: kiểm duyệt nghiêm ngặt, chặn ngay nội dung nhạy cảm, không an toàn, 
-        spam, ảnh chế, nội dung không liên quan học thuật hoặc có dấu hiệu sao chép
+        Chỉ kiểm tra các nhóm sau:
+        - Mức độ phù hợp tối thiểu với môi trường giáo dục và nghiên cứu.
+        - Nội dung 18+, khỏa thân, tình dục, khiêu dâm.
+        - Nội dung bạo lực, nguy hiểm, máu me, phản cảm.
+        - Spam, ảnh chế, nội dung rác, nội dung chất lượng quá thấp rõ ràng.
+        - Dấu hiệu quảng cáo, câu view hoặc nội dung giải trí không phù hợp với môi trường học thuật.
+        - Mức độ chuyên nghiệp và tính nghiêm túc ở mức tối thiểu.
+        - Nội dung vi phạm pháp luật hoặc đạo đức học thuật rõ ràng.
+        - Nội dung phân biệt đối xử, kích động, thù ghét hoặc gây tranh cãi không phù hợp.
 
-        - teacher: linh hoạt hơn với nội dung mang tính giáo dục hoặc minh họa học thuật, 
-        nhưng vẫn phải chặn nội dung 18+, bạo lực, bất hợp pháp,nội dung gây nguy hiểm, 
-        watermark nặng hoặc có dấu hiệu đánh cắp
-
-        Nhiệm vụ:
-        - Phân tích hình ảnh và nội dung sản phẩm
-        - Kiểm tra mức độ phù hợp với môi trường giáo dục và nghiên cứu
-        - Kiểm tra nội dung 18+ / khỏa thân / tình dục
-        - Kiểm tra nội dung bạo lực / nguy hiểm / phản cảm
-        - Kiểm tra spam / ảnh chế / nội dung chất lượng thấp
-        - Kiểm tra độ liên quan với chuyên ngành hoặc lĩnh vực học thuật
-        - Kiểm tra watermark hoặc dấu hiệu nội dung bị sao chép / đánh cắp
-        - Kiểm tra nội dung gây hiểu lầm, thông tin sai lệch hoặc phi học thuật
-        - Kiểm tra ngôn từ thô tục, xúc phạm hoặc thiếu văn minh
-        - Kiểm tra hình ảnh mờ, chất lượng thấp hoặc không liên quan sản phẩm
-        - Kiểm tra dấu hiệu quảng cáo, câu view hoặc nội dung giải trí không phù hợp
-        - Kiểm tra mức độ chuyên nghiệp và tính nghiêm túc của nội dung
-        - Kiểm tra nội dung có vi phạm pháp luật hoặc đạo đức học thuật hay không
-        - Kiểm tra nội dung có mang tính phân biệt đối xử, kích động hoặc gây tranh cãi không phù hợp
+        Không kiểm tra:
+        - Không kiểm tra sản phẩm có trùng hay không.
+        - Không kiểm tra watermark hoặc bản quyền nếu chỉ là logo, mockup, poster, giao diện, thương hiệu minh họa trong bài làm sinh viên.
+        - Không từ chối vì ảnh là giao diện phần mềm demo, prototype, dashboard, sơ đồ mạng, poster, mockup thương hiệu hoặc sản phẩm thiết kế.
+        - Không từ chối vì có tên sinh viên, mã sinh viên, điểm số hoặc dữ liệu minh họa trong giao diện phần mềm demo.
+        - Không từ chối vì chưa khớp chuyên ngành hoàn toàn.
 
         Dữ liệu sản phẩm:
         {$json}
 
-        QUY TẮC QUAN TRỌNG:
-        - Nếu role = student → chấm điểm nghiêm ngặt hơn
-        - Nếu role = teacher → cho phép một số nội dung giáo dục ở mức ranh giới
-        - Chỉ trả về JSON hợp lệ
-        - Không giải thích ngoài JSON
-        - Trường "violations" phải là mảng các chuỗi tiếng Việt mô tả cụ thể nội dung vi phạm
-        - Nếu vi phạm nằm trong hình ảnh, mỗi phần tử violations phải bắt đầu bằng "Ảnh:" và ghi rõ nội dung nhìn thấy trong ảnh
-        - Nếu trong ảnh có chữ, logo, watermark, thông tin nhạy cảm hoặc nội dung gây vi phạm, hãy ghi lại ngắn gọn chính thông tin/chữ đó trong violations
-        - Không trả violations chung chung như "image_related" hoặc "adult_or_sensitive"; phải ghi rõ ví dụ: "Ảnh: có chữ ...", "Ảnh: có watermark ...", "Ảnh: nội dung không liên quan ..."
-        - Ảnh chụp giao diện phần mềm, bài tập, prototype quản lý học viên/sinh viên/thí sinh hoặc quản lý điểm là nội dung giáo dục hợp lệ.
-        - Tên, MSSV, mã học viên, ngày sinh, địa chỉ và điểm số xuất hiện bên trong giao diện phần mềm demo phải được xem là dữ liệu minh họa; KHÔNG từ chối chỉ vì các trường hoặc dữ liệu này.
-        - Chỉ xem là vi phạm riêng tư khi đó rõ ràng là ảnh tài liệu/hồ sơ/bảng điểm thật (không phải UI phần mềm demo) hoặc lộ định danh rủi ro cao như CCCD/hộ chiếu, số điện thoại, email cá nhân hay tài khoản đăng nhập.
-        - Đặt checks.software_ui_or_prototype=true khi ảnh là screenshot giao diện ứng dụng, website, desktop app, mockup hoặc prototype.
-        - Với ngành Thiết kế đồ họa/TKĐH/Graphic Design: logo, bộ nhận diện thương hiệu, bao bì, poster, mỹ phẩm, giày dép, túi xách, mannequin và minh họa người mẫu mặc trang phục thông thường là sản phẩm học thuật hợp lệ.
-        - KHÔNG đánh dấu adult_or_sensitive chỉ vì ảnh có người mẫu, váy, đường viền cổ áo, mỹ phẩm hoặc chủ đề thời trang/làm đẹp.
-        - Chữ thương hiệu nằm trong logo, poster hoặc bộ nhận diện do sinh viên trình bày không tự động được xem là watermark hay quảng cáo vi phạm.
-        - Chỉ chặn ảnh thời trang khi nhìn thấy khỏa thân, bộ phận sinh dục, tình dục rõ ràng hoặc trang phục gợi dục quá mức; violations phải mô tả cụ thể chi tiết nhìn thấy.
+        Quy tắc trả lời:
+        - Chỉ trả JSON hợp lệ, không markdown, không giải thích ngoài JSON.
+        - approved=false chỉ khi có vi phạm rõ ràng thuộc các nhóm cần kiểm tra ở trên.
+        - Nếu không chắc chắn hoặc vi phạm nhẹ, hãy approved=true.
+        - violations là mảng chuỗi tiếng Việt, mô tả cụ thể vi phạm.
+        - Nếu vi phạm nằm trong ảnh, bắt đầu violation bằng "Ảnh:".
 
-        Định dạng trả về:
-
+        Định dạng JSON:
         {
             "approved": true,
             "score": 0-100,
@@ -552,21 +620,17 @@ class ContentModeration
             "violations": [],
             "role": "{$role}",
             "checks": {
-                "image_related": true,
                 "educational": true,
                 "adult_or_sensitive": false,
                 "violence_or_danger": false,
                 "spam_or_meme": false,
-                "major_match": true,
-                "watermark_or_stolen_signal": false,
+                "clickbait_or_ads": false,
+                "low_quality_or_unprofessional": false,
+                "illegal_or_unethical": false,
+                "discrimination_or_incitation": false,
                 "software_ui_or_prototype": false
             }
         }
-
-        Từ chối (approved=false) nếu:
-        - Phát hiện nội dung 18+ / tình dục
-        - Phát hiện bạo lực / máu me
-        - Có watermark nặng hoặc dấu hiệu nội dung bị đánh cắp
         PROMPT;
     }
 }

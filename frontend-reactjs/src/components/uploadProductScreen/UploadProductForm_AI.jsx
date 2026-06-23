@@ -4,7 +4,7 @@ import { confirmToast } from "../common/ConfirmToast";
 import useMajorName from "../../hooks/common/useMajorName";
 import { AuthContext } from "../../contexts/AuthContext";
 import LoadingSpinner from "../common/LoadingOverlay";
-import { sanitizeTextInput } from "../../utils/sanitizeInput";
+import CustomCategoryInput from "./CustomCategoryInput";
 
 const UploadProductForm_AI = ({
   formData,
@@ -215,6 +215,12 @@ const UploadProductForm_AI = ({
                       </div>
                     </div>
                   </div>
+                  <CustomCategoryInput
+                    formData={formData}
+                    handleChange={handleChange}
+                    errors={errors}
+                    focusClass="focus:border-purple-500 focus:ring-purple-100"
+                  />
                 </div>
 
                 {/* Mô hình / Thuật toán AI */}
@@ -237,7 +243,8 @@ const UploadProductForm_AI = ({
                     placeholder="VD: FaceNet, YOLOv8, BERT, LSTM..."
                   />
                   <p className="mt-2 text-xs text-gray-500">
-                    Nhập tên mô hình hoặc thuật toán chính được dùng trong sản phẩm.
+                    Nhập tên mô hình hoặc thuật toán chính được dùng trong sản
+                    phẩm.
                   </p>
                   {errors.model_used && (
                     <p className="mt-2 text-sm text-red-600">
@@ -476,15 +483,13 @@ const UploadProductForm_AI = ({
               {/* Framework / Thư viện */}
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
-                  Framework / Thư viện
+                  Framework / Thư viện / Công cụ{" "}
                 </label>
                 <input
                   type="text"
                   name="framework"
                   value={frameworkInput}
-                  onChange={(e) =>
-                    setFrameworkInput(sanitizeTextInput(e.target.value))
-                  }
+                  onChange={(e) => setFrameworkInput(e.target.value)}
                   onKeyDown={handleFrameworkKeyDown}
                   onBlur={addFramework}
                   className={`w-full rounded-xl border-2 border-gray-200 px-4 py-3 ${

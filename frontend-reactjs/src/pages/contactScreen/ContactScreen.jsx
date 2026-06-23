@@ -12,7 +12,7 @@ import {
 import { authApi } from "../../api";
 import ScrollButtons from "../../components/common/ScrollButtons";
 import PublicHeader from "../../layouts/PublicHeader";
-import { sanitizeTextInput } from "../../utils/sanitizeInput";
+import { getInvalidCharacterMessage } from "../../utils/sanitizeInput";
 
 const CONTACT_LIMITS = {
   name: 255,
@@ -43,11 +43,11 @@ export default function ContactScreen() {
     event.preventDefault();
 
     const payload = {
-      name: sanitizeTextInput(contactName).trim(),
+      name: contactName.trim(),
       email: contactEmail.trim(),
-      phone: contactPhone.replace(/\D/g, "").trim(),
-      subject: sanitizeTextInput(contactSubject).trim(),
-      message: sanitizeTextInput(contactMessage, { multiline: true }).trim(),
+      phone: contactPhone.trim(),
+      subject: contactSubject.trim(),
+      message: contactMessage.trim(),
     };
 
     if (
@@ -57,6 +57,28 @@ export default function ContactScreen() {
       !payload.message
     ) {
       setContactError("Vui lòng nhập đầy đủ họ tên, email, tiêu đề và nội dung.");
+      setContactSuccess("");
+      return;
+    }
+
+    const characterError =
+      getInvalidCharacterMessage("name", payload.name, { label: "Họ tên" }) ||
+      getInvalidCharacterMessage("subject", payload.subject, {
+        label: "Tiêu đề",
+      }) ||
+      getInvalidCharacterMessage("message", payload.message, {
+        label: "Nội dung",
+        multiline: true,
+      });
+
+    if (characterError) {
+      setContactError(characterError);
+      setContactSuccess("");
+      return;
+    }
+
+    if (payload.phone && !/^\d+$/.test(payload.phone)) {
+      setContactError("Số điện thoại chỉ được nhập số.");
       setContactSuccess("");
       return;
     }
@@ -165,9 +187,7 @@ export default function ContactScreen() {
                 </span>
                 <input
                   value={contactName}
-                  onChange={(event) =>
-                    setContactName(sanitizeTextInput(event.target.value))
-                  }
+                  onChange={(event) => setContactName(event.target.value)}
                   className="h-11 w-full rounded-md border border-slate-200 px-3 text-sm outline-none focus:border-[#003087]"
                   placeholder="Nguyễn Văn A"
                   maxLength={CONTACT_LIMITS.name}
@@ -198,9 +218,7 @@ export default function ContactScreen() {
                 </span>
                 <input
                   value={contactPhone}
-                  onChange={(event) =>
-                    setContactPhone(event.target.value.replace(/\D/g, ""))
-                  }
+                  onChange={(event) => setContactPhone(event.target.value)}
                   className="h-11 w-full rounded-md border border-slate-200 px-3 text-sm outline-none focus:border-[#003087]"
                   placeholder="Không bắt buộc"
                   maxLength={CONTACT_LIMITS.phone}
@@ -214,9 +232,7 @@ export default function ContactScreen() {
                 </span>
                 <input
                   value={contactSubject}
-                  onChange={(event) =>
-                    setContactSubject(sanitizeTextInput(event.target.value))
-                  }
+                  onChange={(event) => setContactSubject(event.target.value)}
                   className="h-11 w-full rounded-md border border-slate-200 px-3 text-sm outline-none focus:border-[#003087]"
                   placeholder="Cần hỗ trợ..."
                   maxLength={CONTACT_LIMITS.subject}
@@ -235,11 +251,7 @@ export default function ContactScreen() {
               </span>
               <textarea
                 value={contactMessage}
-                onChange={(event) =>
-                  setContactMessage(
-                    sanitizeTextInput(event.target.value, { multiline: true }),
-                  )
-                }
+                onChange={(event) => setContactMessage(event.target.value)}
                 className="min-h-36 w-full resize-y rounded-md border border-slate-200 px-3 py-3 text-sm outline-none focus:border-[#003087]"
                 placeholder="Mô tả vấn đề bạn cần hỗ trợ"
                 maxLength={CONTACT_LIMITS.message}

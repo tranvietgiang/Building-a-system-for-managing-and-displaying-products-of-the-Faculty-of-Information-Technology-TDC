@@ -15,6 +15,18 @@ const SKIP_SANITIZE_FIELD_NAMES = new Set([
   "accuracy_score",
   "color_palette",
   "framework",
+  "programming_language",
+  "database_used",
+  "model_used",
+  "language",
+  "dataset_used",
+  "topology_type",
+  "simulation_tool",
+  "network_protocol",
+  "design_type",
+  "tools_used",
+  "custom_category_name",
+  "description",
 ]);
 
 export const sanitizeTextInput = (value, { multiline = false } = {}) => {
@@ -43,4 +55,47 @@ export const sanitizeNamedInput = (name, value, { multiline = false } = {}) => {
     return String(value ?? "").replace(DISALLOWED_PERSON_NAME_PATTERN, "");
   }
   return sanitizeTextInput(value, { multiline });
+};
+
+export const hasInvalidTextInput = (value, { multiline = false } = {}) => {
+  const text = String(value ?? "");
+  const pattern = multiline
+    ? DISALLOWED_TEXT_PATTERN
+    : DISALLOWED_SINGLE_LINE_PATTERN;
+
+  pattern.lastIndex = 0;
+  return pattern.test(text);
+};
+
+export const hasInvalidNamedInput = (
+  name,
+  value,
+  { multiline = false } = {},
+) => {
+  if (!shouldSanitizeField(name)) return false;
+
+  const text = String(value ?? "");
+  let pattern = multiline
+    ? DISALLOWED_TEXT_PATTERN
+    : DISALLOWED_SINGLE_LINE_PATTERN;
+
+  if (name === "team_members") {
+    pattern = DISALLOWED_NAME_LIST_PATTERN;
+  }
+
+  if (name === "advisor_name") {
+    pattern = DISALLOWED_PERSON_NAME_PATTERN;
+  }
+
+  pattern.lastIndex = 0;
+  return pattern.test(text);
+};
+
+export const getInvalidCharacterMessage = (
+  name,
+  value,
+  { label = "Trường này", multiline = false } = {},
+) => {
+  if (!hasInvalidNamedInput(name, value, { multiline })) return "";
+  return `${label} không được chứa ký tự đặc biệt.`;
 };

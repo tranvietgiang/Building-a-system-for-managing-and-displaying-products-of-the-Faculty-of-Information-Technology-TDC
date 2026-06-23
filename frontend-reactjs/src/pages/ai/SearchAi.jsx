@@ -22,7 +22,7 @@ import useDebounce from "../../hooks/common/useDebounce";
 import { ROLE } from "../../utils/constants";
 import useProductSearch from "../../hooks/useProduct/useProductSearch";
 import { systemSettingsApi } from "../../api";
-import { sanitizeTextInput } from "../../utils/sanitizeInput";
+import { getInvalidCharacterMessage } from "../../utils/sanitizeInput";
 
 const MAX_SEARCH_KEYWORD_LENGTH = 300;
 
@@ -146,6 +146,7 @@ export default function SearchAi({
     product_search_enabled: true,
   });
   const [currentPage, setCurrentPage] = useState(1);
+  const [localSearchError, setLocalSearchError] = useState("");
   const [searchHistory, setSearchHistory] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem(historyKey)) || [];
@@ -168,7 +169,8 @@ export default function SearchAi({
   const canUseAiSearch = systemSettings.ai_search_enabled !== false;
   const canUseProductSearch = systemSettings.product_search_enabled !== false;
   const activeResult = aiEnabled ? searchResult : productSearchResult;
-  const activeError = aiEnabled ? searchError : productSearchError;
+  const activeError =
+    localSearchError || (aiEnabled ? searchError : productSearchError);
   const activeLoading = aiEnabled ? loadingSearchAi : loadingProductSearch;
   const products = useMemo(
     () => (Array.isArray(activeResult?.products) ? activeResult.products : []),
@@ -200,7 +202,17 @@ export default function SearchAi({
   );
 
   const runSearch = async (value) => {
-    const nextKeyword = sanitizeTextInput(value).trim();
+    const nextKeyword = String(value || "").trim();
+    const characterError = getInvalidCharacterMessage("search", nextKeyword, {
+      label: "Nội dung tìm kiếm",
+    });
+
+    if (characterError) {
+      setLocalSearchError(characterError);
+      return;
+    }
+
+    setLocalSearchError("");
     if (aiEnabled && !canUseAiSearch) return;
     if (!aiEnabled && !canUseProductSearch) return;
     const searchKey = `${aiEnabled ? "ai" : "normal"}:${nextKeyword}`;
@@ -221,6 +233,7 @@ export default function SearchAi({
 
   const handleClear = () => {
     setKeyword("");
+    setLocalSearchError("");
     lastSearchRef.current = "";
     setCurrentPage(1);
     clearSearch();
@@ -228,9 +241,8 @@ export default function SearchAi({
   };
 
   const handleSuggestionClick = async (suggestion) => {
-    const safeSuggestion = sanitizeTextInput(suggestion);
-    setKeyword(safeSuggestion);
-    await runSearch(safeSuggestion);
+    setKeyword(suggestion);
+    await runSearch(suggestion);
   };
 
   const handleViewDetail = (productId) => {
@@ -385,9 +397,10 @@ export default function SearchAi({
                 <Search className="ml-2 h-5 w-5 shrink-0 text-slate-400" />
                 <input
                   value={keyword}
-                  onChange={(event) =>
-                    setKeyword(sanitizeTextInput(event.target.value))
-                  }
+                  onChange={(event) => {
+                    setKeyword(event.target.value);
+                    setLocalSearchError("");
+                  }}
                   placeholder={searchConfig.placeholder}
                   maxLength={MAX_SEARCH_KEYWORD_LENGTH}
                   className="min-w-0 flex-1 bg-transparent px-1 py-2 text-sm text-slate-800 outline-none placeholder:text-slate-400"

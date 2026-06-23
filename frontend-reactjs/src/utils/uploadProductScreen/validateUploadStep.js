@@ -13,6 +13,7 @@ export const initialCNTTFormData = {
   awards: "",
   github_link: "",
   demo_link: "",
+  custom_category_name: "",
 
   // riêng CNTT
   programming_language: "",
@@ -28,6 +29,7 @@ export const initialGraphicFormData = {
   advisor_name: "",
   cate_id: "",
   awards: "",
+  custom_category_name: "",
 
   // riêng đồ họa
   design_type: "",
@@ -46,6 +48,7 @@ export const initialAIFormData = {
   awards: "",
   github_link: "",
   demo_link: "",
+  custom_category_name: "",
 
   // riêng AI
   model_used: "",
@@ -63,6 +66,7 @@ export const initialNetworkFormData = {
   advisor_name: "",
   cate_id: "",
   awards: "",
+  custom_category_name: "",
 
   // riêng mạng
   simulation_tool: "",
@@ -102,8 +106,12 @@ const validateBasicInfo = (formData, errors) => {
   }
 
   // CATEGORY
-  if (!formData.cate_id) {
-    errors.cate_id = "Chọn danh mục";
+  if (!formData.cate_id && !formData.custom_category_name?.trim()) {
+    errors.cate_id = "Chọn danh mục hoặc nhập danh mục khác";
+  }
+
+  if (formData.custom_category_name && formData.custom_category_name.length > 100) {
+    errors.custom_category_name = "Danh mục khác ≤ 100 ký tự";
   }
 
   // LINKS
