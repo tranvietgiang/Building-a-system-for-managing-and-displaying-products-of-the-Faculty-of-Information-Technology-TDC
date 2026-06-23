@@ -56,7 +56,7 @@ class ProductSeeder extends Seeder
                 'major_id' => $major->major_id,
                 'cate_id' => $categories[$categoryName],
                 'approved_by' => $status === 'approved' ? $teacher->user_id : null,
-                'advisor_name' => 'ThS. '.$teacher->name,
+                'advisor_name' => 'ThS. ' . $teacher->name,
                 'awards' => $index % 7 === 0 ? 'Sản phẩm tiêu biểu cấp khoa' : null,
                 'submitted_at' => $submittedAt,
                 'approved_at' => $status === 'approved' ? (clone $submittedAt)->addDays(5) : null,

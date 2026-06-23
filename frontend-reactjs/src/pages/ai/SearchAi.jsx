@@ -22,6 +22,7 @@ import useDebounce from "../../hooks/common/useDebounce";
 import { ROLE } from "../../utils/constants";
 import useProductSearch from "../../hooks/useProduct/useProductSearch";
 import { systemSettingsApi } from "../../api";
+import { sanitizeTextInput } from "../../utils/sanitizeInput";
 
 const MAX_SEARCH_KEYWORD_LENGTH = 300;
 
@@ -199,7 +200,7 @@ export default function SearchAi({
   );
 
   const runSearch = async (value) => {
-    const nextKeyword = String(value || "").trim();
+    const nextKeyword = sanitizeTextInput(value).trim();
     if (aiEnabled && !canUseAiSearch) return;
     if (!aiEnabled && !canUseProductSearch) return;
     const searchKey = `${aiEnabled ? "ai" : "normal"}:${nextKeyword}`;
@@ -227,8 +228,9 @@ export default function SearchAi({
   };
 
   const handleSuggestionClick = async (suggestion) => {
-    setKeyword(suggestion);
-    await runSearch(suggestion);
+    const safeSuggestion = sanitizeTextInput(suggestion);
+    setKeyword(safeSuggestion);
+    await runSearch(safeSuggestion);
   };
 
   const handleViewDetail = (productId) => {
@@ -383,7 +385,9 @@ export default function SearchAi({
                 <Search className="ml-2 h-5 w-5 shrink-0 text-slate-400" />
                 <input
                   value={keyword}
-                  onChange={(event) => setKeyword(event.target.value)}
+                  onChange={(event) =>
+                    setKeyword(sanitizeTextInput(event.target.value))
+                  }
                   placeholder={searchConfig.placeholder}
                   maxLength={MAX_SEARCH_KEYWORD_LENGTH}
                   className="min-w-0 flex-1 bg-transparent px-1 py-2 text-sm text-slate-800 outline-none placeholder:text-slate-400"

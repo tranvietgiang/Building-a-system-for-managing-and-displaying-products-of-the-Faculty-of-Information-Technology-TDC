@@ -12,6 +12,7 @@ import {
 import { authApi } from "../../api";
 import ScrollButtons from "../../components/common/ScrollButtons";
 import PublicHeader from "../../layouts/PublicHeader";
+import { sanitizeTextInput } from "../../utils/sanitizeInput";
 
 const CONTACT_LIMITS = {
   name: 255,
@@ -42,11 +43,11 @@ export default function ContactScreen() {
     event.preventDefault();
 
     const payload = {
-      name: contactName.trim(),
+      name: sanitizeTextInput(contactName).trim(),
       email: contactEmail.trim(),
-      phone: contactPhone.trim(),
-      subject: contactSubject.trim(),
-      message: contactMessage.trim(),
+      phone: contactPhone.replace(/\D/g, "").trim(),
+      subject: sanitizeTextInput(contactSubject).trim(),
+      message: sanitizeTextInput(contactMessage, { multiline: true }).trim(),
     };
 
     if (
@@ -164,7 +165,9 @@ export default function ContactScreen() {
                 </span>
                 <input
                   value={contactName}
-                  onChange={(event) => setContactName(event.target.value)}
+                  onChange={(event) =>
+                    setContactName(sanitizeTextInput(event.target.value))
+                  }
                   className="h-11 w-full rounded-md border border-slate-200 px-3 text-sm outline-none focus:border-[#003087]"
                   placeholder="Nguyễn Văn A"
                   maxLength={CONTACT_LIMITS.name}
@@ -195,7 +198,9 @@ export default function ContactScreen() {
                 </span>
                 <input
                   value={contactPhone}
-                  onChange={(event) => setContactPhone(event.target.value)}
+                  onChange={(event) =>
+                    setContactPhone(event.target.value.replace(/\D/g, ""))
+                  }
                   className="h-11 w-full rounded-md border border-slate-200 px-3 text-sm outline-none focus:border-[#003087]"
                   placeholder="Không bắt buộc"
                   maxLength={CONTACT_LIMITS.phone}
@@ -209,7 +214,9 @@ export default function ContactScreen() {
                 </span>
                 <input
                   value={contactSubject}
-                  onChange={(event) => setContactSubject(event.target.value)}
+                  onChange={(event) =>
+                    setContactSubject(sanitizeTextInput(event.target.value))
+                  }
                   className="h-11 w-full rounded-md border border-slate-200 px-3 text-sm outline-none focus:border-[#003087]"
                   placeholder="Cần hỗ trợ..."
                   maxLength={CONTACT_LIMITS.subject}
@@ -228,7 +235,11 @@ export default function ContactScreen() {
               </span>
               <textarea
                 value={contactMessage}
-                onChange={(event) => setContactMessage(event.target.value)}
+                onChange={(event) =>
+                  setContactMessage(
+                    sanitizeTextInput(event.target.value, { multiline: true }),
+                  )
+                }
                 className="min-h-36 w-full resize-y rounded-md border border-slate-200 px-3 py-3 text-sm outline-none focus:border-[#003087]"
                 placeholder="Mô tả vấn đề bạn cần hỗ trợ"
                 maxLength={CONTACT_LIMITS.message}

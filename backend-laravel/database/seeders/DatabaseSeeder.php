@@ -12,11 +12,11 @@ class DatabaseSeeder extends Seeder
             MajorSeeder::class,
             userSeeder::class,
             CategorySeeder::class,
-            ProductSeeder::class,
-            ProductImageSeeder::class,
-            ProductTagSeeder::class,
-            ProductStatisticSeeder::class,
-            ReviewSeeder::class,
+            // ProductSeeder::class,
+            // ProductImageSeeder::class,
+            // ProductTagSeeder::class,
+            // ProductStatisticSeeder::class,
+            // ReviewSeeder::class,
         ]);
     }
 }

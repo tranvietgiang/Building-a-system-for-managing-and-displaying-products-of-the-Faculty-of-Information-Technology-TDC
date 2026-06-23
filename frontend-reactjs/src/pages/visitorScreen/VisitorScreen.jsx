@@ -19,6 +19,7 @@ import useScrollControls from "../../hooks/common/useScrollControls";
 import ScrollButtons from "../../components/common/ScrollButtons";
 import { productApi, systemSettingsApi } from "../../api";
 import PublicHeader from "../../layouts/PublicHeader";
+import { sanitizeTextInput } from "../../utils/sanitizeInput";
 
 const MAX_SEARCH_KEYWORD_LENGTH = 300;
 const VisitorHeroScene = React.lazy(
@@ -281,7 +282,7 @@ export default function VisitorScreen() {
 
   const handleSearchSubmit = async (e) => {
     e.preventDefault();
-    const keyword = searchTerm.trim();
+    const keyword = sanitizeTextInput(searchTerm).trim();
     const useAiSearch = effectiveAiEnabled;
     const searchKey = `${useAiSearch ? "ai" : "normal"}:${keyword}`;
     if (!keyword || lastSearchRef.current === searchKey) return;
@@ -305,19 +306,20 @@ export default function VisitorScreen() {
   };
 
   const handleSuggestionSearch = async (suggestion) => {
-    setSearchTerm(suggestion);
+    const safeSuggestion = sanitizeTextInput(suggestion);
+    setSearchTerm(safeSuggestion);
     const useAiSearch = effectiveAiEnabled;
-    const searchKey = `${useAiSearch ? "ai" : "normal"}:${suggestion}`;
+    const searchKey = `${useAiSearch ? "ai" : "normal"}:${safeSuggestion}`;
     if (lastSearchRef.current === searchKey) return;
 
     lastSearchRef.current = searchKey;
     setCurrentPage(1);
     if (useAiSearch) {
-      await searchAi(suggestion);
+      await searchAi(safeSuggestion);
       return;
     }
 
-    await searchProducts(getSearchParams(suggestion, 1));
+    await searchProducts(getSearchParams(safeSuggestion, 1));
   };
 
   useEffect(() => {
@@ -649,7 +651,7 @@ export default function VisitorScreen() {
                 className="flex-1 bg-transparent outline-none text-gray-700 text-sm"
                 value={searchTerm}
                 onChange={(e) => {
-                  setSearchTerm(e.target.value);
+                  setSearchTerm(sanitizeTextInput(e.target.value));
                   setCurrentPage(1);
                 }}
               />

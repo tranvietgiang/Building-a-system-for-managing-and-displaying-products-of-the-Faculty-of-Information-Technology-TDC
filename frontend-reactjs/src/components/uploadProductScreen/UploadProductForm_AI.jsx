@@ -4,6 +4,7 @@ import { confirmToast } from "../common/ConfirmToast";
 import useMajorName from "../../hooks/common/useMajorName";
 import { AuthContext } from "../../contexts/AuthContext";
 import LoadingSpinner from "../common/LoadingOverlay";
+import { sanitizeTextInput } from "../../utils/sanitizeInput";
 
 const UploadProductForm_AI = ({
   formData,
@@ -481,7 +482,9 @@ const UploadProductForm_AI = ({
                   type="text"
                   name="framework"
                   value={frameworkInput}
-                  onChange={(e) => setFrameworkInput(e.target.value)}
+                  onChange={(e) =>
+                    setFrameworkInput(sanitizeTextInput(e.target.value))
+                  }
                   onKeyDown={handleFrameworkKeyDown}
                   onBlur={addFramework}
                   className={`w-full rounded-xl border-2 border-gray-200 px-4 py-3 ${

@@ -8,6 +8,7 @@ import {
   restoreDraftImages,
   saveDrafts,
 } from "../../utils/uploadProductScreen/draftStorage";
+import { sanitizeNamedInput } from "../../utils/sanitizeInput";
 
 export default function useUploadBaseForm({
   initialData,
@@ -63,10 +64,13 @@ export default function useUploadBaseForm({
   const handleChange = useCallback(
     (e) => {
       const { name, value } = e.target;
+      const nextValue = sanitizeNamedInput(name, value, {
+        multiline: e.target.tagName === "TEXTAREA",
+      });
 
       setFormData((prev) => ({
         ...prev,
-        [name]: value,
+        [name]: nextValue,
       }));
 
       if (errors[name]) {
@@ -210,7 +214,7 @@ export default function useUploadBaseForm({
       if (e.key === "Enter" && tagInput.trim()) {
         e.preventDefault();
 
-        const newTag = tagInput.trim();
+        const newTag = sanitizeNamedInput("tag", tagInput).trim();
 
         if (!tags.includes(newTag)) {
           setTags((prev) => [...prev, newTag]);
@@ -330,7 +334,13 @@ export default function useUploadBaseForm({
         const payload = new FormData();
 
         Object.keys(formData).forEach((key) => {
-          payload.append(key, formData[key] || "");
+          const value = formData[key] || "";
+          payload.append(
+            key,
+            sanitizeNamedInput(key, value, {
+              multiline: key === "description" || key === "awards",
+            }),
+          );
         });
 
         payload.append("major_id", user?.major_id || "");
@@ -340,7 +350,9 @@ export default function useUploadBaseForm({
           payload.append("replace_product_id", editProductId);
         }
 
-        tags.forEach((tag) => payload.append("tags[]", tag));
+        tags.forEach((tag) =>
+          payload.append("tags[]", sanitizeNamedInput("tag", tag)),
+        );
 
         images.forEach((img, index) => {
           if (img.file) {
