@@ -8,7 +8,7 @@ import React, {
 } from "react";
 
 import { Icons } from "../../components/common/Icon";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import useMajorAll from "../../hooks/common/useMajorAll";
 import useVisitorProduct from "../../hooks/useProduct/useVisitorProduct";
 import ChatBoxAi from "../../pages/chatBoxAi/ChatBoxAi";
@@ -18,6 +18,7 @@ import useProductSearch from "../../hooks/useProduct/useProductSearch";
 import useScrollControls from "../../hooks/common/useScrollControls";
 import ScrollButtons from "../../components/common/ScrollButtons";
 import { productApi } from "../../api";
+import PublicHeader from "../../layouts/PublicHeader";
 
 const MAX_SEARCH_KEYWORD_LENGTH = 300;
 const VisitorHeroScene = React.lazy(
@@ -141,7 +142,7 @@ export default function VisitorScreen() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const majorParam = searchParams.get("major");
-  const { handleTop, handleBottom } = useScrollControls();
+  const { handleBottom } = useScrollControls();
 
   const { majorAll, loadingMajorAll } = useMajorAll();
   const visitorProductParams = useMemo(
@@ -541,70 +542,7 @@ export default function VisitorScreen() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
-      {/* HEADER */}
-      <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 md:h-20">
-            <div className="flex items-center gap-3">
-              <Icons.Logo />
-
-              <div className="hidden sm:block">
-                <h1 className="text-lg md:text-xl font-bold text-[#003087] leading-tight">
-                  Trưng bày sản phẩm sinh viên
-                </h1>
-
-                <p className="text-xs text-gray-500 -mt-0.5">
-                  Khoa Công Nghệ Thông Tin | TDC
-                </p>
-              </div>
-            </div>
-
-            <nav className="hidden md:flex items-center gap-6">
-              <button
-                type="button"
-                onClick={() => handleTop("/khach-tham-quan")}
-                className="text-sm font-medium text-gray-600 transition-colors hover:text-[#003087]"
-              >
-                Trang chủ
-              </button>
-              <button
-                type="button"
-                onClick={() => handleBottom("/khach-tham-quan", "san-pham")}
-                className="text-sm font-medium text-gray-600 transition-colors hover:text-[#003087]"
-              >
-                Sản phẩm
-              </button>
-              <Link
-                to="/nganh-hoc"
-                className="text-sm font-medium text-gray-600 transition-colors hover:text-[#003087]"
-              >
-                Ngành học
-              </Link>
-              <Link
-                to="/huong-dan"
-                className="text-sm font-medium text-gray-600 transition-colors hover:text-[#003087]"
-              >
-                Hướng dẫn
-              </Link>
-              <Link
-                to="/lien-he"
-                className="text-sm font-medium text-gray-600 transition-colors hover:text-[#003087]"
-              >
-                Liên hệ
-              </Link>
-            </nav>
-
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => navigate("/dang-nhap")}
-                className="px-5 py-2 text-[#003087] border border-[#003087] rounded-md font-medium text-sm hover:bg-[#003087] hover:text-white transition-all"
-              >
-                Đăng nhập
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <PublicHeader title="Trưng bày sản phẩm sinh viên" />
 
       <main>
         {/* HERO */}

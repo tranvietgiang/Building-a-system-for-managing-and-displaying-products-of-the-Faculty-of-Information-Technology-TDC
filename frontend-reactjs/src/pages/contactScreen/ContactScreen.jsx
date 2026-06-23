@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   CheckCircle2,
@@ -9,14 +9,26 @@ import {
   Phone,
   Send,
 } from "lucide-react";
-import logoTdc from "../../assets/logo-tdc-orginal.webp";
 import { authApi } from "../../api";
-import useScrollControls from "../../hooks/common/useScrollControls";
 import ScrollButtons from "../../components/common/ScrollButtons";
+import PublicHeader from "../../layouts/PublicHeader";
+
+const CONTACT_LIMITS = {
+  name: 255,
+  email: 255,
+  phone: 30,
+  subject: 255,
+  message: 2000,
+};
+
+const CharacterCount = ({ value, max }) => (
+  <span className="mt-1 block text-right text-xs text-slate-400">
+    {value.length}/{max}
+  </span>
+);
 
 export default function ContactScreen() {
   const navigate = useNavigate();
-  const { handleTop, handleBottom } = useScrollControls();
   const [contactName, setContactName] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [contactPhone, setContactPhone] = useState("");
@@ -37,8 +49,26 @@ export default function ContactScreen() {
       message: contactMessage.trim(),
     };
 
-    if (!payload.name || !payload.email || !payload.subject || !payload.message) {
+    if (
+      !payload.name ||
+      !payload.email ||
+      !payload.subject ||
+      !payload.message
+    ) {
       setContactError("Vui lòng nhập đầy đủ họ tên, email, tiêu đề và nội dung.");
+      setContactSuccess("");
+      return;
+    }
+
+    const isOverLimit =
+      payload.name.length > CONTACT_LIMITS.name ||
+      payload.email.length > CONTACT_LIMITS.email ||
+      payload.phone.length > CONTACT_LIMITS.phone ||
+      payload.subject.length > CONTACT_LIMITS.subject ||
+      payload.message.length > CONTACT_LIMITS.message;
+
+    if (isOverLimit) {
+      setContactError("Nội dung liên hệ vượt quá giới hạn ký tự cho phép.");
       setContactSuccess("");
       return;
     }
@@ -69,60 +99,7 @@ export default function ContactScreen() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900">
-      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:h-20 lg:px-8">
-          <Link to="/khach-tham-quan" className="flex items-center gap-3">
-            <img src={logoTdc} alt="TDC" className="h-12 w-auto" />
-            <div className="hidden sm:block">
-              <p className="text-lg font-bold leading-tight text-[#003087]">
-                Liên hệ hỗ trợ
-              </p>
-              <p className="text-xs text-slate-500">
-                Khoa Công Nghệ Thông Tin | TDC
-              </p>
-            </div>
-          </Link>
-
-          <nav className="hidden items-center gap-6 md:flex">
-            <button
-              type="button"
-              onClick={() => handleTop("/khach-tham-quan")}
-              className="text-sm font-medium text-slate-600 transition hover:text-[#003087]"
-            >
-              Trang chủ
-            </button>
-            <button
-              type="button"
-              onClick={() => handleBottom("/khach-tham-quan", "san-pham")}
-              className="text-sm font-medium text-slate-600 transition hover:text-[#003087]"
-            >
-              Sản phẩm
-            </button>
-            <Link
-              to="/nganh-hoc"
-              className="text-sm font-medium text-slate-600 transition hover:text-[#003087]"
-            >
-              Ngành học
-            </Link>
-            <Link
-              to="/huong-dan"
-              className="text-sm font-medium text-slate-600 transition hover:text-[#003087]"
-            >
-              Hướng dẫn
-            </Link>
-            <Link to="/lien-he" className="text-sm font-semibold text-[#003087]">
-              Liên hệ
-            </Link>
-          </nav>
-
-          <button
-            onClick={() => navigate("/dang-nhap")}
-            className="rounded-md border border-[#003087] px-4 py-2 text-sm font-semibold text-[#003087] transition hover:bg-[#003087] hover:text-white"
-          >
-            Đăng nhập
-          </button>
-        </div>
-      </header>
+      <PublicHeader title="Liên hệ hỗ trợ" />
 
       <main>
         <section className="bg-[#003087] text-white">
@@ -190,8 +167,10 @@ export default function ContactScreen() {
                   onChange={(event) => setContactName(event.target.value)}
                   className="h-11 w-full rounded-md border border-slate-200 px-3 text-sm outline-none focus:border-[#003087]"
                   placeholder="Nguyễn Văn A"
-                  maxLength={255}
+                  maxLength={CONTACT_LIMITS.name}
+                  required
                 />
+                <CharacterCount value={contactName} max={CONTACT_LIMITS.name} />
               </label>
 
               <label className="block">
@@ -204,8 +183,10 @@ export default function ContactScreen() {
                   onChange={(event) => setContactEmail(event.target.value)}
                   className="h-11 w-full rounded-md border border-slate-200 px-3 text-sm outline-none focus:border-[#003087]"
                   placeholder="email@tdc.edu.vn"
-                  maxLength={255}
+                  maxLength={CONTACT_LIMITS.email}
+                  required
                 />
+                <CharacterCount value={contactEmail} max={CONTACT_LIMITS.email} />
               </label>
 
               <label className="block">
@@ -217,8 +198,9 @@ export default function ContactScreen() {
                   onChange={(event) => setContactPhone(event.target.value)}
                   className="h-11 w-full rounded-md border border-slate-200 px-3 text-sm outline-none focus:border-[#003087]"
                   placeholder="Không bắt buộc"
-                  maxLength={30}
+                  maxLength={CONTACT_LIMITS.phone}
                 />
+                <CharacterCount value={contactPhone} max={CONTACT_LIMITS.phone} />
               </label>
 
               <label className="block">
@@ -230,7 +212,12 @@ export default function ContactScreen() {
                   onChange={(event) => setContactSubject(event.target.value)}
                   className="h-11 w-full rounded-md border border-slate-200 px-3 text-sm outline-none focus:border-[#003087]"
                   placeholder="Cần hỗ trợ..."
-                  maxLength={255}
+                  maxLength={CONTACT_LIMITS.subject}
+                  required
+                />
+                <CharacterCount
+                  value={contactSubject}
+                  max={CONTACT_LIMITS.subject}
                 />
               </label>
             </div>
@@ -244,7 +231,12 @@ export default function ContactScreen() {
                 onChange={(event) => setContactMessage(event.target.value)}
                 className="min-h-36 w-full resize-y rounded-md border border-slate-200 px-3 py-3 text-sm outline-none focus:border-[#003087]"
                 placeholder="Mô tả vấn đề bạn cần hỗ trợ"
-                maxLength={2000}
+                maxLength={CONTACT_LIMITS.message}
+                required
+              />
+              <CharacterCount
+                value={contactMessage}
+                max={CONTACT_LIMITS.message}
               />
             </label>
 
