@@ -17,7 +17,7 @@ import useDebounce from "../../hooks/common/useDebounce";
 import useProductSearch from "../../hooks/useProduct/useProductSearch";
 import useScrollControls from "../../hooks/common/useScrollControls";
 import ScrollButtons from "../../components/common/ScrollButtons";
-import { productApi } from "../../api";
+import { productApi, systemSettingsApi } from "../../api";
 import PublicHeader from "../../layouts/PublicHeader";
 
 const MAX_SEARCH_KEYWORD_LENGTH = 300;
@@ -131,6 +131,9 @@ export default function VisitorScreen() {
   const [selectedMajor, setSelectedMajor] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
   const [aiEnabled, setAiEnabled] = useState(false);
+  const [systemSettings, setSystemSettings] = useState({
+    ai_search_enabled: true,
+  });
 
   // giữ UI input
   const [searchTerm, setSearchTerm] = useState("");
@@ -170,6 +173,28 @@ export default function VisitorScreen() {
     productSearchError,
     loadingProductSearch,
   } = useProductSearch({ visitor: true });
+
+  const canUseAiSearch = systemSettings.ai_search_enabled !== false;
+  const effectiveAiEnabled = aiEnabled && canUseAiSearch;
+
+  useEffect(() => {
+    systemSettingsApi
+      .getPublicSettings()
+      .then((res) => {
+        const nextSettings = {
+          ai_search_enabled: res.data?.ai_search_enabled !== false,
+        };
+
+        setSystemSettings(nextSettings);
+
+        if (!nextSettings.ai_search_enabled) {
+          setAiEnabled(false);
+        }
+      })
+      .catch(() => {
+        setSystemSettings({ ai_search_enabled: true });
+      });
+  }, []);
 
   useEffect(() => {
     if (!majorParam) {
@@ -232,16 +257,16 @@ export default function VisitorScreen() {
   );
 
   const productsSource = useMemo(() => {
-    if (aiEnabled && searchResult) {
+    if (effectiveAiEnabled && searchResult) {
       return (searchResult.products ?? []).map(normalizeAiProduct);
     }
 
-    if (!aiEnabled && productSearchResult) {
+    if (!effectiveAiEnabled && productSearchResult) {
       return (productSearchResult.products ?? []).map(normalizeSearchProduct);
     }
 
     return productVisitor ?? [];
-  }, [aiEnabled, productVisitor, productSearchResult, searchResult]);
+  }, [effectiveAiEnabled, productVisitor, productSearchResult, searchResult]);
 
   const getSearchParams = useCallback(
     (keyword, page = 1) => ({
@@ -257,12 +282,13 @@ export default function VisitorScreen() {
   const handleSearchSubmit = async (e) => {
     e.preventDefault();
     const keyword = searchTerm.trim();
-    const searchKey = `${aiEnabled ? "ai" : "normal"}:${keyword}`;
+    const useAiSearch = effectiveAiEnabled;
+    const searchKey = `${useAiSearch ? "ai" : "normal"}:${keyword}`;
     if (!keyword || lastSearchRef.current === searchKey) return;
 
     lastSearchRef.current = searchKey;
     setCurrentPage(1);
-    if (aiEnabled) {
+    if (useAiSearch) {
       await searchAi(keyword);
       return;
     }
@@ -280,12 +306,13 @@ export default function VisitorScreen() {
 
   const handleSuggestionSearch = async (suggestion) => {
     setSearchTerm(suggestion);
-    const searchKey = `${aiEnabled ? "ai" : "normal"}:${suggestion}`;
+    const useAiSearch = effectiveAiEnabled;
+    const searchKey = `${useAiSearch ? "ai" : "normal"}:${suggestion}`;
     if (lastSearchRef.current === searchKey) return;
 
     lastSearchRef.current = searchKey;
     setCurrentPage(1);
-    if (aiEnabled) {
+    if (useAiSearch) {
       await searchAi(suggestion);
       return;
     }
@@ -305,18 +332,19 @@ export default function VisitorScreen() {
       return;
     }
 
-    const searchKey = `${aiEnabled ? "ai" : "normal"}:${keyword}`;
+    const useAiSearch = effectiveAiEnabled;
+    const searchKey = `${useAiSearch ? "ai" : "normal"}:${keyword}`;
     if (keyword.length < 2 || lastSearchRef.current === searchKey) return;
 
     lastSearchRef.current = searchKey;
-    if (aiEnabled) {
+    if (useAiSearch) {
       searchAi(keyword);
       return;
     }
 
     searchProducts(getSearchParams(keyword, 1));
   }, [
-    aiEnabled,
+    effectiveAiEnabled,
     debouncedSearchTerm,
     clearProductSearch,
     clearSearch,
@@ -332,26 +360,27 @@ export default function VisitorScreen() {
     const keyword = searchTerm.trim();
     if (keyword.length < 2) return;
 
-    lastSearchRef.current = `${aiEnabled ? "ai" : "normal"}:${keyword}`;
-    if (aiEnabled) {
+    const useAiSearch = effectiveAiEnabled;
+    lastSearchRef.current = `${useAiSearch ? "ai" : "normal"}:${keyword}`;
+    if (useAiSearch) {
       searchAi(keyword);
       return;
     }
 
     searchProducts(getSearchParams(keyword, 1));
-  }, [aiEnabled]);
+  }, [effectiveAiEnabled]);
 
   useEffect(() => {
     const keyword = searchTerm.trim();
 
-    if (aiEnabled || !productSearchResult || !keyword) return;
+    if (effectiveAiEnabled || !productSearchResult || !keyword) return;
 
     searchProducts(getSearchParams(keyword, currentPage));
   }, [currentPage, selectedMajor, sortBy]);
 
-  const activeSearchResult = aiEnabled ? searchResult : productSearchResult;
-  const activeSearchError = aiEnabled ? searchError : productSearchError;
-  const activeSearchLoading = aiEnabled
+  const activeSearchResult = effectiveAiEnabled ? searchResult : productSearchResult;
+  const activeSearchError = effectiveAiEnabled ? searchError : productSearchError;
+  const activeSearchLoading = effectiveAiEnabled
     ? loadingSearchAi
     : loadingProductSearch;
 
@@ -389,7 +418,7 @@ export default function VisitorScreen() {
   const filteredProducts = useMemo(() => {
     const base = productsSource;
 
-    if (!aiEnabled) {
+    if (!effectiveAiEnabled) {
       return base;
     }
 
@@ -429,7 +458,7 @@ export default function VisitorScreen() {
         return 0;
       });
   }, [
-    aiEnabled,
+    effectiveAiEnabled,
     productsSource,
     selectedMajor,
     sortBy,
@@ -442,18 +471,18 @@ export default function VisitorScreen() {
     ? activeSearchResult.data
     : paginationVisitor;
 
-  const totalPages = aiEnabled
+  const totalPages = effectiveAiEnabled
     ? Math.ceil(filteredProducts.length / ITEMS_PER_PAGE)
     : serverPagination?.last_page || 1;
 
   const paginatedProducts = useMemo(() => {
-    if (!aiEnabled) {
+    if (!effectiveAiEnabled) {
       return filteredProducts;
     }
 
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
     return filteredProducts.slice(start, start + ITEMS_PER_PAGE);
-  }, [aiEnabled, filteredProducts, currentPage]);
+  }, [effectiveAiEnabled, filteredProducts, currentPage]);
 
   useEffect(() => {
     productCardObserverRef.current?.disconnect();
@@ -675,16 +704,25 @@ export default function VisitorScreen() {
               <span>Thường</span>
               <button
                 type="button"
-                onClick={() => setAiEnabled((prev) => !prev)}
+                onClick={() =>
+                  canUseAiSearch && setAiEnabled((prev) => !prev)
+                }
+                disabled={!canUseAiSearch}
                 className={`relative h-6 w-11 rounded-full transition ${
-                  aiEnabled ? "bg-[#003087]" : "bg-gray-300"
-                }`}
-                aria-pressed={aiEnabled}
-                title={aiEnabled ? "Tắt AI Search" : "Bật AI Search"}
+                  effectiveAiEnabled ? "bg-[#003087]" : "bg-gray-300"
+                } disabled:cursor-not-allowed disabled:opacity-60`}
+                aria-pressed={effectiveAiEnabled}
+                title={
+                  canUseAiSearch
+                    ? effectiveAiEnabled
+                      ? "Tắt AI Search"
+                      : "Bật AI Search"
+                    : "AI Search đã bị quản trị viên tắt"
+                }
               >
                 <span
                   className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition ${
-                    aiEnabled ? "left-5" : "left-0.5"
+                    effectiveAiEnabled ? "left-5" : "left-0.5"
                   }`}
                 />
               </button>
@@ -698,7 +736,7 @@ export default function VisitorScreen() {
             >
               {activeSearchLoading
                 ? "Đang tìm..."
-                : aiEnabled
+                : effectiveAiEnabled
                   ? "Tìm AI"
                   : "Tìm thường"}
             </button>
@@ -713,7 +751,7 @@ export default function VisitorScreen() {
           {activeSearchResult && (
             <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-sm text-gray-600">
               <p>
-                {aiEnabled ? "AI" : "Tìm thường"} tìm thấy{" "}
+                {effectiveAiEnabled ? "AI" : "Tìm thường"} tìm thấy{" "}
                 <span className="font-semibold text-[#003087]">
                   {activeSearchResult.count ?? filteredProducts.length}
                 </span>{" "}
@@ -782,7 +820,7 @@ export default function VisitorScreen() {
         {loadingVisitor || activeSearchLoading ? (
           <p className="p-6 text-center">
             {activeSearchLoading
-              ? aiEnabled
+              ? effectiveAiEnabled
                 ? "AI đang tìm kiếm..."
                 : "Đang tìm thường..."
               : "Đang tải..."}
