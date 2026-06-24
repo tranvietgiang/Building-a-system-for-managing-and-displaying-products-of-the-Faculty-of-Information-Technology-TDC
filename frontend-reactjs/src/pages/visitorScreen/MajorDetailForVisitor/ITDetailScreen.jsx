@@ -187,20 +187,36 @@ const ITDetailScreen = ({
 
             {/* Thumbnails */}
             {productVisitorDetail?.images?.length > 0 && (
-              <div className="group flex h-28 gap-3 overflow-hidden md:h-36">
-                {productVisitorDetail.images.slice(0, 4).map((img, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => openViewer(img.image_url)}
-                    className="min-w-0 flex-1 overflow-hidden rounded-xl border-2 border-gray-200 transition-all duration-500 ease-out hover:flex-[3] hover:border-blue-400 focus:flex-[3] focus:border-blue-400 focus:outline-none"
-                  >
-                    <img
-                      src={img.image_url}
-                      alt=""
-                      className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
-                    />
-                  </button>
-                ))}
+              <div className="space-y-3">
+                {[0, 5].map((start) => {
+                  const rowImages = productVisitorDetail.images.slice(
+                    start,
+                    start + 5,
+                  );
+
+                  if (rowImages.length === 0) return null;
+
+                  return (
+                    <div
+                      key={start}
+                      className="group flex h-28 gap-3 overflow-hidden md:h-36"
+                    >
+                      {rowImages.map((img, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => openViewer(img.image_url)}
+                          className="min-w-0 flex-1 overflow-hidden rounded-xl border-2 border-gray-200 transition-all duration-500 ease-out hover:flex-[3] hover:border-blue-400 focus:flex-[3] focus:border-blue-400 focus:outline-none"
+                        >
+                          <img
+                            src={img.image_url}
+                            alt=""
+                            className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  );
+                })}
               </div>
             )}
 
@@ -282,7 +298,9 @@ const ITDetailScreen = ({
                         className="p-5 rounded-xl border border-gray-200 hover:border-gray-400 hover:shadow-md transition"
                       >
                         <div className="text-2xl mb-2">📦</div>
-                        <div className="font-semibold text-gray-800">Mã nguồn GitHub</div>
+                        <div className="font-semibold text-gray-800">
+                          Mã nguồn GitHub
+                        </div>
                         <p className="text-sm text-gray-500 mt-1 break-all">
                           {productVisitorDetail.resources.github}
                         </p>
@@ -296,7 +314,9 @@ const ITDetailScreen = ({
                         className="p-5 rounded-xl border border-gray-200 hover:border-blue-400 hover:shadow-md transition"
                       >
                         <div className="text-2xl mb-2">🚀</div>
-                        <div className="font-semibold text-gray-800">Bản chạy thử</div>
+                        <div className="font-semibold text-gray-800">
+                          Bản chạy thử
+                        </div>
                         <p className="text-sm text-gray-500 mt-1 break-all">
                           {productVisitorDetail.resources.demo}
                         </p>
@@ -305,7 +325,8 @@ const ITDetailScreen = ({
                     {!productVisitorDetail?.resources?.github &&
                       !productVisitorDetail?.resources?.demo && (
                         <p className="md:col-span-2 text-center text-gray-500 py-8">
-                          Sản phẩm chưa cập nhật liên kết GitHub hoặc bản chạy thử.
+                          Sản phẩm chưa cập nhật liên kết GitHub hoặc bản chạy
+                          thử.
                         </p>
                       )}
                   </div>
