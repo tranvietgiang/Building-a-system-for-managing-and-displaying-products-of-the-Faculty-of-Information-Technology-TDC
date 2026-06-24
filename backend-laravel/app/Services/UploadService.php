@@ -56,10 +56,12 @@ class UploadService extends BaseRepository
         if ($duplicate) {
             return [
                 'error' => true,
-                'message' => 'Sản phẩm bị trùng với “'.$duplicate['title'].'” ('.$duplicate['similarity'].'%).',
+                // 'message' => 'Sản phẩm bị trùng với “'.$duplicate['title'].'” ('.$duplicate['similarity'].'%).',
+                'message' => 'Sản phẩm có mức tương đồng cao với một sản phẩm đã tồn tại trong hệ thống. Bạn vẫn có thể tiếp tục gửi!',
                 'detail' => $duplicate,
             ];
         }
+
 
         $uploadedImages = array_values($data['existing_images'] ?? []);
         $tags = $data['tags'] ?? [];

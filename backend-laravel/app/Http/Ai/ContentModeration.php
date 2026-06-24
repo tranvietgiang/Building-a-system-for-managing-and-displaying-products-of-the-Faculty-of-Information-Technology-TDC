@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Http\Client\Response;
 use App\Services\SystemSettingService;
 
 class ContentModeration
@@ -15,6 +16,46 @@ class ContentModeration
     public function __construct(
         protected SystemSettingService $settings
     ) {}
+
+    private function sendOpenAiModerationRequest(string $apiKey, array $messages): Response
+    {
+        $payload = [
+            'model' => config('services.openai.vision_model', 'gpt-4o-mini'),
+            'messages' => $messages,
+            'temperature' => 0.2,
+            'max_tokens' => 350,
+        ];
+
+        $response = null;
+
+        for ($attempt = 1; $attempt <= 4; $attempt++) {
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $apiKey,
+                'Content-Type' => 'application/json',
+            ])
+                ->timeout(60)
+                ->post('https://api.openai.com/v1/chat/completions', $payload);
+
+            if (! $this->isOpenAiRateLimited($response)) {
+                return $response;
+            }
+
+            usleep($attempt * 800_000);
+        }
+
+        return $response;
+    }
+
+    private function isOpenAiRateLimited(Response $response): bool
+    {
+        if ($response->status() === 429) {
+            return true;
+        }
+
+        $message = (string) data_get($response->json(), 'error.message', '');
+
+        return str_contains(Str::lower($message), 'rate limit');
+    }
 
     public function moderateProduct(Product $product, array $frontendContext = []): array
     {
@@ -78,21 +119,11 @@ class ContentModeration
                 ],
             ];
 
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $apiKey,
-                'Content-Type' => 'application/json',
-            ])
-                ->timeout(45)
-                ->post('https://api.openai.com/v1/chat/completions', [
-                    'model' => config('services.openai.vision_model', 'gpt-4o-mini'),
-                    'messages' => $messages,
-                    'temperature' => 0.2,
-                    'max_tokens' => 1000,
-                ]);
+            $response = $this->sendOpenAiModerationRequest($apiKey, $messages);
 
             // ❌ REAL API ERROR
             if ($response->failed()) {
-                $errorBody = $response->json();
+                $errorBody = $response->json() ?? [];
                 $errorMessage = $this->extractErrorMessage($errorBody);
 
                 Log::error('OpenAI moderation API failed', [
@@ -103,7 +134,7 @@ class ContentModeration
 
                 return [
                     'approved' => false,
-                    'reason' => 'Lỗi AI: ' . $errorMessage,
+                    'reason' => 'Loi AI: ' . $errorMessage,
                     'violations' => ['api_error'],
                     'raw' => null,
                 ];
@@ -175,31 +206,25 @@ class ContentModeration
         ];
 
         try {
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $apiKey,
-                'Content-Type' => 'application/json',
-            ])
-                ->timeout(45)
-                ->post('https://api.openai.com/v1/chat/completions', [
-                    'model' => config('services.openai.vision_model', 'gpt-4o-mini'),
-                    'messages' => [
-                        [
-                            'role' => 'system',
-                            'content' => 'Return ONLY valid JSON. No explanation. No markdown.',
-                        ],
-                        [
-                            'role' => 'user',
-                            'content' => $content,
-                        ],
-                    ],
-                    'temperature' => 0.2,
-                    'max_tokens' => 1000,
-                ]);
+            $messages = [
+                [
+                    'role' => 'system',
+                    'content' => 'Return ONLY valid JSON. No explanation. No markdown.',
+                ],
+                [
+                    'role' => 'user',
+                    'content' => $content,
+                ],
+            ];
+
+            $response = $this->sendOpenAiModerationRequest($apiKey, $messages);
 
             if ($response->failed()) {
+                $errorMessage = $this->extractErrorMessage($response->json() ?? []);
+
                 return [
                     'approved' => false,
-                    'reason' => 'Lỗi AI: ' . $response->body(),
+                    'reason' => 'Loi AI: ' . $errorMessage,
                     'violations' => ['api_error'],
                     'raw' => null,
                 ];
@@ -325,15 +350,15 @@ class ContentModeration
     {
         $checks = $result['checks'] ?? [];
 
-        foreach ([
-            'adult_or_sensitive',
-            'violence_or_danger',
-            'spam_or_meme',
-            'illegal_or_unethical',
-            'discrimination_or_incitation',
-            'clickbait_or_ads',
-            'low_quality_or_unprofessional',
-        ] as $key) {
+        foreach (
+            [
+                'adult_or_sensitive',
+                'violence_or_danger',
+                'spam_or_meme',
+                'illegal_or_unethical',
+                'discrimination_or_incitation',
+            ] as $key
+        ) {
             if (($checks[$key] ?? false) === true) {
                 return true;
             }
@@ -346,51 +371,72 @@ class ContentModeration
 
         $strongTerms = [
             '18+',
-            'khỏa thân',
-            'khoa than',
+
+            // Adult / Sexual Content
             'nudity',
-            'tình dục',
-            'tinh duc',
+            'nude',
             'sexual',
+            'sex',
             'porn',
-            'khiêu dâm',
-            'khieu dam',
-            'bạo lực',
-            'bao luc',
+            'pornography',
+            'erotic',
+            'adult content',
+            'explicit content',
+
+            // Violence / Gore
             'violence',
-            'máu me',
-            'mau me',
-            'vũ khí',
-            'vu khi',
+            'violent',
+            'gore',
+            'blood',
+            'bloody',
+            'corpse',
+            'dead body',
+            'beheading',
+            'murder',
+
+            // Weapons / Dangerous Content
             'weapon',
-            'nguy hiểm',
-            'nguy hiem',
+            'gun',
+            'firearm',
+            'knife',
+            'explosive',
             'danger',
-            'phản cảm',
-            'phan cam',
+            'dangerous',
+
+            // Drugs / Self-Harm
+            'drug',
+            'drugs',
+            'illegal drugs',
+            'narcotics',
+            'suicide',
+            'self-harm',
+
+            // Spam / Meme / Low Quality
             'spam',
-            'ảnh chế',
-            'anh che',
             'meme',
-            'câu view',
-            'cau view',
             'clickbait',
-            'quảng cáo',
-            'quang cao',
-            'bất hợp pháp',
-            'bat hop phap',
+            'misleading content',
+            'low quality content',
+
+            // Illegal Content
             'illegal',
-            'vi phạm pháp luật',
-            'vi pham phap luat',
-            'đạo đức học thuật',
-            'dao duc hoc thuat',
-            'phân biệt đối xử',
-            'phan biet doi xu',
-            'kích động',
-            'kich dong',
-            'thù ghét',
-            'thu ghet',
+            'law violation',
+            'criminal activity',
+            'fraud',
+
+            // Academic Misconduct
+            'academic misconduct',
+            'academic dishonesty',
+            'plagiarism',
+            'cheating',
+
+            // Hate / Discrimination
             'hate',
+            'hate speech',
+            'discrimination',
+            'harassment',
+            'incitement',
+            'extremism',
         ];
 
         return collect($strongTerms)
@@ -457,29 +503,39 @@ class ContentModeration
         ]));
 
         $strongViolations = [
-            'khỏa thân',
-            'khoa than',
             'nudity',
-            ' nude ',
-            'bộ phận sinh dục',
-            'lộ ngực',
-            'ngực trần',
-            'tình dục',
+            'nude',
+            'naked body',
+            'genitals',
+            'exposed breasts',
+            'topless',
+            'sexual content',
             'sexual',
+            'pornography',
             'porn',
-            'khiêu dâm',
-            'đồ lót gợi dục',
+            'erotic content',
+            'fetish lingerie',
             'lingerie',
             'bikini',
-            'máu me',
-            'thi thể',
-            'chặt đầu',
-            'vũ khí',
+
+            'gore',
+            'bloody scene',
+            'corpse',
+            'dead body',
+            'beheading',
+            'decapitation',
+
             'weapon',
-            'ma túy',
+            'gun',
+            'knife',
+            'explosive',
+
             'drug',
-            'tự sát',
+            'illegal drugs',
+            'narcotics',
+
             'suicide',
+            'self-harm',
         ];
 
         return !collect($strongViolations)
@@ -527,6 +583,8 @@ class ContentModeration
         // Check standard OpenAI error format: error.message
         if (isset($errorBody['error']['message'])) {
             $msg = $errorBody['error']['message'];
+            $code = (string) ($errorBody['error']['code'] ?? '');
+            $lowerError = Str::lower($msg . ' ' . $code);
 
             // Translate common error messages to Vietnamese
             if (strpos($msg, 'invalid_image_url') !== false || strpos($msg, 'downloading') !== false) {
@@ -535,8 +593,8 @@ class ContentModeration
             if (strpos($msg, 'timeout') !== false) {
                 return 'Lỗi: Yêu cầu quá thời gian chờ';
             }
-            if (strpos($msg, 'rate_limit') !== false) {
-                return 'Lỗi: Quá nhiều yêu cầu, vui lòng thử lại sau';
+            if (str_contains($lowerError, 'rate limit') || str_contains($lowerError, 'rate_limit')) {
+                return 'Hệ thống AI đang quá tải do kiểm duyệt quá nhiều ảnh liên tiếp. Vui lòng thử lại sau vài giây hoặc giảm số lượng ảnh trong mỗi lần tải lên.';
             }
             if (strpos($msg, 'authentication') !== false || strpos($msg, 'unauthorized') !== false) {
                 return 'Lỗi: Xác thực không hợp lệ';
@@ -579,47 +637,64 @@ class ContentModeration
         $json = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
         return <<<PROMPT
-        Bạn là hệ thống AI kiểm duyệt nội dung khi sinh viên đăng sản phẩm nghiên cứu.
+        You are an AI moderation system responsible for reviewing student research project submissions.
 
-        Mục tiêu của bước này là kiểm tra an toàn nội dung cơ bản. KHÔNG đánh giá trùng lặp sản phẩm, KHÔNG chấm quá kỹ chất lượng học thuật, KHÔNG từ chối chỉ vì sản phẩm đơn giản, ảnh UI chưa đẹp, ảnh demo chưa hoàn hảo hoặc nội dung chưa thật chuyên sâu. Chức năng so sánh trùng sẽ do giáo viên và module so sánh riêng xử lý.
+        The goal of this review is to perform basic content safety checks only.
 
-        Vai trò người dùng: {$role}
+        DO NOT evaluate duplicate projects.
+        DO NOT perform detailed academic quality assessment.
+        DO NOT reject submissions simply because:
 
-        Chỉ kiểm tra các nhóm sau:
-        - Mức độ phù hợp tối thiểu với môi trường giáo dục và nghiên cứu.
-        - Nội dung 18+, khỏa thân, tình dục, khiêu dâm.
-        - Nội dung bạo lực, nguy hiểm, máu me, phản cảm.
-        - Spam, ảnh chế, nội dung rác, nội dung chất lượng quá thấp rõ ràng.
-        - Dấu hiệu quảng cáo, câu view hoặc nội dung giải trí không phù hợp với môi trường học thuật.
-        - Mức độ chuyên nghiệp và tính nghiêm túc ở mức tối thiểu.
-        - Nội dung vi phạm pháp luật hoặc đạo đức học thuật rõ ràng.
-        - Nội dung phân biệt đối xử, kích động, thù ghét hoặc gây tranh cãi không phù hợp.
+        * The project is simple.
+        * The UI design is basic.
+        * Screenshots are imperfect.
+        * The project lacks advanced technical depth.
 
-        Không kiểm tra:
-        - Không kiểm tra sản phẩm có trùng hay không.
-        - Không kiểm tra watermark hoặc bản quyền nếu chỉ là logo, mockup, poster, giao diện, thương hiệu minh họa trong bài làm sinh viên.
-        - Không từ chối vì ảnh là giao diện phần mềm demo, prototype, dashboard, sơ đồ mạng, poster, mockup thương hiệu hoặc sản phẩm thiết kế.
-        - Không từ chối vì có tên sinh viên, mã sinh viên, điểm số hoặc dữ liệu minh họa trong giao diện phần mềm demo.
-        - Không từ chối vì chưa khớp chuyên ngành hoàn toàn.
+        Project similarity and duplication checks are handled separately by instructors and a dedicated comparison module.
 
-        Dữ liệu sản phẩm:
+        User Role: {$role}
+
+        Review only the following categories:
+
+        * Minimum suitability for an educational and research environment.
+        * Adult, sexual, pornographic, or explicit content.
+        * Violence, dangerous content, gore, or disturbing material.
+        * Spam, meme content, obvious junk content, or extremely low-value submissions.
+        * Minimum level of professionalism and seriousness.
+        * Clearly illegal content or obvious academic misconduct.
+        * Hate speech, discrimination, incitement, or inappropriate controversial content.
+
+        Do NOT evaluate:
+
+        * Whether the project is duplicated or similar to another project.
+        * Watermarks, copyrights, logos, mockups, posters, interfaces, or brands used as examples in student work.
+        * Software UI screenshots, prototypes, dashboards, network diagrams, posters, branding mockups, or design projects.
+        * Student names, student IDs, grades, or demonstration/sample data shown inside software interfaces.
+        * Whether the project perfectly matches the student's major.
+
+        Project Data:
+
         {$json}
 
-        Quy tắc trả lời:
-        - Chỉ trả JSON hợp lệ, không markdown, không giải thích ngoài JSON.
-        - approved=false chỉ khi có vi phạm rõ ràng thuộc các nhóm cần kiểm tra ở trên.
-        - Nếu không chắc chắn hoặc vi phạm nhẹ, hãy approved=true.
-        - violations là mảng chuỗi tiếng Việt, mô tả cụ thể vi phạm.
-        - Nếu vi phạm nằm trong ảnh, bắt đầu violation bằng "Ảnh:".
+        Response Rules:
 
-        Định dạng JSON:
+        * Return valid JSON only.
+        * Do not use Markdown.
+        * Do not include explanations outside the JSON response.
+        * Set approved=false only when there is a clear violation within the categories listed above.
+        * If uncertain or if the violation is minor, return approved=true.
+        * violations must be an array of Vietnamese strings describing the specific issue.
+        * If the violation is found in an image, start the violation message with "Ảnh:".
+
+        JSON Format:
+
         {
-            "approved": true,
-            "score": 0-100,
-            "reason": "giải thích ngắn gọn bằng tiếng Việt",
-            "violations": [],
-            "role": "{$role}",
-            "checks": {
+        "approved": true,
+        "score": 0-100,
+        "reason": "Giải thích ngắn gọn bằng tiếng Việt",
+        "violations": [],
+        "role": "{$role}",
+        "checks": {
                 "educational": true,
                 "adult_or_sensitive": false,
                 "violence_or_danger": false,

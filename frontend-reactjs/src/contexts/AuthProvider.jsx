@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { AuthContext } from "./AuthContext";
 import {
   getToken,
@@ -6,11 +6,26 @@ import {
   setToken,
   setRefreshToken,
   getRefreshToken,
+  getLastActivity,
+  setLastActivity,
   setUser as setStoredUser,
   clearAuth,
   removeUser,
 } from "../utils/storage";
 import authApi from "../api/auth.api";
+
+const IDLE_TIMEOUT_MINUTES = Number(
+  import.meta.env.VITE_AUTH_IDLE_TIMEOUT_MINUTES ?? 60,
+);
+const IDLE_TIMEOUT_MS = Math.max(1, IDLE_TIMEOUT_MINUTES) * 60 * 1000;
+const ACTIVITY_EVENTS = [
+  "click",
+  "keydown",
+  "mousemove",
+  "scroll",
+  "touchstart",
+  "focus",
+];
 
 export const AuthProvider = ({ children }) => {
   const [user, setUserState] = useState(getUser());
@@ -60,6 +75,7 @@ export const AuthProvider = ({ children }) => {
 
       setToken(res.token);
       setRefreshToken(res.refresh_token);
+      setLastActivity();
       setTokenState(res.token);
 
       setStoredUser(res.user);
@@ -85,7 +101,7 @@ export const AuthProvider = ({ children }) => {
     setUserState(nextUser);
   };
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       await authApi.logout({ refresh_token: getRefreshToken() });
     } catch (err) {
@@ -95,7 +111,53 @@ export const AuthProvider = ({ children }) => {
       setUserState(null);
       setTokenState(null);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (!token) return undefined;
+
+    const isIdleExpired = () => {
+      const lastActivity = getLastActivity();
+
+      if (!lastActivity) {
+        setLastActivity();
+        return false;
+      }
+
+      return Date.now() - lastActivity >= IDLE_TIMEOUT_MS;
+    };
+    const checkIdleSession = () => {
+      if (isIdleExpired()) {
+        logout();
+      }
+    };
+    const refreshActivity = () => {
+      if (isIdleExpired()) {
+        logout();
+        return;
+      }
+
+      setLastActivity();
+    };
+
+    if (!getLastActivity()) {
+      setLastActivity();
+    }
+
+    ACTIVITY_EVENTS.forEach((eventName) => {
+      window.addEventListener(eventName, refreshActivity, { passive: true });
+    });
+
+    const intervalId = window.setInterval(checkIdleSession, 30 * 1000);
+    checkIdleSession();
+
+    return () => {
+      ACTIVITY_EVENTS.forEach((eventName) => {
+        window.removeEventListener(eventName, refreshActivity);
+      });
+      window.clearInterval(intervalId);
+    };
+  }, [logout, token]);
 
   return (
     <AuthContext.Provider

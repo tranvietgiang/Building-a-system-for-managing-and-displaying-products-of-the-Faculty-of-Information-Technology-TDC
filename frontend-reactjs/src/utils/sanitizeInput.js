@@ -4,6 +4,7 @@ const DISALLOWED_NAME_LIST_PATTERN = /[^\p{L}\p{N} ,\n-]/gu;
 const DISALLOWED_PERSON_NAME_PATTERN = /[^\p{L}\p{N} .,-]/gu;
 
 const SKIP_SANITIZE_FIELD_NAMES = new Set([
+  "title",
   "email",
   "password",
   "github_link",
