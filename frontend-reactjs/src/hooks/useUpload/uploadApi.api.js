@@ -1,10 +1,11 @@
 import axiosClient from "../../api/axiosClient";
+
 export const UPLOAD_PRODUCT_TIMEOUT_MS = 120_000;
 
 export const uploadApi = {
   uploadProduct: async (formData) => {
     try {
-      const data = await axiosClient.post("/upload", formData, {
+      const response = await axiosClient.post("/upload", formData, {
         timeout: UPLOAD_PRODUCT_TIMEOUT_MS,
         headers: {
           "Content-Type": "multipart/form-data",
@@ -12,8 +13,11 @@ export const uploadApi = {
         },
       });
 
+      const data = response?.data || response;
+
       return {
         success: true,
+        ...data,
         data,
         message: data?.message,
       };
@@ -36,6 +40,7 @@ export const uploadApi = {
 
       return {
         success: false,
+        ...(responseError || {}),
         error: responseError || error,
         message: responseError?.message || "Lỗi server",
       };
