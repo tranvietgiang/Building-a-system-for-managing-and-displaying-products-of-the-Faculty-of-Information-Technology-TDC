@@ -8,6 +8,15 @@ RUN apt-get update && apt-get install -y \
 # PHP extensions
 RUN docker-php-ext-install pdo pdo_mysql mbstring zip
 
+# Uploads can include multiple product images. Keep PHP limits above the UI cap.
+RUN { \
+    echo "upload_max_filesize=64M"; \
+    echo "post_max_size=80M"; \
+    echo "memory_limit=256M"; \
+    echo "max_execution_time=180"; \
+    echo "max_input_time=180"; \
+} > /usr/local/etc/php/conf.d/uploads.ini
+
 # Bật rewrite Apache
 RUN a2enmod rewrite
 

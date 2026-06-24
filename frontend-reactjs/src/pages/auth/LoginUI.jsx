@@ -39,6 +39,11 @@ const programs = [
   },
 ];
 
+// vùng cấm
+// localStorage.clear();
+// sessionStorage.clear();
+// indexedDB.deleteDatabase("product-upload-drafts");
+
 const stats = [
   { value: "2026", label: "Năm phát triển website", icon: Award },
   { value: "4", label: "Ngành đào tạo chất lượng cao", icon: BookOpen },

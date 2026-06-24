@@ -2,9 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Major;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -16,171 +14,113 @@ class userSeeder extends Seeder
      */
     public function run(): void
     {
+        $now = now();
 
-        // user-1
-        // Student
         DB::table('users')->insert([
             [
-                'user_id' => '23211TT2984',
-                'name' => 'Nguyễn Văn An',
+                'user_id' => '23211CNTT1',
+                'name' => 'Sinh vien CNTT 1',
+                'email' => '23211cntt1@student.tdc.edu.vn',
+                'password' => Hash::make('23211CNTT1'),
+                'role' => 'student',
+                'major_id' => 2,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'user_id' => '23211CNTT5',
+                'name' => 'Sinh vien CNTT 5',
                 'email' => 'wedgiang@gmail.com',
-                'password' => Hash::make('12345678'),
-                'role' => 'student',
-                'major_id' => 1,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'user_id' => '23211TT1111',
-                'name' => 'Trần Thị Bình',
-                'email' => 'binh1111@student.tdc.edu.vn',
-                'password' => Hash::make('12345678'),
+                'password' => Hash::make('23211CNTT5'),
                 'role' => 'student',
                 'major_id' => 2,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'created_at' => $now,
+                'updated_at' => $now,
             ],
             [
-                'user_id' => '23211TT2222',
-                'name' => 'Lê Hoàng Cường',
-                'email' => 'cuong2222@student.tdc.edu.vn',
-                'password' => Hash::make('12345678'),
+                'user_id' => '23211AI2',
+                'name' => 'Sinh vien AI 2',
+                'email' => '23211ai2@student.tdc.edu.vn',
+                'password' => Hash::make('23211AI2'),
+                'role' => 'student',
+                'major_id' => 1,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'user_id' => '23211MMT3',
+                'name' => 'Sinh vien MMT 3',
+                'email' => '23211mmt3@student.tdc.edu.vn',
+                'password' => Hash::make('23211MMT3'),
                 'role' => 'student',
                 'major_id' => 3,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'created_at' => $now,
+                'updated_at' => $now,
             ],
             [
-                'user_id' => '23211TT3333',
-                'name' => 'Phạm Minh Duy',
-                'email' => 'duy3333@student.tdc.edu.vn',
-                'password' => Hash::make('12345678'),
+                'user_id' => '23211TKDH4',
+                'name' => 'Sinh vien Thiet ke do hoa 4',
+                'email' => '23211tkdh4@student.tdc.edu.vn',
+                'password' => Hash::make('23211TKDH4'),
                 'role' => 'student',
                 'major_id' => 4,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'created_at' => $now,
+                'updated_at' => $now,
             ],
         ]);
 
         DB::table('users')->insert([
             [
-                'user_id' => 'GV001',
-                'name' => 'Trần Văn B',
-                'email' => 'teacher@test.com',
-                'password' => Hash::make('12345678'),
+                'user_id' => 'GVAI',
+                'name' => 'Giang vien AI',
+                'email' => 'gvai@tdc.edu.vn',
+                'password' => Hash::make('GVAI'),
                 'role' => 'teacher',
                 'major_id' => 1,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'created_at' => $now,
+                'updated_at' => $now,
             ],
             [
-                'user_id' => 'GV002',
-                'name' => 'Lê Thị C',
-                'email' => 'teacher2@test.com',
-                'password' => Hash::make('12345678'),
+                'user_id' => 'GVCNTT',
+                'name' => 'Giang vien CNTT',
+                'email' => 'gvcntt@tdc.edu.vn',
+                'password' => Hash::make('GVCNTT'),
                 'role' => 'teacher',
                 'major_id' => 2,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'created_at' => $now,
+                'updated_at' => $now,
             ],
             [
-                'user_id' => 'GV003',
-                'name' => 'Phạm Văn D',
-                'email' => 'teacher3@test.com',
-                'password' => Hash::make('12345678'),
+                'user_id' => 'GVMMT',
+                'name' => 'Giang vien MMT',
+                'email' => 'gvmmt@tdc.edu.vn',
+                'password' => Hash::make('GVMMT'),
                 'role' => 'teacher',
                 'major_id' => 3,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'created_at' => $now,
+                'updated_at' => $now,
             ],
             [
-                'user_id' => 'GV004',
-                'name' => 'Nguyễn Thị E',
-                'email' => 'teacher4@test.com',
-                'password' => Hash::make('12345678'),
+                'user_id' => 'GVTKDH',
+                'name' => 'Giang vien Thiet ke do hoa',
+                'email' => 'gvtkdh@tdc.edu.vn',
+                'password' => Hash::make('GVTKDH'),
                 'role' => 'teacher',
                 'major_id' => 4,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
         ]);
 
-        // ADMIN
         User::create([
-            'user_id' => 'ADMIN01',
+            'user_id' => 'admin',
             'name' => 'Admin',
-            'email' => 'admin@test.com',
-            'password' => Hash::make('12345678'),
+            'email' => 'admin@tdc.edu.vn',
+            'password' => Hash::make('admin'),
             'role' => 'admin',
-            'major_id' => null
-        ]);
-
-        // user-2
-        // Student
-        DB::table('users')->insert([
-            [
-                'user_id' => '00000TT2984',
-                'name' => '00000TT2984-name1',
-                'email' => 'abc00000@student.tdc.edu.vn',
-                'password' => Hash::make('12345678'),
-                'role' => 'student',
-                'major_id' => 1,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'user_id' => '11111TT2984',
-                'name' => '11111TT2984-name2',
-                'email' => 'abc11111@student.tdc.edu.vn',
-                'password' => Hash::make('12345678'),
-                'role' => 'student',
-                'major_id' => 2,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'user_id' => '22222TT2984',
-                'name' => '22222TT2984-name3',
-                'email' => 'abc22222@student.tdc.edu.vn',
-                'password' => Hash::make('12345678'),
-                'role' => 'student',
-                'major_id' => 3,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'user_id' => '33333TT2984',
-                'name' => '33333TT2984-name4',
-                'email' => 'abc33333@student.tdc.edu.vn',
-                'password' => Hash::make('12345678'),
-                'role' => 'student',
-                'major_id' => 4,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-        ]);
-
-        DB::table('users')->insert([
-            [
-                'user_id' => 'GV9999',
-                'name' => 'GV-GV9999',
-                'email' => 'teacherGV9999@test.com',
-                'password' => Hash::make('12345678'),
-                'role' => 'teacher',
-                'major_id' => 4,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]
-        ]);
-
-        // ADMIN
-        User::create([
-            'user_id' => 'ADMIN02',
-            'name' => 'Admin2',
-            'email' => 'admin2@test.com',
-            'password' => Hash::make('12345678'),
-            'role' => 'admin',
-            'major_id' => null
+            'major_id' => null,
+            'created_at' => $now,
+            'updated_at' => $now,
         ]);
     }
 }

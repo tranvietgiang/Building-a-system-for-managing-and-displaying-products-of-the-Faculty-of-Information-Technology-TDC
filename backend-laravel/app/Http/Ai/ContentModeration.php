@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Http\Client\Response;
 use App\Services\SystemSettingService;
 
 class ContentModeration
@@ -15,6 +16,46 @@ class ContentModeration
     public function __construct(
         protected SystemSettingService $settings
     ) {}
+
+    private function sendOpenAiModerationRequest(string $apiKey, array $messages): Response
+    {
+        $payload = [
+            'model' => config('services.openai.vision_model', 'gpt-4o-mini'),
+            'messages' => $messages,
+            'temperature' => 0.2,
+            'max_tokens' => 350,
+        ];
+
+        $response = null;
+
+        for ($attempt = 1; $attempt <= 4; $attempt++) {
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $apiKey,
+                'Content-Type' => 'application/json',
+            ])
+                ->timeout(60)
+                ->post('https://api.openai.com/v1/chat/completions', $payload);
+
+            if (! $this->isOpenAiRateLimited($response)) {
+                return $response;
+            }
+
+            usleep($attempt * 800_000);
+        }
+
+        return $response;
+    }
+
+    private function isOpenAiRateLimited(Response $response): bool
+    {
+        if ($response->status() === 429) {
+            return true;
+        }
+
+        $message = (string) data_get($response->json(), 'error.message', '');
+
+        return str_contains(Str::lower($message), 'rate limit');
+    }
 
     public function moderateProduct(Product $product, array $frontendContext = []): array
     {
@@ -78,21 +119,11 @@ class ContentModeration
                 ],
             ];
 
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $apiKey,
-                'Content-Type' => 'application/json',
-            ])
-                ->timeout(45)
-                ->post('https://api.openai.com/v1/chat/completions', [
-                    'model' => config('services.openai.vision_model', 'gpt-4o-mini'),
-                    'messages' => $messages,
-                    'temperature' => 0.2,
-                    'max_tokens' => 1000,
-                ]);
+            $response = $this->sendOpenAiModerationRequest($apiKey, $messages);
 
             // ❌ REAL API ERROR
             if ($response->failed()) {
-                $errorBody = $response->json();
+                $errorBody = $response->json() ?? [];
                 $errorMessage = $this->extractErrorMessage($errorBody);
 
                 Log::error('OpenAI moderation API failed', [
@@ -103,7 +134,7 @@ class ContentModeration
 
                 return [
                     'approved' => false,
-                    'reason' => 'Lỗi AI: ' . $errorMessage,
+                    'reason' => 'Loi AI: ' . $errorMessage,
                     'violations' => ['api_error'],
                     'raw' => null,
                 ];
@@ -175,31 +206,25 @@ class ContentModeration
         ];
 
         try {
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $apiKey,
-                'Content-Type' => 'application/json',
-            ])
-                ->timeout(45)
-                ->post('https://api.openai.com/v1/chat/completions', [
-                    'model' => config('services.openai.vision_model', 'gpt-4o-mini'),
-                    'messages' => [
-                        [
-                            'role' => 'system',
-                            'content' => 'Return ONLY valid JSON. No explanation. No markdown.',
-                        ],
-                        [
-                            'role' => 'user',
-                            'content' => $content,
-                        ],
-                    ],
-                    'temperature' => 0.2,
-                    'max_tokens' => 1000,
-                ]);
+            $messages = [
+                [
+                    'role' => 'system',
+                    'content' => 'Return ONLY valid JSON. No explanation. No markdown.',
+                ],
+                [
+                    'role' => 'user',
+                    'content' => $content,
+                ],
+            ];
+
+            $response = $this->sendOpenAiModerationRequest($apiKey, $messages);
 
             if ($response->failed()) {
+                $errorMessage = $this->extractErrorMessage($response->json() ?? []);
+
                 return [
                     'approved' => false,
-                    'reason' => 'Lỗi AI: ' . $response->body(),
+                    'reason' => 'Loi AI: ' . $errorMessage,
                     'violations' => ['api_error'],
                     'raw' => null,
                 ];
@@ -325,15 +350,15 @@ class ContentModeration
     {
         $checks = $result['checks'] ?? [];
 
-        foreach ([
-            'adult_or_sensitive',
-            'violence_or_danger',
-            'spam_or_meme',
-            'illegal_or_unethical',
-            'discrimination_or_incitation',
-            'clickbait_or_ads',
-            'low_quality_or_unprofessional',
-        ] as $key) {
+        foreach (
+            [
+                'adult_or_sensitive',
+                'violence_or_danger',
+                'spam_or_meme',
+                'illegal_or_unethical',
+                'discrimination_or_incitation',
+            ] as $key
+        ) {
             if (($checks[$key] ?? false) === true) {
                 return true;
             }
@@ -375,8 +400,6 @@ class ContentModeration
             'câu view',
             'cau view',
             'clickbait',
-            'quảng cáo',
-            'quang cao',
             'bất hợp pháp',
             'bat hop phap',
             'illegal',
@@ -527,6 +550,8 @@ class ContentModeration
         // Check standard OpenAI error format: error.message
         if (isset($errorBody['error']['message'])) {
             $msg = $errorBody['error']['message'];
+            $code = (string) ($errorBody['error']['code'] ?? '');
+            $lowerError = Str::lower($msg . ' ' . $code);
 
             // Translate common error messages to Vietnamese
             if (strpos($msg, 'invalid_image_url') !== false || strpos($msg, 'downloading') !== false) {
@@ -535,8 +560,8 @@ class ContentModeration
             if (strpos($msg, 'timeout') !== false) {
                 return 'Lỗi: Yêu cầu quá thời gian chờ';
             }
-            if (strpos($msg, 'rate_limit') !== false) {
-                return 'Lỗi: Quá nhiều yêu cầu, vui lòng thử lại sau';
+            if (str_contains($lowerError, 'rate limit') || str_contains($lowerError, 'rate_limit')) {
+                return 'Hệ thống AI đang quá tải do kiểm duyệt quá nhiều ảnh liên tiếp. Vui lòng thử lại sau vài giây hoặc giảm số lượng ảnh trong mỗi lần tải lên.';
             }
             if (strpos($msg, 'authentication') !== false || strpos($msg, 'unauthorized') !== false) {
                 return 'Lỗi: Xác thực không hợp lệ';
@@ -590,7 +615,6 @@ class ContentModeration
         - Nội dung 18+, khỏa thân, tình dục, khiêu dâm.
         - Nội dung bạo lực, nguy hiểm, máu me, phản cảm.
         - Spam, ảnh chế, nội dung rác, nội dung chất lượng quá thấp rõ ràng.
-        - Dấu hiệu quảng cáo, câu view hoặc nội dung giải trí không phù hợp với môi trường học thuật.
         - Mức độ chuyên nghiệp và tính nghiêm túc ở mức tối thiểu.
         - Nội dung vi phạm pháp luật hoặc đạo đức học thuật rõ ràng.
         - Nội dung phân biệt đối xử, kích động, thù ghét hoặc gây tranh cãi không phù hợp.
