@@ -28,6 +28,8 @@ const SKIP_SANITIZE_FIELD_NAMES = new Set([
   "tools_used",
   "custom_category_name",
   "description",
+  "awards",
+  "team_members",
 ]);
 
 export const sanitizeTextInput = (value, { multiline = false } = {}) => {
