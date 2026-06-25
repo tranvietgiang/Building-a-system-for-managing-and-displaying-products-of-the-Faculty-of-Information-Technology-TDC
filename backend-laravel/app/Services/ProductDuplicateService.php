@@ -12,28 +12,41 @@ class ProductDuplicateService
     {
         $majorId = (int) ($data['major_id'] ?? 0);
         $title = trim((string) ($data['title'] ?? ''));
+        $description = trim((string) ($data['description'] ?? ''));
         $excludedProductId = (int) ($data['replace_product_id'] ?? 0);
 
         if (!$majorId || $title === '') {
             return null;
         }
 
-        $exactMatch = DB::table('products')
+        /**
+         * Không còn chặn chỉ vì trùng title.
+         * Chỉ cảnh báo nếu title giống và description cũng rất giống.
+         */
+        $sameTitleProducts = DB::table('products')
             ->where('major_id', $majorId)
-            ->when($excludedProductId, fn ($query) => $query->where('product_id', '!=', $excludedProductId))
+            ->when($excludedProductId, fn($query) => $query->where('product_id', '!=', $excludedProductId))
             ->whereIn('status', ['pending', 'approved'])
             ->whereRaw('LOWER(TRIM(title)) = ?', [mb_strtolower($title)])
             ->latest('product_id')
-            ->first(['product_id', 'title', 'description', 'status']);
+            ->limit(5)
+            ->get(['product_id', 'title', 'description', 'status']);
 
-        if ($exactMatch) {
-            return [
-                'product_id' => (int) $exactMatch->product_id,
-                'title' => $exactMatch->title,
-                'similarity' => 100,
-                'reason' => 'Tên sản phẩm trùng hoàn toàn với sản phẩm đã tồn tại.',
-                'method' => 'exact',
-            ];
+        foreach ($sameTitleProducts as $product) {
+            $descriptionSimilarity = $this->textSimilarityPercent(
+                $description,
+                (string) $product->description
+            );
+
+            if ($descriptionSimilarity >= 90) {
+                return [
+                    'product_id' => (int) $product->product_id,
+                    'title' => $product->title,
+                    'similarity' => $descriptionSimilarity,
+                    'reason' => 'Tên sản phẩm và mô tả gần như trùng với sản phẩm đã tồn tại.',
+                    'method' => 'local_title_description',
+                ];
+            }
         }
 
         return $this->checkWithAi($data, $majorId, $excludedProductId);
@@ -49,12 +62,17 @@ class ProductDuplicateService
 
         $candidates = DB::table('products')
             ->where('major_id', $majorId)
-            ->when($excludedProductId, fn ($query) => $query->where('product_id', '!=', $excludedProductId))
+            ->when($excludedProductId, fn($query) => $query->where('product_id', '!=', $excludedProductId))
             ->whereIn('status', ['pending', 'approved'])
             ->latest('product_id')
             ->limit(10)
-            ->get(['product_id', 'title', 'description'])
-            ->map(fn ($product) => (array) $product)
+            ->get([
+                'product_id',
+                'title',
+                'description',
+                'status',
+            ])
+            ->map(fn($product) => (array) $product)
             ->all();
 
         if ($candidates === []) {
@@ -65,12 +83,42 @@ class ProductDuplicateService
             $response = Http::timeout(25)
                 ->withToken($apiKey)
                 ->post('https://api.openai.com/v1/chat/completions', [
-                    'model' => config('services.openai.vision_model', 'gpt-4o-mini'),
+                    'model' => config('services.openai.text_model', 'gpt-4o-mini'),
                     'response_format' => ['type' => 'json_object'],
                     'messages' => [
                         [
                             'role' => 'system',
-                            'content' => 'Bạn phát hiện dự án sinh viên trùng lặp. Chỉ trả JSON: {"duplicate":boolean,"product_id":number|null,"similarity":number,"reason":string}. Chỉ đánh duplicate=true khi nội dung/công nghệ gần như cùng một sản phẩm, similarity từ 90 trở lên.',
+                            'content' => '
+You are an AI system that checks whether a new student project is nearly duplicated from existing student projects.
+
+Return ONLY valid JSON:
+{
+  "duplicate": boolean,
+  "product_id": number|null,
+  "similarity": number,
+  "reason": string
+}
+
+The "reason" field must be written in Vietnamese.
+
+IMPORTANT RULES:
+- Do NOT mark duplicate only because projects use the same programming language, framework, database, tool, or major.
+- Do NOT mark duplicate only because both projects are websites, mobile apps, dashboards, management systems, booking systems, or e-commerce systems.
+- Do NOT mark duplicate only because the title is similar.
+- Mark duplicate=true ONLY when the new project is almost the same product as an existing one.
+- Duplicate=true should be used only when the core idea, main features, workflow, target users, and implementation scope are almost identical.
+- If projects are only in the same field but have different purpose, features, or workflow, duplicate must be false.
+- If similarity is below 95, duplicate must be false.
+- Only return duplicate=true when similarity is from 95 to 100.
+- Similarity 90-94 means high similarity but still not enough to block submission.
+- Similarity below 90 means not a duplicate.
+
+Scoring guide:
+- 95-100: Almost the same product, only minor wording/UI/name changes.
+- 90-94: Very similar idea, but still has some meaningful differences. Return duplicate=false.
+- 70-89: Same field or some similar features, but not a duplicate.
+- Below 70: Clearly different.
+                            ',
                         ],
                         [
                             'role' => 'user',
@@ -80,11 +128,16 @@ class ProductDuplicateService
                             ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
                         ],
                     ],
-                    'temperature' => 0.1,
+                    'temperature' => 0,
+                    'max_tokens' => 500,
                 ]);
 
             if (!$response->successful()) {
-                Log::warning('Duplicate AI check failed', ['status' => $response->status()]);
+                Log::warning('Duplicate AI check failed', [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+
                 return null;
             }
 
@@ -92,23 +145,39 @@ class ProductDuplicateService
                 (string) $response->json('choices.0.message.content'),
                 true
             );
-            $threshold = (int) config('product.duplicate_similarity_threshold', 90);
+
+            if (!is_array($result)) {
+                return null;
+            }
+
+            /**
+             * Nới ngưỡng mặc định lên 95.
+             * Có thể chỉnh trong config/product.php nếu muốn.
+             */
+            $threshold = (int) config('product.duplicate_similarity_threshold', 95);
+
             $matchedId = (int) ($result['product_id'] ?? 0);
+            $similarity = (int) ($result['similarity'] ?? 0);
+
             $candidate = collect($candidates)->firstWhere('product_id', $matchedId);
 
-            if (empty($result['duplicate']) || (int) ($result['similarity'] ?? 0) < $threshold || !$candidate) {
+            if (
+                empty($result['duplicate'])
+                || $similarity < $threshold
+                || !$candidate
+            ) {
                 return null;
             }
 
             return [
                 'product_id' => $matchedId,
                 'title' => $candidate['title'],
-                'similarity' => (int) $result['similarity'],
-                'reason' => $result['reason'] ?? 'AI phát hiện sản phẩm có nội dung gần như trùng lặp.',
+                'similarity' => $similarity,
+                'reason' => $result['reason'] ?? 'AI phát hiện sản phẩm gần như trùng với một sản phẩm đã tồn tại.',
                 'method' => 'ai',
             ];
         } catch (\Throwable $exception) {
-            Log::error('Duplicate AI check error: '.$exception->getMessage());
+            Log::error('Duplicate AI check error: ' . $exception->getMessage());
             return null;
         }
     }
@@ -116,10 +185,42 @@ class ProductDuplicateService
     private function comparableData(array $data): array
     {
         return collect($data)->only([
-            'title', 'description', 'major_code', 'programming_language',
-            'framework', 'database_used', 'model_used', 'language',
-            'dataset_used', 'simulation_tool', 'network_protocol',
-            'topology_type', 'design_type', 'tools_used',
+            'title',
+            'description',
+            'major_code',
+            'programming_language',
+            'framework',
+            'database_used',
+            'model_used',
+            'language',
+            'dataset_used',
+            'simulation_tool',
+            'network_protocol',
+            'topology_type',
+            'design_type',
+            'tools_used',
         ])->all();
+    }
+
+    private function normalizeText(string $text): string
+    {
+        $text = mb_strtolower(trim($text));
+        $text = preg_replace('/\s+/u', ' ', $text);
+
+        return $text ?? '';
+    }
+
+    private function textSimilarityPercent(string $a, string $b): int
+    {
+        $a = $this->normalizeText($a);
+        $b = $this->normalizeText($b);
+
+        if ($a === '' || $b === '') {
+            return 0;
+        }
+
+        similar_text($a, $b, $percent);
+
+        return (int) round($percent);
     }
 }
