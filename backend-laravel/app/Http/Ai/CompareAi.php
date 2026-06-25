@@ -180,7 +180,7 @@ class CompareAi
                 'messages' => [
                     [
                         'role' => 'system',
-                        'content' => 'Bạn là một chuyên gia so sánh dự án sinh viên. Trả lời CHỈ bằng JSON hợp lệ, không có text khác. Tất cả trường "reason" phải bằng tiếng Việt.'
+                        'content' => 'You are an expert in comparing student projects for similarity and potential duplication. Respond ONLY with valid JSON, without any extra text. The "reason" field must be written in Vietnamese.'
                     ],
                     [
                         'role' => 'user',
@@ -205,108 +205,146 @@ class CompareAi
     private function buildComparisonPrompt($a, $b, $projectType)
     {
         $commonPrompt = "
-        So sánh 2 dự án sinh viên.
+        You are an expert in detecting similarity and potential duplication between student projects.
 
-        Nếu tiêu đề giống nhau hoặc các công nghệ chính giống nhau thì phải đánh similarity cao.
-        Nếu gần như trùng thông tin thì similarity phải từ 90 đến 100.
-        Trả lời JSON ONLY:
+        Your task:
+        - Compare the core idea, product goal, main features, and processing workflow.
+        - Detect cases where a project only changes the name, UI, colors, logo, icons, layout, or minor details from an existing project.
+        - Do not only compare words literally. You must understand the real meaning and purpose of each project.
+        - Do not approve or reject the project. Only provide a similarity analysis and warning.
+
+        COMPARISON PRIORITY:
+        1. Core idea
+        2. Product goal
+        3. Main features
+        4. Business workflow / processing flow
+        5. System scope
+        6. Target users
+        7. Technology, framework, database, or tools
+
+        SCORING WEIGHTS:
+        - Core idea: 35%
+        - Main features: 30%
+        - Processing workflow: 20%
+        - Technology / tools: 10%
+        - Product name / UI: 5%
+
+        SIMILARITY SCORING RULES:
+        - 95-100: The projects are almost identical in idea, features, workflow, and technology.
+        - 90-98: The project only changes the name, UI, colors, logo, icons, layout, or minor details, but the real product nature is still the same.
+        - 80-89: The projects share the same core idea and most main features, but differ in some implementation details.
+        - 60-79: The projects share some features or technology, but have different goals or scope.
+        - Below 60: The projects are only in the same field/major, but their goals and features are clearly different.
+
+        STRICT RULES:
+        - If both projects have the same core idea and the same main features, similarity must be at least 80.
+        - If only the product name is changed but the features and workflow are the same, similarity must be at least 90.
+        - If the titles are different but the descriptions, features, and workflow are similar, the similarity must still be high.
+        - Do not give a low similarity score only because the UI, colors, icons, layout, or images are different.
+        - Do not give a low similarity score only because the technology stack is different, if the idea and features are similar.
+        - If there is not enough data to compare, clearly mention it in the reason.
+        - If similarity is 85 or above, level must be \"high\".
+        - If similarity is from 60 to 84, level must be \"medium\".
+        - If similarity is below 60, level must be \"low\".
+
+        Return ONLY valid JSON in this format:
         {
-            \"similarity\": number (0-100),
+            \"similarity\": number,
             \"level\": \"low\" | \"medium\" | \"high\",
-            \"reason\": \"giải thích ngắn bằng tiếng Việt\"
+            \"reason\": \"short explanation in Vietnamese\"
         }
-
-        Quy tắc bắt buộc khi chấm similarity:
-        - Nếu các trường chính giống nhau hoặc gần giống nhau, phải đánh similarity cao từ 85-100.
-        - Nếu tiêu đề giống nhau và công nghệ giống nhau, similarity phải là 95-100.
-        - Với similarity từ 85 trở lên, level phải là \"high\".
         ";
 
         if ($projectType === 'AI') {
             return $commonPrompt . "
-        Dự án A (AI):
-        Tiêu đề: {$a->title}
+        Project A (AI):
+        Title: {$a->title}
+        Description: {$a->description}
         Model: {$a->model_used}
         Framework: {$a->framework}
-        Ngôn ngữ: {$a->language}
+        Programming language: {$a->language}
         Dataset: {$a->dataset_used}
-        Độ chính xác: {$a->accuracy_score}
+        Accuracy score: {$a->accuracy_score}
 
-        Dự án B (AI):
-        Tiêu đề: {$b['title']}
+        Project B (AI):
+        Title: {$b['title']}
+        Description: {$b['description']}
         Model: {$b['model_used']}
         Framework: {$b['framework']}
-        Ngôn ngữ: {$b['language']}
+        Programming language: {$b['language']}
         Dataset: {$b['dataset_used']}
-        Độ chính xác: {$b['accuracy_score']}
+        Accuracy score: {$b['accuracy_score']}
 
-        So sánh dựa trên: Model, Framework, Ngôn ngữ, Dataset sử dụng.
+        Compare based on: AI problem, core idea, model, dataset, framework, programming language, and implementation approach.
         ";
         } elseif ($projectType === 'CNTT') {
             return $commonPrompt . "
-        Dự án A (CNTT):
-        Tiêu đề: {$a->title}
-        Ngôn ngữ lập trình: {$a->programming_language}
+        Project A (Information Technology):
+        Title: {$a->title}
+        Description: {$a->description}
+        Programming language: {$a->programming_language}
         Framework: {$a->framework}
-        Cơ sở dữ liệu: {$a->database_used}
+        Database: {$a->database_used}
 
-        Dự án B (CNTT):
-        Tiêu đề: {$b['title']}
-        Ngôn ngữ lập trình: {$b['programming_language']}
+        Project B (Information Technology):
+        Title: {$b['title']}
+        Description: {$b['description']}
+        Programming language: {$b['programming_language']}
         Framework: {$b['framework']}
-        Cơ sở dữ liệu: {$b['database_used']}
+        Database: {$b['database_used']}
 
-        So sánh dựa trên: Ngôn ngữ lập trình, Framework, Cơ sở dữ liệu.
+        Compare based on: system idea, main features, processing workflow, target users, technology stack, framework, and database.
         ";
         } elseif ($projectType === 'Multimedia') {
             return $commonPrompt . "
-        Dự án A (Multimedia):
-        Tiêu đề: {$a->title}
-        Công cụ mô phỏng: {$a->simulation_tool}
-        Giao thức mạng: {$a->network_protocol}
-        Loại hệ thống: {$a->topology_type}
-        File config: {$a->config_file}
+        Project A (Multimedia / Networking):
+        Title: {$a->title}
+        Description: {$a->description}
+        Simulation tool: {$a->simulation_tool}
+        Network protocol: {$a->network_protocol}
+        Topology type: {$a->topology_type}
+        Config file: {$a->config_file}
 
-        Dự án B (Multimedia):
-        Tiêu đề: {$b['title']}
-        Công cụ mô phỏng: {$b['simulation_tool']}
-        Giao thức mạng: {$b['network_protocol']}
-        Loại hệ thống: {$b['topology_type']}
-        File config: {$b['config_file']}
+        Project B (Multimedia / Networking):
+        Title: {$b['title']}
+        Description: {$b['description']}
+        Simulation tool: {$b['simulation_tool']}
+        Network protocol: {$b['network_protocol']}
+        Topology type: {$b['topology_type']}
+        Config file: {$b['config_file']}
 
-        So sánh dựa trên: Công cụ mô phỏng, Giao thức mạng, Loại hệ thống.
+        Compare based on: network/system model, topology, network protocol, simulation tool, configuration method, and implementation purpose.
         ";
         } elseif ($projectType === 'Graphics') {
             return $commonPrompt . "
-        Dự án A (Đồ họa):
-        Tiêu đề: {$a->title}
-        Mô tả: {$a->description}
-        Loại thiết kế: {$a->design_type}
-        Công cụ sử dụng: {$a->tools_used}
-        Link Behance: {$a->behance_link}
+        Project A (Graphic Design):
+        Title: {$a->title}
+        Description: {$a->description}
+        Design type: {$a->design_type}
+        Tools used: {$a->tools_used}
+        Behance link: {$a->behance_link}
 
-        Dự án B (Đồ họa):
-        Tiêu đề: {$b['title']}
-        Mô tả: {$b['description']}
-        Loại thiết kế: {$b['design_type']}
-        Công cụ sử dụng: {$b['tools_used']}
-        Link Behance: {$b['behance_link']}
+        Project B (Graphic Design):
+        Title: {$b['title']}
+        Description: {$b['description']}
+        Design type: {$b['design_type']}
+        Tools used: {$b['tools_used']}
+        Behance link: {$b['behance_link']}
 
-        So sánh dựa trên: Tiêu đề, Mô tả, Loại thiết kế, Công cụ sử dụng và Phong cách thiết kế.
+        Compare based on: design idea, visual style, layout, purpose, design type, tools, and overall creative direction.
         ";
         }
 
-        // Default for other types
         return $commonPrompt . "
-        Dự án A:
-        Tiêu đề: {$a->title}
-        Mô tả: {$a->description}
+        Project A:
+        Title: {$a->title}
+        Description: {$a->description}
 
-        Dự án B:
-        Tiêu đề: {$b['title']}
-        Mô tả: {$b['description']}
+        Project B:
+        Title: {$b['title']}
+        Description: {$b['description']}
 
-        So sánh độ tương đồng giữa 2 dự án này.
+        Compare the similarity between these two student projects.
         ";
     }
 
