@@ -517,7 +517,6 @@ class ContentModeration
         - Kiểm tra nội dung gây hiểu lầm, thông tin sai lệch hoặc phi học thuật
         - Kiểm tra ngôn từ thô tục, xúc phạm hoặc thiếu văn minh
         - Kiểm tra hình ảnh mờ, chất lượng thấp hoặc không liên quan sản phẩm
-        - Kiểm tra dấu hiệu quảng cáo, câu view hoặc nội dung giải trí không phù hợp
         - Kiểm tra mức độ chuyên nghiệp và tính nghiêm túc của nội dung
         - Kiểm tra nội dung có vi phạm pháp luật hoặc đạo đức học thuật hay không
         - Kiểm tra nội dung có mang tính phân biệt đối xử, kích động hoặc gây tranh cãi không phù hợp
@@ -526,8 +525,8 @@ class ContentModeration
         {$json}
 
         QUY TẮC QUAN TRỌNG:
-        - Nếu role = student → chấm điểm nghiêm ngặt hơn
-        - Nếu role = teacher → cho phép một số nội dung giáo dục ở mức ranh giới
+        - Nếu role = student → cho phép một số nội dung giáo dục ở mức ranh giới
+        - Nếu role = teacher → chấm điểm nghiêm ngặt hơn
         - Chỉ trả về JSON hợp lệ
         - Không giải thích ngoài JSON
         - Trường "violations" phải là mảng các chuỗi tiếng Việt mô tả cụ thể nội dung vi phạm
@@ -540,7 +539,7 @@ class ContentModeration
         - Đặt checks.software_ui_or_prototype=true khi ảnh là screenshot giao diện ứng dụng, website, desktop app, mockup hoặc prototype.
         - Với ngành Thiết kế đồ họa/TKĐH/Graphic Design: logo, bộ nhận diện thương hiệu, bao bì, poster, mỹ phẩm, giày dép, túi xách, mannequin và minh họa người mẫu mặc trang phục thông thường là sản phẩm học thuật hợp lệ.
         - KHÔNG đánh dấu adult_or_sensitive chỉ vì ảnh có người mẫu, váy, đường viền cổ áo, mỹ phẩm hoặc chủ đề thời trang/làm đẹp.
-        - Chữ thương hiệu nằm trong logo, poster hoặc bộ nhận diện do sinh viên trình bày không tự động được xem là watermark hay quảng cáo vi phạm.
+        - Chữ thương hiệu nằm trong logo, poster hoặc bộ nhận diện do sinh viên trình bày không tự động được xem là watermark vi phạm.
         - Chỉ chặn ảnh thời trang khi nhìn thấy khỏa thân, bộ phận sinh dục, tình dục rõ ràng hoặc trang phục gợi dục quá mức; violations phải mô tả cụ thể chi tiết nhìn thấy.
 
         Định dạng trả về:
