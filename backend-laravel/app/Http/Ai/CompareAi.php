@@ -248,14 +248,14 @@ class CompareAi
         - Do not give a low similarity score only because the UI, colors, icons, layout, or images are different.
         - Do not give a low similarity score only because the technology stack is different, if the idea and features are similar.
         - If there is not enough data to compare, clearly mention it in the reason.
-        - If similarity is 85 or above, level must be \"Cao\".
-        - If similarity is from 60 to 84, level must be \"Trung bình\".
-        - If similarity is below 60, level must be \"Thấp\".
+        - If similarity is 85 or above, level must be \"high\".
+        - If similarity is from 60 to 84, level must be \"medium\".
+        - If similarity is below 60, level must be \"low\".
 
         Return ONLY valid JSON in this format:
         {
             \"similarity\": number,
-            \"level\": \"Thấp\" | \"Trung bình\" | \"Cao\",
+            \"level\": \"low\" | \"medium\" | \"high\" |  \"Vietnamese\",
             \"reason\": \"short explanation in Vietnamese\"
         }
         ";
