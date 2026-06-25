@@ -507,43 +507,29 @@ class ContentModeration
         watermark nặng hoặc có dấu hiệu đánh cắp
 
         Nhiệm vụ:
-        - Phân tích hình ảnh và nội dung sản phẩm
-        - Kiểm tra mức độ phù hợp với môi trường giáo dục và nghiên cứu
-        - Kiểm tra nội dung 18+ / khỏa thân / tình dục
-        - Kiểm tra nội dung bạo lực / nguy hiểm / phản cảm
-        - Kiểm tra spam / ảnh chế / nội dung chất lượng thấp
-        - Kiểm tra độ liên quan với chuyên ngành hoặc lĩnh vực học thuật
-        - Kiểm tra watermark hoặc dấu hiệu nội dung bị sao chép / đánh cắp
-        - Kiểm tra nội dung gây hiểu lầm, thông tin sai lệch hoặc phi học thuật
-        - Kiểm tra ngôn từ thô tục, xúc phạm hoặc thiếu văn minh
-        - Kiểm tra hình ảnh mờ, chất lượng thấp hoặc không liên quan sản phẩm
-        - Kiểm tra mức độ chuyên nghiệp và tính nghiêm túc của nội dung
-        - Kiểm tra nội dung có vi phạm pháp luật hoặc đạo đức học thuật hay không
-        - Kiểm tra nội dung có mang tính phân biệt đối xử, kích động hoặc gây tranh cãi không phù hợp
+        - Kiểm tra hình ảnh có liên quan đến sản phẩm nghiên cứu/chuyên ngành hay không
+        - Phát hiện nội dung 18+, khỏa thân, tình dục
+        - Phát hiện nội dung bạo lực, máu me, nguy hiểm
+        - Phát hiện nội dung phản cảm, kích động, vi phạm pháp luật hoặc phân biệt đối xử
+        - Kiểm tra spam, ảnh chế, nội dung chất lượng thấp hoặc không phù hợp học thuật
 
         Dữ liệu sản phẩm:
         {$json}
 
         QUY TẮC QUAN TRỌNG:
-        - Nếu role = student → cho phép một số nội dung giáo dục ở mức ranh giới
-        - Nếu role = teacher → chấm điểm nghiêm ngặt hơn
+
+        - Nếu role = student → ưu tiên cho phép các nội dung phục vụ học tập và nghiên cứu
         - Chỉ trả về JSON hợp lệ
         - Không giải thích ngoài JSON
-        - Trường "violations" phải là mảng các chuỗi tiếng Việt mô tả cụ thể nội dung vi phạm
-        - Nếu vi phạm nằm trong hình ảnh, mỗi phần tử violations phải bắt đầu bằng "Ảnh:" và ghi rõ nội dung nhìn thấy trong ảnh
-        - Nếu trong ảnh có chữ, logo, watermark, thông tin nhạy cảm hoặc nội dung gây vi phạm, hãy ghi lại ngắn gọn chính thông tin/chữ đó trong violations
-        - Không trả violations chung chung như "image_related" hoặc "adult_or_sensitive"; phải ghi rõ ví dụ: "Ảnh: có chữ ...", "Ảnh: có watermark ...", "Ảnh: nội dung không liên quan ..."
-        - Ảnh chụp giao diện phần mềm, bài tập, prototype quản lý học viên/sinh viên/thí sinh hoặc quản lý điểm là nội dung giáo dục hợp lệ.
-        - Tên, MSSV, mã học viên, ngày sinh, địa chỉ và điểm số xuất hiện bên trong giao diện phần mềm demo phải được xem là dữ liệu minh họa; KHÔNG từ chối chỉ vì các trường hoặc dữ liệu này.
-        - Chỉ xem là vi phạm riêng tư khi đó rõ ràng là ảnh tài liệu/hồ sơ/bảng điểm thật (không phải UI phần mềm demo) hoặc lộ định danh rủi ro cao như CCCD/hộ chiếu, số điện thoại, email cá nhân hay tài khoản đăng nhập.
-        - Đặt checks.software_ui_or_prototype=true khi ảnh là screenshot giao diện ứng dụng, website, desktop app, mockup hoặc prototype.
-        - Với ngành Thiết kế đồ họa/TKĐH/Graphic Design: logo, bộ nhận diện thương hiệu, bao bì, poster, mỹ phẩm, giày dép, túi xách, mannequin và minh họa người mẫu mặc trang phục thông thường là sản phẩm học thuật hợp lệ.
-        - KHÔNG đánh dấu adult_or_sensitive chỉ vì ảnh có người mẫu, váy, đường viền cổ áo, mỹ phẩm hoặc chủ đề thời trang/làm đẹp.
-        - Chữ thương hiệu nằm trong logo, poster hoặc bộ nhận diện do sinh viên trình bày không tự động được xem là watermark vi phạm.
-        - Chỉ chặn ảnh thời trang khi nhìn thấy khỏa thân, bộ phận sinh dục, tình dục rõ ràng hoặc trang phục gợi dục quá mức; violations phải mô tả cụ thể chi tiết nhìn thấy.
+        - Trường "violations" phải mô tả cụ thể nội dung vi phạm bằng tiếng Việt
+        - Nếu vi phạm nằm trong hình ảnh, mỗi phần tử trong "violations" phải bắt đầu bằng "Ảnh:" và mô tả rõ nội dung vi phạm
+        - Không sử dụng các mô tả chung chung như "adult_or_sensitive" hoặc "image_related"
+        - Ảnh chụp giao diện website, ứng dụng, prototype hoặc bài tập được xem là nội dung học thuật hợp lệ
+        - Không từ chối chỉ vì hình ảnh có logo, watermark nhỏ hoặc giao diện tham khảo
+        - Chỉ từ chối khi phát hiện nội dung 18+, bạo lực, phản cảm, spam hoặc hình ảnh hoàn toàn không liên quan đến sản phẩm
+        - Nếu không đủ căn cứ xác định vi phạm, ưu tiên đánh giá an toàn và giải thích trong trường "reason"
 
         Định dạng trả về:
-
         {
             "approved": true,
             "score": 0-100,
@@ -563,9 +549,10 @@ class ContentModeration
         }
 
         Từ chối (approved=false) nếu:
-        - Phát hiện nội dung 18+ / tình dục
-        - Phát hiện bạo lực / máu me
-        - Có watermark nặng hoặc dấu hiệu nội dung bị đánh cắp
+        - Có nội dung 18+, khỏa thân hoặc tình dục
+        - Có nội dung bạo lực, máu me hoặc nguy hiểm
+        - Có nội dung phản cảm hoặc vi phạm pháp luật
+        - Là hình ảnh spam, ảnh chế hoặc hoàn toàn không liên quan đến sản phẩm
         PROMPT;
     }
 }
