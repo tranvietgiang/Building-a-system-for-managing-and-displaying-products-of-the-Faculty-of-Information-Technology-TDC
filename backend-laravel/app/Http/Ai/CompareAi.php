@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use App\Repositories\ProductRepository;
 use App\Services\SystemSettingService;
+use Illuminate\Support\Facades\DB;
 
 class CompareAi
 {
@@ -72,7 +73,11 @@ class CompareAi
                 $gpt = $this->compareWithAi($currentProduct, $product, $projectType);
                 $duplicateFields = $this->getDuplicateFields($currentProduct, $product, $projectType);
 
+                $productId = (int) ($product['product_id'] ?? 0);
+
                 $enriched[] = array_merge($product, [
+                    'images' => $this->getProductImages($productId),
+
                     'ai_similarity' => $gpt['similarity'] ?? 0,
                     'ai_level' => $gpt['level'] ?? 'low',
                     'ai_reason' => $gpt['reason'] ?? '',
@@ -416,6 +421,7 @@ class CompareAi
             'title' => $p->title,
             'description' => $p->description,
             'thumbnail' => $p->thumbnail,
+            'images' => $this->getProductImages((int) $p->product_id),
             'status' => $p->status,
             'created_at' => $p->created_at,
             'approved_at' => $p->approved_at,
@@ -441,5 +447,20 @@ class CompareAi
             // Common fields
             'framework' => $p->framework ?? null,
         ];
+    }
+
+    private function getProductImages(int $productId): array
+    {
+        if (!$productId) {
+            return [];
+        }
+
+        return DB::table('product_images')
+            ->where('product_id', $productId)
+            ->whereNotNull('image_url')
+            ->pluck('image_url')
+            ->filter()
+            ->values()
+            ->all();
     }
 }

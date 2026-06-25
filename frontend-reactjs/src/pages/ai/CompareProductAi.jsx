@@ -130,9 +130,21 @@ export default function CompareProductAi() {
         { key: "model_used", label: "Model", getValue: (p) => p.model_used },
         { key: "framework", label: "Framework", getValue: (p) => p.framework },
         { key: "language", label: "Ngôn ngữ", getValue: (p) => p.language },
-        { key: "dataset_used", label: "Dataset", getValue: (p) => p.dataset_used },
-        { key: "accuracy_score", label: "Độ chính xác", getValue: (p) => p.accuracy_score },
-        { key: "ai_similarity", label: "Độ tương đồng AI", getValue: (p) => p.ai_similarity },
+        {
+          key: "dataset_used",
+          label: "Dataset",
+          getValue: (p) => p.dataset_used,
+        },
+        {
+          key: "accuracy_score",
+          label: "Độ chính xác",
+          getValue: (p) => p.accuracy_score,
+        },
+        {
+          key: "ai_similarity",
+          label: "Độ tương đồng AI",
+          getValue: (p) => p.ai_similarity,
+        },
         { key: "ai_level", label: "Cấp độ AI", getValue: (p) => p.ai_level },
       ];
     }
@@ -146,9 +158,17 @@ export default function CompareProductAi() {
     ) {
       return [
         { key: "title", label: "Tiêu đề", getValue: (p) => p.title },
-        { key: "programming_language", label: "Ngôn ngữ lập trình", getValue: (p) => p.programming_language },
+        {
+          key: "programming_language",
+          label: "Ngôn ngữ lập trình",
+          getValue: (p) => p.programming_language,
+        },
         { key: "framework", label: "Framework", getValue: (p) => p.framework },
-        { key: "database_used", label: "Cơ sở dữ liệu", getValue: (p) => p.database_used },
+        {
+          key: "database_used",
+          label: "Cơ sở dữ liệu",
+          getValue: (p) => p.database_used,
+        },
       ];
     }
 
@@ -162,10 +182,26 @@ export default function CompareProductAi() {
     ) {
       return [
         { key: "title", label: "Tiêu đề", getValue: (p) => p.title },
-        { key: "simulation_tool", label: "Công cụ mô phỏng", getValue: (p) => p.simulation_tool },
-        { key: "network_protocol", label: "Giao thức mạng", getValue: (p) => p.network_protocol },
-        { key: "topology_type", label: "Loại hệ thống", getValue: (p) => p.topology_type },
-        { key: "config_file", label: "File config", getValue: (p) => p.config_file },
+        {
+          key: "simulation_tool",
+          label: "Công cụ mô phỏng",
+          getValue: (p) => p.simulation_tool,
+        },
+        {
+          key: "network_protocol",
+          label: "Giao thức mạng",
+          getValue: (p) => p.network_protocol,
+        },
+        {
+          key: "topology_type",
+          label: "Loại hệ thống",
+          getValue: (p) => p.topology_type,
+        },
+        {
+          key: "config_file",
+          label: "File config",
+          getValue: (p) => p.config_file,
+        },
       ];
     }
 
@@ -178,9 +214,21 @@ export default function CompareProductAi() {
     ) {
       return [
         { key: "title", label: "Tiêu đề", getValue: (p) => p.title },
-        { key: "design_type", label: "Loại ấn phẩm", getValue: (p) => p.design_type },
-        { key: "tools_used", label: "Công cụ sử dụng", getValue: (p) => p.tools_used },
-        { key: "behance_link", label: "Link Behance", getValue: (p) => p.behance_link },
+        {
+          key: "design_type",
+          label: "Loại ấn phẩm",
+          getValue: (p) => p.design_type,
+        },
+        {
+          key: "tools_used",
+          label: "Công cụ sử dụng",
+          getValue: (p) => p.tools_used,
+        },
+        {
+          key: "behance_link",
+          label: "Link Behance",
+          getValue: (p) => p.behance_link,
+        },
       ];
     }
 
@@ -236,6 +284,131 @@ export default function CompareProductAi() {
   const overlap = selectedMatch
     ? calculateOverlap(productData, selectedMatch, comparisonFields)
     : null;
+
+  //
+  const normalizeImageItem = (item) => {
+    if (!item) return null;
+
+    if (typeof item === "string") {
+      return item;
+    }
+
+    return (
+      item.image_url ||
+      item.url ||
+      item.secure_url ||
+      item.thumbnail ||
+      item.path ||
+      null
+    );
+  };
+
+  const getProductImages = (product) => {
+    if (!product) return [];
+
+    const rawImages = [
+      product.thumbnail,
+      ...(Array.isArray(product.images) ? product.images : []),
+      ...(Array.isArray(product.product_images) ? product.product_images : []),
+      ...(Array.isArray(product.gallery) ? product.gallery : []),
+      ...(Array.isArray(product.gallery_images) ? product.gallery_images : []),
+    ];
+
+    return Array.from(
+      new Set(rawImages.map(normalizeImageItem).filter(Boolean)),
+    );
+  };
+
+  const normalizeImageUrl = (url) => {
+    return String(url || "")
+      .split("?")[0]
+      .trim()
+      .toLowerCase();
+  };
+
+  const isSameImageUrl = (imageUrl, otherImages) => {
+    const current = normalizeImageUrl(imageUrl);
+
+    return otherImages.some((other) => normalizeImageUrl(other) === current);
+  };
+
+  const productAImages = getProductImages(productData);
+  const productBImages = getProductImages(selectedMatch);
+
+  const duplicatedImageCount = productAImages.filter((img) =>
+    isSameImageUrl(img, productBImages),
+  ).length;
+  //
+  const GalleryColumn = ({ title, subtitle, images, otherImages, color }) => {
+    return (
+      <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div>
+            <h3 className="font-bold text-gray-900">{title}</h3>
+            <p className="text-xs text-gray-500 line-clamp-1">{subtitle}</p>
+          </div>
+
+          <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-gray-700">
+            {images.length} ảnh
+          </span>
+        </div>
+
+        {images.length > 0 ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {images.map((src, index) => {
+              const duplicated = isSameImageUrl(src, otherImages);
+
+              return (
+                <div
+                  key={`${src}-${index}`}
+                  className={`relative overflow-hidden rounded-lg border bg-white ${
+                    duplicated
+                      ? "border-red-700 ring-2 ring-red-300"
+                      : "border-gray-200"
+                  }`}
+                >
+                  <a href={src} target="_blank" rel="noreferrer">
+                    <img
+                      src={src}
+                      alt={`${title} ảnh ${index + 1}`}
+                      className="h-32 w-full object-cover transition hover:scale-105"
+                      onError={(e) => {
+                        e.currentTarget.src =
+                          "https://via.placeholder.com/800x450?text=No+Image";
+                      }}
+                    />
+                  </a>
+
+                  <div className="absolute left-2 top-2 rounded-full bg-black/70 px-2 py-1 text-xs font-semibold text-white">
+                    #{index + 1}
+                  </div>
+
+                  {index === 0 && (
+                    <div
+                      className={`absolute right-2 top-2 rounded-full px-2 py-1 text-xs font-semibold text-white ${color}`}
+                    >
+                      Thumbnail
+                    </div>
+                  )}
+
+                  {duplicated && (
+                    <div className="absolute bottom-2 left-2 right-2 rounded-md bg-red-800 px-2 py-1 text-center text-xs font-bold text-white">
+                      Trùng URL ảnh
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="rounded-lg border border-dashed border-gray-300 bg-white p-8 text-center text-sm text-gray-500">
+            Chưa có ảnh gallery
+          </div>
+        )}
+      </div>
+    );
+  };
+  //
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8">
@@ -305,7 +478,8 @@ export default function CompareProductAi() {
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
               {allMatches.map((product) => {
                 const statusBadge = getStatusBadge(product.status);
-                const isSelected = selectedMatch?.product_id === product.product_id;
+                const isSelected =
+                  selectedMatch?.product_id === product.product_id;
                 const duplicateFields = product.duplicate_fields || [];
 
                 return (
@@ -350,7 +524,8 @@ export default function CompareProductAi() {
                     </div>
 
                     <p className="text-xs text-gray-600 mt-3 line-clamp-2">
-                      {product.duplicate_message || "Không có trường chính trùng"}
+                      {product.duplicate_message ||
+                        "Không có trường chính trùng"}
                     </p>
                   </button>
                 );
@@ -599,104 +774,134 @@ export default function CompareProductAi() {
             </div>
 
             {/* Thumbnail Section */}
-            {(selectedMatch.thumbnail || productData.thumbnail) && (
+            {/* Gallery Comparison Section */}
+            {(productAImages.length > 0 || productBImages.length > 0) && (
               <div className="bg-white rounded-2xl shadow-lg overflow-hidden mt-6">
                 <div className="bg-gray-800 text-white p-4">
-                  <h2 className="text-xl font-bold">🖼️ Hình ảnh sản phẩm</h2>
+                  <h2 className="text-xl font-bold">
+                    🖼️ So sánh hình ảnh / gallery sản phẩm
+                  </h2>
+                  <p className="text-sm opacity-90 mt-1">
+                    Hiển thị thumbnail và gallery để xem trực quan trước khi
+                    duyệt hoặc từ chối.
+                  </p>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6">
-                  {productData.thumbnail && (
-                    <div>
-                      <p className="text-sm font-semibold text-gray-700 mb-2">
+
+                <div className="p-6">
+                  <div className="mb-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div className="rounded-lg bg-blue-50 p-4">
+                      <p className="text-sm font-semibold text-blue-700">
                         Sản phẩm A
                       </p>
-                      <img
-                        src={productData.thumbnail}
-                        alt={productData.title}
-                        className="w-full h-48 object-cover rounded-lg"
-                        onError={(e) => {
-                          e.target.src =
-                            "https://via.placeholder.com/800x450?text=No+Image";
-                        }}
-                      />
+                      <p className="text-2xl font-bold text-blue-900">
+                        {productAImages.length} ảnh
+                      </p>
                     </div>
-                  )}
-                  {selectedMatch.thumbnail && (
-                    <div>
-                      <p className="text-sm font-semibold text-gray-700 mb-2">
+
+                    <div className="rounded-lg bg-purple-50 p-4">
+                      <p className="text-sm font-semibold text-purple-700">
                         Sản phẩm B
                       </p>
-                      <img
-                        src={selectedMatch.thumbnail}
-                        alt={selectedMatch.title}
-                        className="w-full h-48 object-cover rounded-lg"
-                        onError={(e) => {
-                          e.target.src =
-                            "https://via.placeholder.com/800x450?text=No+Image";
-                        }}
-                      />
+                      <p className="text-2xl font-bold text-purple-900">
+                        {productBImages.length} ảnh
+                      </p>
                     </div>
-                  )}
+
+                    <div className="rounded-lg bg-red-50 p-4">
+                      <p className="text-sm font-semibold text-red-700">
+                        Ảnh trùng URL
+                      </p>
+                      <p className="text-2xl font-bold text-red-900">
+                        {duplicatedImageCount}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <GalleryColumn
+                      title="Sản phẩm A"
+                      subtitle={productData.title}
+                      images={productAImages}
+                      otherImages={productBImages}
+                      color="bg-blue-600"
+                    />
+
+                    <GalleryColumn
+                      title="Sản phẩm B"
+                      subtitle={selectedMatch.title}
+                      images={productBImages}
+                      otherImages={productAImages}
+                      color="bg-purple-600"
+                    />
+                  </div>
+
+                  <div className="mt-4 rounded-lg bg-yellow-50 border border-yellow-200 p-4 text-sm text-yellow-800">
+                    Lưu ý: phần này chỉ hỗ trợ xem trực quan gallery. Nếu ảnh bị
+                    crop, resize, đổi định dạng hoặc upload lại thành URL khác
+                    thì hệ thống có thể không tự đánh dấu trùng URL. Người duyệt
+                    vẫn nên xem bằng mắt trước khi quyết định.
+                  </div>
                 </div>
               </div>
             )}
 
             {/* AI Similarity Info (if available) */}
-            {selectedMatch.ai_similarity !== null && selectedMatch.ai_similarity !== undefined && (
-              <div className="bg-white rounded-2xl shadow-lg overflow-hidden mt-6">
-                <div className="bg-gray-800 text-white p-4">
-                  <h2 className="text-xl font-bold">🤖 Đánh giá từ AI</h2>
-                </div>
-                <div className="p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div
-                      className={`rounded-lg p-4 ${
-                        selectedMatch.ai_similarity >= 85
-                          ? "bg-red-100 border-2 border-red-700"
-                          : "bg-blue-50"
-                      }`}
-                    >
-                      <p
-                        className={`text-sm font-semibold ${
-                          selectedMatch.ai_similarity >= 85
-                            ? "text-red-800"
-                            : "text-blue-600"
-                        }`}
-                      >
-                        Độ tương đồng
-                      </p>
-                      <p
-                        className={`text-2xl font-bold ${
-                          selectedMatch.ai_similarity >= 85
-                            ? "text-red-950"
-                            : "text-blue-700"
-                        }`}
-                      >
-                        {selectedMatch.ai_similarity}%
-                      </p>
-                    </div>
-                    <div className="bg-purple-50 rounded-lg p-4">
-                      <p className="text-sm text-purple-600 font-semibold">
-                        Cấp độ
-                      </p>
-                      <p className="text-2xl font-bold text-purple-700">
-                        {selectedMatch.ai_level}
-                      </p>
-                    </div>
+            {selectedMatch.ai_similarity !== null &&
+              selectedMatch.ai_similarity !== undefined && (
+                <div className="bg-white rounded-2xl shadow-lg overflow-hidden mt-6">
+                  <div className="bg-gray-800 text-white p-4">
+                    <h2 className="text-xl font-bold">🤖 Đánh giá từ AI</h2>
                   </div>
-                  {selectedMatch.ai_reason && (
-                    <div className="mt-4 bg-gray-50 rounded-lg p-4">
-                      <p className="text-sm text-gray-600 font-semibold mb-1">
-                        Lý do
-                      </p>
-                      <p className="text-gray-700 leading-relaxed">
-                        {selectedMatch.ai_reason}
-                      </p>
+                  <div className="p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div
+                        className={`rounded-lg p-4 ${
+                          selectedMatch.ai_similarity >= 85
+                            ? "bg-red-100 border-2 border-red-700"
+                            : "bg-blue-50"
+                        }`}
+                      >
+                        <p
+                          className={`text-sm font-semibold ${
+                            selectedMatch.ai_similarity >= 85
+                              ? "text-red-800"
+                              : "text-blue-600"
+                          }`}
+                        >
+                          Độ tương đồng
+                        </p>
+                        <p
+                          className={`text-2xl font-bold ${
+                            selectedMatch.ai_similarity >= 85
+                              ? "text-red-950"
+                              : "text-blue-700"
+                          }`}
+                        >
+                          {selectedMatch.ai_similarity}%
+                        </p>
+                      </div>
+                      <div className="bg-purple-50 rounded-lg p-4">
+                        <p className="text-sm text-purple-600 font-semibold">
+                          Cấp độ
+                        </p>
+                        <p className="text-2xl font-bold text-purple-700">
+                          {selectedMatch.ai_level}
+                        </p>
+                      </div>
                     </div>
-                  )}
+                    {selectedMatch.ai_reason && (
+                      <div className="mt-4 bg-gray-50 rounded-lg p-4">
+                        <p className="text-sm text-gray-600 font-semibold mb-1">
+                          Lý do
+                        </p>
+                        <p className="text-gray-700 leading-relaxed">
+                          {selectedMatch.ai_reason}
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
           </>
         )}
 
