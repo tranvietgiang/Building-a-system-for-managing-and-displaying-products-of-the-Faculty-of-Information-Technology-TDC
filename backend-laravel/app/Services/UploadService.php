@@ -57,7 +57,7 @@ class UploadService extends BaseRepository
             return [
                 'error' => true,
                 // 'message' => 'Sản phẩm bị trùng với “'.$duplicate['title'].'” ('.$duplicate['similarity'].'%).',
-                'message' => 'Sản phẩm có mức tương đồng cao với một sản phẩm đã tồn tại trong hệ thống. Bạn vẫn có thể tiếp tục gửi!',
+                'message' => 'Sản phẩm có mức tương đồng cao với một sản phẩm đã tồn tại trong hệ thống!',
                 'detail' => $duplicate,
             ];
         }
