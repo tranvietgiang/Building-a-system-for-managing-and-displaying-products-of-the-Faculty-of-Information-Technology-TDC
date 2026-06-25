@@ -165,8 +165,10 @@ const UploadProductForm_Graphic = ({
               {/* Mô tả ý tưởng */}
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
-                  Mô tả ý tưởng, phong cách
-                  {" "}<span className="ml-1 text-xs font-normal text-gray-400">(có thể bỏ qua)</span>
+                  Mô tả ý tưởng, phong cách{" "}
+                  <span className="ml-1 text-xs font-normal text-gray-400">
+                    (có thể bỏ qua)
+                  </span>
                 </label>
                 <textarea
                   name="description"
@@ -449,7 +451,6 @@ const UploadProductForm_Graphic = ({
                   <p className="mt-2 text-sm text-red-600">{errors.images}</p>
                 )}
               </div>
-
             </div>
           </div>
 
@@ -471,8 +472,7 @@ const UploadProductForm_Graphic = ({
               {/* TAG */}
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
-                  Công cụ / Phong cách / Kỹ thuật
-                  {" "}
+                  Công cụ / Phong cách / Kỹ thuật{" "}
                   <span className="ml-1 text-xs font-normal text-gray-400">
                     (có thể bỏ qua)
                   </span>
@@ -488,7 +488,8 @@ const UploadProductForm_Graphic = ({
                 />
 
                 <p className="mt-2 text-xs text-gray-500">
-                  Nhập từng công cụ, phong cách hoặc kỹ thuật, sau đó nhấn Enter.
+                  Nhập từng công cụ, phong cách hoặc kỹ thuật, sau đó nhấn
+                  Enter.
                 </p>
 
                 {tags.length > 0 && (
@@ -515,19 +516,25 @@ const UploadProductForm_Graphic = ({
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
                   Bảng màu sắc{" "}
-                  <span className="font-normal text-gray-400">(có thể bỏ qua)</span>
+                  <span className="font-normal text-gray-400">
+                    (có thể bỏ qua)
+                  </span>
                 </label>
                 <div className="flex flex-wrap items-center gap-3">
                   <input
                     type="color"
                     value={selectedPaletteColor}
-                    onChange={(event) => setSelectedPaletteColor(event.target.value.toUpperCase())}
+                    onChange={(event) =>
+                      setSelectedPaletteColor(event.target.value.toUpperCase())
+                    }
                     className="h-11 w-14 cursor-pointer rounded-lg border border-gray-200 bg-white p-1"
                   />
                   <input
                     type="text"
                     value={selectedPaletteColor}
-                    onChange={(event) => setSelectedPaletteColor(event.target.value.toUpperCase())}
+                    onChange={(event) =>
+                      setSelectedPaletteColor(event.target.value.toUpperCase())
+                    }
                     onKeyDown={(event) => {
                       if (event.key === "Enter") {
                         event.preventDefault();
@@ -541,7 +548,10 @@ const UploadProductForm_Graphic = ({
                   <button
                     type="button"
                     onClick={addPaletteColor}
-                    disabled={paletteColors.length >= 8 || !/^#[0-9A-F]{6}$/i.test(selectedPaletteColor)}
+                    disabled={
+                      paletteColors.length >= 8 ||
+                      !/^#[0-9A-F]{6}$/i.test(selectedPaletteColor)
+                    }
                     className="rounded-xl bg-gray-900 px-4 py-2.5 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     Thêm màu
@@ -566,7 +576,9 @@ const UploadProductForm_Graphic = ({
                           style={{ backgroundColor: color }}
                         />
                         {color}
-                        <span className="text-gray-400 group-hover:text-red-500">×</span>
+                        <span className="text-gray-400 group-hover:text-red-500">
+                          ×
+                        </span>
                       </button>
                     ))}
                   </div>
@@ -594,8 +606,11 @@ const UploadProductForm_Graphic = ({
                 {/* Behance */}
                 <div>
                   <label className="mb-2 block text-sm font-semibold text-gray-700">
-                    Liên kết tham khảo Behance / Dribbble
-                   {" "}<span className="ml-1 text-xs font-normal text-gray-400">(có thể bỏ qua)</span></label>
+                    Liên kết tham khảo Behance / Dribbble{" "}
+                    <span className="ml-1 text-xs font-normal text-gray-400">
+                      (có thể bỏ qua)
+                    </span>
+                  </label>
 
                   <input
                     type="url"
@@ -614,8 +629,11 @@ const UploadProductForm_Graphic = ({
                 {/* GITHUB */}
                 <div>
                   <label className="mb-2 block text-sm font-semibold text-gray-700">
-                    GitHub (nếu có web design)
-                   {" "}<span className="ml-1 text-xs font-normal text-gray-400">(có thể bỏ qua)</span></label>
+                    GitHub (nếu có web design){" "}
+                    <span className="ml-1 text-xs font-normal text-gray-400">
+                      (có thể bỏ qua)
+                    </span>
+                  </label>
 
                   <input
                     type="url"
@@ -630,8 +648,11 @@ const UploadProductForm_Graphic = ({
                 {/* DEMO */}
                 <div>
                   <label className="mb-2 block text-sm font-semibold text-gray-700">
-                    Demo Website / Portfolio
-                   {" "}<span className="ml-1 text-xs font-normal text-gray-400">(có thể bỏ qua)</span></label>
+                    Demo Website / Portfolio{" "}
+                    <span className="ml-1 text-xs font-normal text-gray-400">
+                      (có thể bỏ qua)
+                    </span>
+                  </label>
 
                   <input
                     type="url"
@@ -765,7 +786,7 @@ const UploadProductForm_Graphic = ({
           <div className="rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 p-4 text-center">
             <p className="text-sm text-gray-600">
               <span className="font-semibold text-blue-600">📌 Lưu ý:</span> Sản
-              phẩm của bạn sẽ được gửi đến giảng viên chuyên ngành
+              phẩm của bạn sẽ được gửi đến giảng viên chuyên ngành{" "}
               <span className="font-semibold"> {currentStudent?.major}</span> để
               xét duyệt trong vòng 24-48 giờ.
             </p>

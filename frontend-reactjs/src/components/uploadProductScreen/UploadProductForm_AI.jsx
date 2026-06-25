@@ -786,7 +786,7 @@ const UploadProductForm_AI = ({
           <div className="rounded-xl bg-gradient-to-r from-purple-50 to-indigo-50 p-4 text-center">
             <p className="text-sm text-gray-600">
               <span className="font-semibold text-purple-600">📌 Lưu ý:</span>{" "}
-              Sản phẩm của bạn sẽ được gửi đến giảng viên chuyên ngành
+              Sản phẩm của bạn sẽ được gửi đến giảng viên chuyên ngành{" "}
               <span className="font-semibold"> {currentStudent?.major}</span> để
               xét duyệt trong vòng 24-48 giờ.
             </p>

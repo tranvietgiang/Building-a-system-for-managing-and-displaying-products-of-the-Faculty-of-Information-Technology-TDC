@@ -59,8 +59,7 @@ const UploadProductScreen = () => {
         editProduct.accuracy_score || aiDetail.accuracy_score || "",
       programming_language:
         editProduct.programming_language || itDetail.programming_language || "",
-      database_used:
-        editProduct.database_used || itDetail.database_used || "",
+      database_used: editProduct.database_used || itDetail.database_used || "",
       simulation_tool:
         editProduct.simulation_tool || networkDetail.simulation_tool || "",
       network_protocol:
@@ -103,7 +102,8 @@ const UploadProductScreen = () => {
 
     return [...thumbnailImage, ...detailImages].filter(
       (image, index, allImages) =>
-        image.url && allImages.findIndex((item) => item.url === image.url) === index,
+        image.url &&
+        allImages.findIndex((item) => item.url === image.url) === index,
     );
   }, [editProduct, isEditMode]);
 
@@ -235,9 +235,7 @@ const UploadProductScreen = () => {
             {isEditMode ? "Chỉnh sửa sản phẩm" : title}
           </h1>
           <p className="mt-2 text-gray-600">
-            {isEditMode
-              ? "Cập nhật thông tin sản phẩm của bạn"
-              : description}
+            {isEditMode ? "Cập nhật thông tin sản phẩm của bạn" : description}
           </p>
         </div>
 
@@ -314,7 +312,9 @@ const UploadProductScreen = () => {
             rows={3}
             maxLength={2000}
             className="w-full rounded-xl border-2 border-slate-200 px-4 py-3 outline-none transition focus:border-slate-400"
-            placeholder={"Mỗi sinh viên một dòng, VD:\n23211TT0001 - Nguyễn Văn B"}
+            placeholder={
+              "Mỗi sinh viên một dòng, VD:\n23211TT0001 - Nguyễn Văn B"
+            }
           />
           <p className="mt-2 text-xs text-slate-500">
             Người đăng sản phẩm được ghi nhận tự động là nhóm trưởng.
