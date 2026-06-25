@@ -91,19 +91,19 @@ class ContentModeration
 
             if ($response->failed()) {
                 $errorBody = $response->json();
-                $errorMessage = $this->extractErrorMessage($errorBody);
 
-                Log::error('OpenAI moderation API failed', [
-                    'status' => $response->status(),
-                    'body' => $response->body(),
-                    'product_id' => $product->product_id,
-                ]);
+                if ($response->status() === 429) {
+                    return $this->aiBusySkippedResult();
+                }
+
+                $errorMessage = $this->extractErrorMessage($errorBody);
 
                 return [
                     'approved' => false,
                     'reason' => 'Lỗi AI: ' . $errorMessage,
                     'violations' => ['Lỗi hệ thống AI'],
                     'raw' => null,
+                    'system_error' => true,
                 ];
             }
 
@@ -196,6 +196,11 @@ class ContentModeration
 
             if ($response->failed()) {
                 $errorBody = $response->json();
+
+                if ($response->status() === 429) {
+                    return $this->aiBusySkippedResult();
+                }
+
                 $errorMessage = $this->extractErrorMessage($errorBody);
 
                 return [
@@ -203,6 +208,7 @@ class ContentModeration
                     'reason' => 'Lỗi AI: ' . $errorMessage,
                     'violations' => ['Lỗi hệ thống AI'],
                     'raw' => null,
+                    'system_error' => true,
                 ];
             }
 
@@ -618,6 +624,19 @@ class ContentModeration
             'violations' => [],
             'raw' => null,
             'skipped' => true,
+        ];
+    }
+
+    private function aiBusySkippedResult(): array
+    {
+        return [
+            'approved' => true,
+            'reason' => 'Hệ thống AI đang quá tải do kiểm duyệt nhiều ảnh liên tiếp. Ảnh được tạm thời cho qua và không bị xem là vi phạm.',
+            'violations' => [],
+            'raw' => null,
+            'skipped' => true,
+            'system_error' => true,
+            'retryable' => true,
         ];
     }
 
