@@ -56,7 +56,6 @@ class ContentModeration
             ],
         ];
 
-        // image (ONLY if valid url)
         if ($this->isSupportedImageReference($imageUrl)) {
             $content[] = [
                 'type' => 'image_url',
@@ -70,7 +69,7 @@ class ContentModeration
             $messages = [
                 [
                     'role' => 'system',
-                    'content' => 'Return ONLY valid JSON. No explanation. No markdown.',
+                    'content' => 'You are an AI image moderation system. Return ONLY valid JSON. No explanation. No markdown. The reason and violations must be written in Vietnamese.',
                 ],
                 [
                     'role' => 'user',
@@ -90,7 +89,6 @@ class ContentModeration
                     'max_tokens' => 1000,
                 ]);
 
-            // ❌ REAL API ERROR
             if ($response->failed()) {
                 $errorBody = $response->json();
                 $errorMessage = $this->extractErrorMessage($errorBody);
@@ -104,7 +102,7 @@ class ContentModeration
                 return [
                     'approved' => false,
                     'reason' => 'Lỗi AI: ' . $errorMessage,
-                    'violations' => ['api_error'],
+                    'violations' => ['Lỗi hệ thống AI'],
                     'raw' => null,
                 ];
             }
@@ -185,7 +183,7 @@ class ContentModeration
                     'messages' => [
                         [
                             'role' => 'system',
-                            'content' => 'Return ONLY valid JSON. No explanation. No markdown.',
+                            'content' => 'You are an AI image moderation system. Return ONLY valid JSON. No explanation. No markdown. The reason and violations must be written in Vietnamese.',
                         ],
                         [
                             'role' => 'user',
@@ -197,10 +195,13 @@ class ContentModeration
                 ]);
 
             if ($response->failed()) {
+                $errorBody = $response->json();
+                $errorMessage = $this->extractErrorMessage($errorBody);
+
                 return [
                     'approved' => false,
-                    'reason' => 'Lỗi AI: ' . $response->body(),
-                    'violations' => ['api_error'],
+                    'reason' => 'Lỗi AI: ' . $errorMessage,
+                    'violations' => ['Lỗi hệ thống AI'],
                     'raw' => null,
                 ];
             }
@@ -227,7 +228,6 @@ class ContentModeration
     {
         $text = trim($text);
 
-        // remove markdown
         $text = preg_replace('/```json|```/', '', $text);
 
         $decoded = json_decode($text, true);
@@ -274,12 +274,12 @@ class ContentModeration
     {
         $approved = (bool) ($result['approved'] ?? false);
         $violations = $this->formatViolations($result['violations'] ?? []);
-        $reason = trim($result['reason'] ?? '');
+        $reason = trim((string) ($result['reason'] ?? ''));
 
-        if (!$approved && $this->isSafeEducationalSoftwareScreenshot($result, $violations)) {
+        if (!$approved && $this->isSafeEducationalSoftwareScreenshot($result, $violations, $payload)) {
             return [
                 'approved' => true,
-                'reason' => 'Ảnh giao diện phần mềm giáo dục có dữ liệu minh họa hợp lệ',
+                'reason' => 'Ảnh là giao diện website, ứng dụng hoặc prototype hợp lệ, không phát hiện vi phạm rõ ràng.',
                 'violations' => [],
                 'raw' => $result,
             ];
@@ -288,17 +288,16 @@ class ContentModeration
         if (!$approved && $this->isSafeCreativeDesignWork($result, $violations, $payload)) {
             return [
                 'approved' => true,
-                'reason' => 'Ảnh minh họa thiết kế hoặc thời trang hợp lệ',
+                'reason' => 'Ảnh minh họa thiết kế hoặc sản phẩm đồ họa hợp lệ, không phát hiện vi phạm rõ ràng.',
                 'violations' => [],
                 'raw' => $result,
             ];
         }
 
-        // Giảm false-positive khi AI từ chối nhưng không nêu được vi phạm cụ thể.
-        if (!$approved && count($violations) === 0) {
+        if (!$approved && count($violations) === 0 && !$this->hasStrongUnsafeSignal($reason)) {
             return [
                 'approved' => true,
-                'reason' => 'Auto-approved (no strong violations)',
+                'reason' => 'Ảnh không có dấu hiệu vi phạm rõ ràng nên được chấp nhận.',
                 'violations' => [],
                 'raw' => $result,
             ];
@@ -306,60 +305,165 @@ class ContentModeration
 
         return [
             'approved' => $approved,
-            'reason' => $reason ?: ($approved ? 'OK' : 'Rejected by AI'),
+            'reason' => $reason ?: ($approved ? 'Ảnh hợp lệ' : 'Ảnh không đạt kiểm duyệt'),
             'violations' => $violations,
             'raw' => $result,
         ];
     }
 
-    private function isSafeEducationalSoftwareScreenshot(array $result, array $violations): bool
+    private function isSafeEducationalSoftwareScreenshot(array $result, array $violations, array $payload = []): bool
     {
         $checks = $result['checks'] ?? [];
 
-        if (($checks['software_ui_or_prototype'] ?? false) !== true
-            || ($checks['image_related'] ?? false) !== true
-            || ($checks['major_match'] ?? false) !== true
-        ) {
+        $content = Str::lower(implode(' ', [
+            (string) ($result['reason'] ?? ''),
+            implode(' ', $violations),
+            (string) ($payload['title'] ?? ''),
+            (string) ($payload['description'] ?? ''),
+            (string) ($payload['major'] ?? ''),
+        ]));
+
+        if ($this->hasStrongUnsafeSignal($content)) {
             return false;
         }
 
-        foreach (['adult_or_sensitive', 'violence_or_danger', 'spam_or_meme', 'watermark_or_stolen_signal'] as $check) {
+        foreach (['adult_or_sensitive', 'violence_or_danger', 'spam_or_meme'] as $check) {
             if (($checks[$check] ?? false) === true) {
                 return false;
             }
         }
 
-        $allowedPrivacyTerms = [
-            'sinh viên',
-            'học viên',
-            'thí sinh',
-            'mssv',
-            'mã sinh viên',
-            'mã học viên',
-            'điểm số',
-            'bảng điểm',
-            'ngày sinh',
-            'địa chỉ',
-            'họ và tên',
-            'thông tin cá nhân',
-            'thông tin nhạy cảm',
-        ];
+        $isMarkedAsInterface =
+            ($checks['software_ui_or_prototype'] ?? false) === true
+            || ($checks['image_related'] ?? false) === true
+            || ($checks['educational'] ?? false) === true;
 
-        return count($violations) > 0 && collect($violations)->every(function ($violation) use ($allowedPrivacyTerms) {
-            $text = Str::lower($violation);
-            return collect($allowedPrivacyTerms)->contains(fn($term) => str_contains($text, $term));
-        });
+        $hasInterfaceKeyword = collect([
+            'website',
+            'web site',
+            'webpage',
+            'landing page',
+            'app',
+            'application',
+            'mobile',
+            'software',
+            'prototype',
+            'ui',
+            'ux',
+            'dashboard',
+            'form',
+            'screen',
+            'screenshot',
+            'interface',
+            'giao diện',
+            'ứng dụng',
+            'phần mềm',
+            'hệ thống',
+            'trang web',
+            'website',
+            'màn hình',
+            'footer',
+            'header',
+            'navbar',
+            'sidebar',
+            'hotline',
+            'contact',
+            'liên hệ',
+            'qr',
+            'logo',
+            'app store',
+            'google play',
+            'certificate',
+            'certification',
+            'chứng nhận',
+            'đối tác',
+            'partner',
+        ])->contains(fn($term) => str_contains($content, $term));
+
+        $onlyWeakUnrelatedWarning = collect([
+            'không liên quan',
+            'khong lien quan',
+            'not related',
+            'unrelated',
+            'no connection',
+            'không phù hợp chuyên ngành',
+            'khong phu hop chuyen nganh',
+        ])->contains(fn($term) => str_contains($content, $term));
+
+        if ($isMarkedAsInterface && $hasInterfaceKeyword) {
+            return true;
+        }
+
+        if ($this->isSoftwareOrInterfaceProject($payload) && $onlyWeakUnrelatedWarning) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private function isSoftwareOrInterfaceProject(array $payload): bool
+    {
+        $content = Str::lower(implode(' ', [
+            (string) ($payload['title'] ?? ''),
+            (string) ($payload['description'] ?? ''),
+            (string) ($payload['major'] ?? ''),
+        ]));
+
+        return collect([
+            'website',
+            'web site',
+            'web',
+            'app',
+            'application',
+            'mobile',
+            'software',
+            'prototype',
+            'ui',
+            'ux',
+            'dashboard',
+            'form',
+            'interface',
+            'frontend',
+            'backend',
+            'react',
+            'laravel',
+            'php',
+            'javascript',
+            'database',
+            'booking',
+            'ecommerce',
+            'e-commerce',
+            'management',
+            'system',
+            'giao diện',
+            'ứng dụng',
+            'phần mềm',
+            'hệ thống',
+            'trang web',
+            'quản lý',
+            'đặt tour',
+            'du lịch',
+            'công nghệ thông tin',
+            'cntt',
+            'thiết kế',
+            'đồ họa',
+            'graphic',
+            'design',
+        ])->contains(fn($term) => str_contains($content, $term));
     }
 
     private function isSafeCreativeDesignWork(array $result, array $violations, array $payload): bool
     {
         $major = Str::lower((string) ($payload['major'] ?? ''));
+
         $isGraphicMajor = collect([
             'tkdh',
             'đồ họa',
             'thiết kế',
             'graphic',
             'design',
+            'ui',
+            'ux',
         ])->contains(fn($term) => str_contains($major, $term));
 
         if (!$isGraphicMajor) {
@@ -371,34 +475,66 @@ class ContentModeration
             implode(' ', $violations),
         ]));
 
-        $strongViolations = [
+        return !$this->hasStrongUnsafeSignal($content);
+    }
+
+    private function hasStrongUnsafeSignal(string $content): bool
+    {
+        $content = Str::lower(" {$content} ");
+
+        return collect([
+            '18+',
             'khỏa thân',
             'khoa than',
             'nudity',
             ' nude ',
+            'naked',
             'bộ phận sinh dục',
+            'bo phan sinh duc',
             'lộ ngực',
+            'lo nguc',
             'ngực trần',
+            'nguc tran',
             'tình dục',
+            'tinh duc',
             'sexual',
+            'sex',
             'porn',
             'khiêu dâm',
+            'khieu dam',
             'đồ lót gợi dục',
             'lingerie',
-            'bikini',
+            'bikini gợi dục',
+            'bao lực',
+            'bạo lực',
+            'violence',
+            'gore',
             'máu me',
+            'mau me',
+            'blood',
             'thi thể',
+            'thi the',
             'chặt đầu',
+            'chat dau',
             'vũ khí',
+            'vu khi',
             'weapon',
+            'gun',
+            'knife',
             'ma túy',
+            'ma tuy',
             'drug',
             'tự sát',
+            'tu sat',
             'suicide',
-        ];
-
-        return !collect($strongViolations)
-            ->contains(fn($term) => str_contains(" {$content} ", $term));
+            'hate',
+            'hateful',
+            'phân biệt đối xử',
+            'phan biet doi xu',
+            'illegal',
+            'bất hợp pháp',
+            'bat hop phap',
+        ])->contains(fn($term) => str_contains($content, $term));
     }
 
     private function resolveImageUrl(Product $product, array $frontendContext): ?string
@@ -433,38 +569,34 @@ class ContentModeration
         return Str::startsWith($imageUrl, ['http://', 'https://', 'data:image/']);
     }
 
-    /**
-     * Extract readable error message from OpenAI API error response
-     * Chuyển lỗi API thành thông báo dễ hiểu bằng tiếng Việt
-     */
     private function extractErrorMessage(array $errorBody): string
     {
-        // Check standard OpenAI error format: error.message
         if (isset($errorBody['error']['message'])) {
             $msg = $errorBody['error']['message'];
 
-            // Translate common error messages to Vietnamese
             if (strpos($msg, 'invalid_image_url') !== false || strpos($msg, 'downloading') !== false) {
                 return 'Lỗi ảnh: URL ảnh không hợp lệ hoặc không thể tải xuống';
             }
+
             if (strpos($msg, 'timeout') !== false) {
                 return 'Lỗi: Yêu cầu quá thời gian chờ';
             }
+
             if (strpos($msg, 'rate_limit') !== false) {
                 return 'Lỗi: Quá nhiều yêu cầu, vui lòng thử lại sau';
             }
+
             if (strpos($msg, 'authentication') !== false || strpos($msg, 'unauthorized') !== false) {
                 return 'Lỗi: Xác thực không hợp lệ';
             }
+
             if (strpos($msg, 'unsupported_image_format') !== false) {
                 return 'Lỗi ảnh: Định dạng ảnh không được hỗ trợ';
             }
 
-            // Return original message if no translation
             return $msg;
         }
 
-        // Fallback to generic error message
         return 'Lỗi hệ thống AI: vui lòng thử lại sau';
     }
 
@@ -494,45 +626,56 @@ class ContentModeration
         $json = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
         return <<<PROMPT
-        Bạn là hệ thống AI kiểm duyệt nội dung cho nền tảng nghiên cứu khoa học sinh viên.
+        You are an AI image moderation system for a student scientific research product platform.
 
-        Vai trò người dùng: {$role}
+        User role: {$role}
 
-        QUY TẮC THEO VAI TRÒ:
-        - student: kiểm duyệt nghiêm ngặt, chặn ngay nội dung nhạy cảm, không an toàn, 
-        spam, ảnh chế, nội dung không liên quan học thuật hoặc có dấu hiệu sao chép
+        The role is only used as context. This moderation result is mainly used to display upload feedback in the system for Vietnamese users and students.
 
-        - teacher: linh hoạt hơn với nội dung mang tính giáo dục hoặc minh họa học thuật, 
-        nhưng vẫn phải chặn nội dung 18+, bạo lực, bất hợp pháp,nội dung gây nguy hiểm, 
-        watermark nặng hoặc có dấu hiệu đánh cắp
+        Your tasks:
+        - Check whether the image is related to the submitted student project, research topic, major, product, or product interface.
+        - Detect adult, nudity, sexual, or pornographic content.
+        - Detect violence, gore, blood, weapons, dangerous, or harmful content.
+        - Detect offensive, discriminatory, illegal, hateful, or harmful content.
+        - Detect spam, meme images, random personal photos, low-quality unrelated images, or content not suitable for an academic platform.
+        - Detect whether the image is a valid website, mobile app, software, system, prototype, UI/UX, dashboard, form, landing page, or graphic design screenshot.
 
-        Nhiệm vụ:
-        - Kiểm tra hình ảnh có liên quan đến sản phẩm nghiên cứu/chuyên ngành hay không
-        - Phát hiện nội dung 18+, khỏa thân, tình dục
-        - Phát hiện nội dung bạo lực, máu me, nguy hiểm
-        - Phát hiện nội dung phản cảm, kích động, vi phạm pháp luật hoặc phân biệt đối xử
-        - Kiểm tra spam, ảnh chế, nội dung chất lượng thấp hoặc không phù hợp học thuật
-
-        Dữ liệu sản phẩm:
+        Product data:
         {$json}
 
-        QUY TẮC QUAN TRỌNG:
+        IMPORTANT UI / WEBSITE / APP SCREENSHOT RULES:
+        For student website, mobile app, software, UI/UX, graphic design, or system interface projects:
 
-        - Nếu role = student → ưu tiên cho phép các nội dung phục vụ học tập và nghiên cứu
-        - Chỉ trả về JSON hợp lệ
-        - Không giải thích ngoài JSON
-        - Trường "violations" phải mô tả cụ thể nội dung vi phạm bằng tiếng Việt
-        - Nếu vi phạm nằm trong hình ảnh, mỗi phần tử trong "violations" phải bắt đầu bằng "Ảnh:" và mô tả rõ nội dung vi phạm
-        - Không sử dụng các mô tả chung chung như "adult_or_sensitive" hoặc "image_related"
-        - Ảnh chụp giao diện website, ứng dụng, prototype hoặc bài tập được xem là nội dung học thuật hợp lệ
-        - Không từ chối chỉ vì hình ảnh có logo, watermark nhỏ hoặc giao diện tham khảo
-        - Chỉ từ chối khi phát hiện nội dung 18+, bạo lực, phản cảm, spam hoặc hình ảnh hoàn toàn không liên quan đến sản phẩm
-        - Nếu không đủ căn cứ xác định vi phạm, ưu tiên đánh giá an toàn và giải thích trong trường "reason"
+        - Screenshots of website/application sections are allowed.
+        - Header, footer, navbar, sidebar, contact information, hotline, QR code, social icons, partner logos, app store badges, certificates, and company information are allowed if they appear as part of the product interface.
+        - Do not reject an image only because it contains a footer, header, logo, phone number, QR code, address, or certification badge.
+        - Do not mark UI sections as unrelated if they are part of a website/app screenshot.
+        - Only mark an image as unrelated when it is clearly a random photo, meme, personal image, advertisement unrelated to the submitted product, or content that has no connection to the product interface/design.
+        - If the image is a screenshot of a website/app interface, including header, footer, contact section, QR code, hotline, partner logos, or app store badges, approve it unless it contains unsafe or clearly unrelated content.
+        - For valid website/app/software interface screenshots, set:
+        "software_ui_or_prototype": true,
+        "image_related": true,
+        "educational": true,
+        "major_match": true
 
-        Định dạng trả về:
+        IMPORTANT MODERATION RULES:
+        - Student learning, research, academic work, software projects, UI/UX projects, prototype screens, dashboards, forms, landing pages, and design projects are valid academic content.
+        - Return ONLY valid JSON.
+        - Do not include any explanation outside JSON.
+        - The "reason" field must be written in Vietnamese for displaying moderation feedback in the system.
+        - The "violations" field must be an array of specific Vietnamese strings for showing clear upload error messages to students.
+        - If the violation is found in the image, each item in "violations" must start with "Ảnh:" and clearly describe the violation.
+        - Do not use vague labels such as "adult_or_sensitive", "image_related", "unsafe", "not_related", or "api_error" as violation messages.
+        - Do not reject only because the image contains a small logo, watermark, UI brand name, sample company name, phone number, address, QR code, partner logo, social icon, app store badge, Google Play badge, or contact information.
+        - Do not reject a footer, header, navbar, sidebar, or contact section if it is part of a website/app/software interface.
+        - Only reject when there is strong evidence of adult content, sexual content, violence, offensive content, illegal content, spam, meme content, or the image is completely unrelated to the submitted product.
+        - If there is not enough evidence to confirm a violation, approve the image and explain the uncertainty in the "reason" field.
+        - If the image looks like a real product screen, UI screen, website section, app section, or design mockup, approve it unless it contains clear unsafe content.
+
+        JSON response format:
         {
             "approved": true,
-            "score": 0-100,
+            "score": 0,
             "reason": "giải thích ngắn gọn bằng tiếng Việt",
             "violations": [],
             "role": "{$role}",
@@ -548,11 +691,37 @@ class ContentModeration
             }
         }
 
-        Từ chối (approved=false) nếu:
-        - Có nội dung 18+, khỏa thân hoặc tình dục
-        - Có nội dung bạo lực, máu me hoặc nguy hiểm
-        - Có nội dung phản cảm hoặc vi phạm pháp luật
-        - Là hình ảnh spam, ảnh chế hoặc hoàn toàn không liên quan đến sản phẩm
+        Score meaning:
+        - 0-20: safe / acceptable
+        - 21-50: minor concern but still acceptable if educational or related to the project
+        - 51-80: risky, should be rejected only if the violation is clear
+        - 81-100: serious violation, must be rejected
+
+        Reject with approved=false only if:
+        - The image contains adult, nudity, sexual, or pornographic content.
+        - The image contains violence, gore, blood, weapons, or dangerous content.
+        - The image contains offensive, discriminatory, illegal, hateful, or harmful content.
+        - The image is spam, a meme, a random personal photo, or completely unrelated to the submitted student project.
+        - The image is clearly an advertisement or promotional image unrelated to the submitted product interface/design.
+
+        Example of a valid approved result for a website footer screenshot:
+        {
+            "approved": true,
+            "score": 5,
+            "reason": "Ảnh là phần footer của giao diện website, có thông tin liên hệ, logo đối tác, chứng nhận và mã QR. Nội dung phù hợp với ảnh giao diện sản phẩm.",
+            "violations": [],
+            "role": "{$role}",
+            "checks": {
+                "image_related": true,
+                "educational": true,
+                "adult_or_sensitive": false,
+                "violence_or_danger": false,
+                "spam_or_meme": false,
+                "major_match": true,
+                "watermark_or_stolen_signal": false,
+                "software_ui_or_prototype": true
+            }
+        }
         PROMPT;
     }
 }
