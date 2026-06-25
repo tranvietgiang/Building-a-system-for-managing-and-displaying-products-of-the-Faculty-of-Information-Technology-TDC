@@ -142,8 +142,10 @@ const UploadProductForm_Network = ({
               {/* Mô tả */}
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
-                  Mô tả giải pháp mạng
-                  {" "}<span className="ml-1 text-xs font-normal text-gray-400">(có thể bỏ qua)</span>
+                  Mô tả giải pháp mạng{" "}
+                  <span className="ml-1 text-xs font-normal text-gray-400">
+                    (có thể bỏ qua)
+                  </span>
                 </label>
                 <textarea
                   name="description"
@@ -190,7 +192,6 @@ const UploadProductForm_Network = ({
                     focusClass="focus:border-blue-500 focus:ring-blue-100"
                   />
                 </div>
-
               </div>
 
               {/* Topology */}
@@ -210,7 +211,7 @@ const UploadProductForm_Network = ({
                     errors.topology_type
                       ? "border-red-300 bg-red-50"
                       : "border-gray-200"
-                    }`}
+                  }`}
                 />
                 <p className="mt-2 text-xs text-gray-500">
                   Topology là cách các thiết bị được bố trí và kết nối với nhau.
@@ -430,7 +431,6 @@ const UploadProductForm_Network = ({
                   <p className="mt-2 text-sm text-red-600">{errors.images}</p>
                 )}
               </div>
-
             </div>
           </div>
 
@@ -451,8 +451,7 @@ const UploadProductForm_Network = ({
               {/* Tags input */}
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
-                  Công nghệ / Giao thức
-                  {" "}
+                  Công nghệ / Giao thức{" "}
                   <span className="ml-1 text-xs font-normal text-gray-400">
                     (có thể bỏ qua)
                   </span>
@@ -516,7 +515,7 @@ const UploadProductForm_Network = ({
                     errors.simulation_tool
                       ? "border-red-300 bg-red-50"
                       : "border-gray-200"
-                    }`}
+                  }`}
                 />
                 {errors.simulation_tool && (
                   <p className="mt-2 text-sm text-red-600">
@@ -680,7 +679,7 @@ const UploadProductForm_Network = ({
           <div className="rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 p-4 text-center">
             <p className="text-sm text-gray-600">
               <span className="font-semibold text-blue-600">📌 Lưu ý:</span> Sản
-              phẩm của bạn sẽ được gửi đến giảng viên chuyên ngành
+              phẩm của bạn sẽ được gửi đến giảng viên chuyên ngành{" "}
               <span className="font-semibold"> {currentStudent?.major}</span> để
               xét duyệt trong vòng 24-48 giờ.
             </p>

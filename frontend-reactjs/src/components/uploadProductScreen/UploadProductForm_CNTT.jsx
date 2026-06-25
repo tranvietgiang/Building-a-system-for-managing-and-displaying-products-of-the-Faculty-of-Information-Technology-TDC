@@ -174,8 +174,10 @@ const UploadProductForm_CNTT = ({
 
               <div>
                 <label className="mb-2 block text-sm font-semibold text-gray-700">
-                  Mô tả ngắn
-                  {" "}<span className="ml-1 text-xs font-normal text-gray-400">(có thể bỏ qua)</span>
+                  Mô tả ngắn{" "}
+                  <span className="ml-1 text-xs font-normal text-gray-400">
+                    (có thể bỏ qua)
+                  </span>
                 </label>
                 <textarea
                   name="description"
@@ -455,7 +457,6 @@ const UploadProductForm_CNTT = ({
                   <p className="mt-2 text-sm text-red-600">{errors.images}</p>
                 )}
               </div>
-
             </div>
           </div>
 
@@ -503,9 +504,7 @@ const UploadProductForm_CNTT = ({
                     type="text"
                     name="framework"
                     value={frameworkInput}
-                    onChange={(e) =>
-                      setFrameworkInput(e.target.value)
-                    }
+                    onChange={(e) => setFrameworkInput(e.target.value)}
                     onKeyDown={handleFrameworkKeyDown}
                     onBlur={addFramework}
                     className="w-full rounded-xl border-2 border-gray-200 px-4 py-3"
@@ -565,8 +564,11 @@ const UploadProductForm_CNTT = ({
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <div>
                   <label className="mb-2 block text-sm font-semibold text-gray-700">
-                    GitHub Link
-                   {" "}<span className="ml-1 text-xs font-normal text-gray-400">(có thể bỏ qua)</span></label>
+                    GitHub Link{" "}
+                    <span className="ml-1 text-xs font-normal text-gray-400">
+                      (có thể bỏ qua)
+                    </span>
+                  </label>
                   <input
                     type="url"
                     name="github_link"
@@ -579,8 +581,11 @@ const UploadProductForm_CNTT = ({
 
                 <div>
                   <label className="mb-2 block text-sm font-semibold text-gray-700">
-                    Demo Link
-                   {" "}<span className="ml-1 text-xs font-normal text-gray-400">(có thể bỏ qua)</span></label>
+                    Demo Link{" "}
+                    <span className="ml-1 text-xs font-normal text-gray-400">
+                      (có thể bỏ qua)
+                    </span>
+                  </label>
                   <input
                     type="url"
                     name="demo_link"
@@ -732,7 +737,7 @@ const UploadProductForm_CNTT = ({
           <div className="rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 p-4 text-center">
             <p className="text-sm text-gray-600">
               <span className="font-semibold text-blue-600">📌 Lưu ý:</span> Sản
-              phẩm của bạn sẽ được gửi đến giảng viên chuyên ngành
+              phẩm của bạn sẽ được gửi đến giảng viên chuyên ngành{" "}
               <span className="font-semibold">{currentStudent?.major}</span> để
               xét duyệt trong vòng 24-48 giờ.
             </p>
