@@ -73,14 +73,13 @@ class CompareAi
                 $gpt = $this->compareWithAi($currentProduct, $product, $projectType);
                 $duplicateFields = $this->getDuplicateFields($currentProduct, $product, $projectType);
 
-                $productId = (int) ($product['product_id'] ?? 0);
+                $matchProductId = (int) ($product['product_id'] ?? 0);
 
                 $similarity = (int) ($gpt['similarity'] ?? 0);
                 $levelCode = $this->normalizeAiLevelCode($gpt['level'] ?? null, $similarity);
 
                 $enriched[] = array_merge($product, [
-                    'images' => $this->getProductImages($productId),
-
+                    'images' => $this->getProductImages($matchProductId),
                     'ai_similarity' => $similarity,
                     'ai_level_code' => $levelCode,
                     'ai_level' => $this->formatAiLevel($levelCode),
