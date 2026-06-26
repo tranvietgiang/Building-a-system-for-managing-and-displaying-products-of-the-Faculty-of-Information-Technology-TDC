@@ -75,11 +75,15 @@ class CompareAi
 
                 $productId = (int) ($product['product_id'] ?? 0);
 
+                $similarity = (int) ($gpt['similarity'] ?? 0);
+                $levelCode = $this->normalizeAiLevelCode($gpt['level'] ?? null, $similarity);
+
                 $enriched[] = array_merge($product, [
                     'images' => $this->getProductImages($productId),
 
-                    'ai_similarity' => $gpt['similarity'] ?? 0,
-                    'ai_level' => $gpt['level'] ?? 'low',
+                    'ai_similarity' => $similarity,
+                    'ai_level_code' => $levelCode,
+                    'ai_level' => $this->formatAiLevel($levelCode),
                     'ai_reason' => $gpt['reason'] ?? '',
                     'has_duplicate_fields' => count($duplicateFields) > 0,
                     'duplicate_count' => count($duplicateFields),
@@ -119,6 +123,29 @@ class CompareAi
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    private function normalizeAiLevelCode($level, int $similarity = 0): string
+    {
+        $level = strtolower(trim((string) $level));
+
+        return match ($level) {
+            'high', 'cao' => 'high',
+            'medium', 'trung bình', 'trung binh' => 'medium',
+            'low', 'thấp', 'thap' => 'low',
+            default => $similarity >= 85
+                ? 'high'
+                : ($similarity >= 60 ? 'medium' : 'low'),
+        };
+    }
+
+    private function formatAiLevel(string $levelCode): string
+    {
+        return match ($levelCode) {
+            'high' => 'Cao',
+            'medium' => 'Trung bình',
+            default => 'Thấp',
+        };
     }
 
     /**
@@ -255,7 +282,7 @@ class CompareAi
         Return ONLY valid JSON in this format:
         {
             \"similarity\": number,
-            \"level\": \"low\" | \"medium\" | \"high\" |  \"Vietnamese\",
+            \"level\": \"low\" | \"medium\" | \"high\",
             \"reason\": \"short explanation in Vietnamese\"
         }
         ";

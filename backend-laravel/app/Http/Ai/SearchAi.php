@@ -25,7 +25,6 @@ class SearchAi
             ], 503);
         }
 
-        // Validate input
         $request->validate(
             [
                 'message' => 'nullable|string|max:200',
@@ -51,7 +50,6 @@ class SearchAi
             ?? ''
         ));
 
-        // Check empty
         if ($message === '') {
             return response()->json([
                 'message' => 'Vui lòng nhập nội dung tìm kiếm.',
@@ -60,8 +58,7 @@ class SearchAi
             ], 422);
         }
 
-        // Check minimum length
-        if (strlen($message) < 2) {
+        if (mb_strlen($message) < 2) {
             return response()->json([
                 'message' => 'Nội dung tìm kiếm phải ít nhất 2 ký tự.',
                 'products' => [],
@@ -69,8 +66,7 @@ class SearchAi
             ], 422);
         }
 
-        // Check maximum length
-        if (strlen($message) > 200) {
+        if (mb_strlen($message) > 200) {
             return response()->json([
                 'message' => 'Nội dung tìm kiếm không được vượt quá 200 ký tự.',
                 'products' => [],
@@ -78,7 +74,6 @@ class SearchAi
             ], 422);
         }
 
-        // Sanitize input - remove dangerous characters
         if ($this->containsDangerousPatterns($message)) {
             return response()->json([
                 'message' => 'Nội dung tìm kiếm chứa ký tự không hợp lệ.',
@@ -90,10 +85,13 @@ class SearchAi
         $user = $this->resolveUser($request);
         $role = $user->role ?? 'guest';
         $majorId = $user->major_id ?? null;
+
         $localMajorCode = $this->detectLocalMajorCode($message);
+
         $intent = $localMajorCode && $this->cleanKeywordForMajor($message, $localMajorCode) === ''
             ? $this->normalizeIntent([
                 'keyword' => '',
+                'expanded_keywords' => [],
                 'major_code' => $localMajorCode,
                 'sort' => 'relevance',
                 'limit' => 12,
@@ -167,12 +165,17 @@ class SearchAi
 
         if ($intentCode === 'GRAPHIC') {
             return str_contains($userCode, 'GRAPHIC')
+                || str_contains($userCode, 'GRAPHICS')
                 || str_contains($userCode, 'TKDH')
                 || str_contains($userCode, 'GR');
         }
 
         if ($intentCode === 'CNTT') {
             return str_contains($userCode, 'CNTT') || str_contains($userCode, 'IT');
+        }
+
+        if ($intentCode === 'MMT') {
+            return str_contains($userCode, 'MMT') || str_contains($userCode, 'NETWORK');
         }
 
         return str_contains($userCode, $intentCode);
@@ -193,51 +196,96 @@ class SearchAi
             $intent['major_code']
         );
 
-        if (($intent['sort'] ?? 'relevance') === 'relevance') {
-            $intent['sort'] = 'relevance';
-        }
-
-        return $intent;
+        return $this->normalizeIntent($intent, $message);
     }
 
     private function detectLocalMajorCode(string $message): ?string
     {
         $text = mb_strtolower($message, 'UTF-8');
+        $accentless = $this->removeVietnameseAccents($text);
 
         $majorKeywords = [
-            'GRAPHIC' => ['graphic', 'graphics', 'design', 'designer', 'ui/ux', 'figma', 'poster', 'logo', 'branding', 'tkdh'],
-            'AI' => ['ai', 'artificial intelligence', 'machine learning', 'deep learning', 'python'],
-            'CNTT' => ['cntt', 'it', 'web', 'mobile', 'laravel', 'react', 'php'],
-            'MMT' => ['mmt', 'network', 'cybersecurity', 'security', 'cisco'],
+            'GRAPHIC' => [
+                'graphic',
+                'graphics',
+                'graphic design',
+                'ui/ux',
+                'figma',
+                'photoshop',
+                'illustrator',
+                'poster',
+                'logo',
+                'banner',
+                'branding',
+                'tkdh',
+                'do hoa',
+                'thiet ke do hoa',
+                'nhan dien thuong hieu',
+            ],
+            'AI' => [
+                'artificial intelligence',
+                'machine learning',
+                'deep learning',
+                'computer vision',
+                'chatbot',
+                'nlp',
+                'tri tue nhan tao',
+                'hoc may',
+                'xu ly anh',
+                'nhan dien',
+                'du doan',
+                'phan loai',
+            ],
+            'CNTT' => [
+                'cntt',
+                'information technology',
+                'cong nghe thong tin',
+                'phan mem',
+                'lap trinh',
+                'website',
+                'web app',
+                'mobile app',
+                'ung dung',
+                'quan ly',
+                'laravel',
+                'react',
+                'php',
+                'javascript',
+                'mysql',
+                'api',
+            ],
+            'MMT' => [
+                'mmt',
+                'network',
+                'computer network',
+                'cybersecurity',
+                'security',
+                'cisco',
+                'packet tracer',
+                'router',
+                'switch',
+                'firewall',
+                'mang may tinh',
+                'bao mat',
+            ],
         ];
 
         foreach ($majorKeywords as $majorCode => $keywords) {
             foreach ($keywords as $keyword) {
-                if (str_contains($text, $keyword)) {
+                if (str_contains($accentless, $keyword) || str_contains($text, $keyword)) {
                     return $majorCode;
                 }
             }
         }
 
-        $accentless = $this->removeVietnameseAccents($text);
+        $trimmed = trim($accentless);
 
-        if (
-            str_contains($accentless, 'do hoa')
-            || str_contains($accentless, 'thiet ke do hoa')
-        ) {
-            return 'GRAPHIC';
-        }
-
-        if (str_contains($accentless, 'tri tue nhan tao') || str_contains($accentless, 'hoc may')) {
+        if ($trimmed === 'ai') {
             return 'AI';
         }
 
-        if (str_contains($accentless, 'cong nghe thong tin') || str_contains($accentless, 'phan mem')) {
+        if ($trimmed === 'it') {
             return 'CNTT';
-        }
-
-        if (str_contains($accentless, 'mang may tinh') || str_contains($accentless, 'bao mat')) {
-            return 'MMT';
         }
 
         return null;
@@ -261,10 +309,13 @@ class SearchAi
             'tim kiem',
             'tim',
             'kiem',
+            'search',
             'cho toi',
             'cho minh',
             'xem',
             'lay',
+            'can',
+            'muon',
             'san pham',
             'do an',
             'du an',
@@ -276,6 +327,7 @@ class SearchAi
             'nganh',
             'major',
             'student',
+            'students',
             'products',
             'product',
             'projects',
@@ -360,207 +412,101 @@ class SearchAi
         };
     }
 
-    private function isMajorOnlyKeyword(string $keyword, ?string $majorCode): bool
-    {
-        if (!$majorCode || trim($keyword) === '') {
-            return false;
-        }
-
-        if ($this->detectLocalMajorCode($keyword) !== $majorCode) {
-            return false;
-        }
-
-        $normalized = $this->removeVietnameseAccents(mb_strtolower($keyword, 'UTF-8'));
-        $aliases = match (strtoupper($majorCode)) {
-            'GRAPHIC' => ['thiet ke do hoa', 'graphic design', 'do hoa', 'graphics', 'graphic', 'tkdh'],
-            'CNTT' => ['cong nghe thong tin', 'information technology', 'phan mem', 'cntt', 'it'],
-            'MMT' => ['mang may tinh', 'computer networks', 'computer network', 'network', 'bao mat', 'mmt'],
-            'AI' => ['tri tue nhan tao', 'artificial intelligence', 'machine learning', 'deep learning', 'hoc may', 'ai'],
-            default => [mb_strtolower($majorCode, 'UTF-8')],
-        };
-
-        foreach ($aliases as $alias) {
-            $normalized = str_replace($alias, ' ', $normalized);
-        }
-
-        return trim(preg_replace('/[^a-z0-9]+/', ' ', $normalized)) === '';
-    }
-
     private function removeVietnameseAccents(string $value): string
     {
-        $from = [
-            'à',
-            'á',
-            'ạ',
-            'ả',
-            'ã',
-            'â',
-            'ầ',
-            'ấ',
-            'ậ',
-            'ẩ',
-            'ẫ',
-            'ă',
-            'ằ',
-            'ắ',
-            'ặ',
-            'ẳ',
-            'ẵ',
-            'è',
-            'é',
-            'ẹ',
-            'ẻ',
-            'ẽ',
-            'ê',
-            'ề',
-            'ế',
-            'ệ',
-            'ể',
-            'ễ',
-            'ì',
-            'í',
-            'ị',
-            'ỉ',
-            'ĩ',
-            'ò',
-            'ó',
-            'ọ',
-            'ỏ',
-            'õ',
-            'ô',
-            'ồ',
-            'ố',
-            'ộ',
-            'ổ',
-            'ỗ',
-            'ơ',
-            'ờ',
-            'ớ',
-            'ợ',
-            'ở',
-            'ỡ',
-            'ù',
-            'ú',
-            'ụ',
-            'ủ',
-            'ũ',
-            'ư',
-            'ừ',
-            'ứ',
-            'ự',
-            'ử',
-            'ữ',
-            'ỳ',
-            'ý',
-            'ỵ',
-            'ỷ',
-            'ỹ',
-            'đ',
+        $map = [
+            'à' => 'a',
+            'á' => 'a',
+            'ạ' => 'a',
+            'ả' => 'a',
+            'ã' => 'a',
+            'â' => 'a',
+            'ầ' => 'a',
+            'ấ' => 'a',
+            'ậ' => 'a',
+            'ẩ' => 'a',
+            'ẫ' => 'a',
+            'ă' => 'a',
+            'ằ' => 'a',
+            'ắ' => 'a',
+            'ặ' => 'a',
+            'ẳ' => 'a',
+            'ẵ' => 'a',
+
+            'è' => 'e',
+            'é' => 'e',
+            'ẹ' => 'e',
+            'ẻ' => 'e',
+            'ẽ' => 'e',
+            'ê' => 'e',
+            'ề' => 'e',
+            'ế' => 'e',
+            'ệ' => 'e',
+            'ể' => 'e',
+            'ễ' => 'e',
+
+            'ì' => 'i',
+            'í' => 'i',
+            'ị' => 'i',
+            'ỉ' => 'i',
+            'ĩ' => 'i',
+
+            'ò' => 'o',
+            'ó' => 'o',
+            'ọ' => 'o',
+            'ỏ' => 'o',
+            'õ' => 'o',
+            'ô' => 'o',
+            'ồ' => 'o',
+            'ố' => 'o',
+            'ộ' => 'o',
+            'ổ' => 'o',
+            'ỗ' => 'o',
+            'ơ' => 'o',
+            'ờ' => 'o',
+            'ớ' => 'o',
+            'ợ' => 'o',
+            'ở' => 'o',
+            'ỡ' => 'o',
+
+            'ù' => 'u',
+            'ú' => 'u',
+            'ụ' => 'u',
+            'ủ' => 'u',
+            'ũ' => 'u',
+            'ư' => 'u',
+            'ừ' => 'u',
+            'ứ' => 'u',
+            'ự' => 'u',
+            'ử' => 'u',
+            'ữ' => 'u',
+
+            'ỳ' => 'y',
+            'ý' => 'y',
+            'ỵ' => 'y',
+            'ỷ' => 'y',
+            'ỹ' => 'y',
+            'đ' => 'd',
         ];
 
-        $to = [
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'a',
-            'e',
-            'e',
-            'e',
-            'e',
-            'e',
-            'e',
-            'e',
-            'e',
-            'e',
-            'e',
-            'e',
-            'i',
-            'i',
-            'i',
-            'i',
-            'i',
-            'o',
-            'o',
-            'o',
-            'o',
-            'o',
-            'o',
-            'o',
-            'o',
-            'o',
-            'o',
-            'o',
-            'o',
-            'o',
-            'o',
-            'o',
-            'o',
-            'o',
-            'u',
-            'u',
-            'u',
-            'u',
-            'u',
-            'u',
-            'u',
-            'u',
-            'u',
-            'u',
-            'u',
-            'y',
-            'y',
-            'y',
-            'y',
-            'y',
-            'd',
-        ];
-
-        return str_replace($from, $to, $value);
+        return strtr($value, $map);
     }
 
     private function detectSearchIntent(string $message): array
     {
-        $systemPrompt = <<<PROMPT
-        Bạn là AI phân tích câu tìm kiếm cho hệ thống quản lý đồ án.
-        Chỉ trả về JSON hợp lệ, không markdown, không giải thích.
-
-        Schema:
-        {
-          "keyword": "từ khóa chính để tìm trong tiêu đề, mô tả, tag, công nghệ",
-          "major_code": "AI|CNTT|MMT|GRAPHIC|null",
-          "category": "tên danh mục nếu có, nếu không thì null",
-          "status": "approved|pending|rejected|null",
-          "sort": "relevance|newest|views|likes",
-          "limit": 12
-        }
-
-        Quy đổi ngành:
-        - trí tuệ nhân tạo, artificial intelligence, machine learning, học máy, deep learning => AI
-        - công nghệ thông tin, phần mềm, web, mobile, lập trình => CNTT
-        - mạng máy tính, network, cybersecurity, bảo mật => MMT
-        - đồ họa, graphic, design, ui/ux, poster, logo => GRAPHIC
-        PROMPT;
-
         $systemPrompt = <<<'PROMPT'
-You classify Vietnamese/English product search queries for a student project gallery.
-Return valid JSON only. No markdown, no explanation.
+You are an AI search intent analyzer for a student project gallery database.
+
+Your job is to convert the user's search message into structured database search intent.
+
+Return ONLY valid JSON.
+No markdown.
+No explanation.
 
 JSON schema:
 {
-  "keyword": "specific product/topic keyword only, or empty string",
+  "keyword": "main normalized keyword or empty string",
+  "expanded_keywords": ["keyword variant 1", "keyword variant 2"],
   "major_code": "AI|CNTT|MMT|GRAPHIC|null",
   "category": "category name if explicitly mentioned, otherwise null",
   "status": "approved|pending|rejected|null",
@@ -568,20 +514,104 @@ JSON schema:
   "limit": 12
 }
 
-Major mapping:
-- "do hoa", "đồ họa", "thiết kế đồ họa", "thiet ke do hoa", "graphic", "graphic design", "poster", "logo", "branding", "figma", "ui/ux" => GRAPHIC
-- "tri tue nhan tao", "trí tuệ nhân tạo", "AI", "artificial intelligence", "machine learning", "hoc may", "deep learning" => AI
-- "cong nghe thong tin", "công nghệ thông tin", "CNTT", "IT", "phan mem", "web", "mobile", "lap trinh" => CNTT
-- "mang may tinh", "mạng máy tính", "MMT", "network", "cybersecurity", "bao mat" => MMT
+LANGUAGE RULES:
+- The prompt is written in English.
+- The search result will be shown to Vietnamese users.
+- keyword and expanded_keywords may contain Vietnamese, English, abbreviations, or normalized variants.
+- Prefer terms that are likely to exist in the database.
 
-Keyword rules:
-- If the user only asks for a major, set keyword to "" and set major_code.
-  Examples: "đồ họa", "san pham do hoa", "do an thiet ke do hoa" => keyword "", major_code "GRAPHIC".
-- Remove generic words from keyword: "tim", "kiem", "san pham", "do an", "du an", "de tai", "nganh".
-- Keep concrete topic/product words:
-  "logo do hoa" => keyword "logo", major_code "GRAPHIC".
-  "poster thiet ke do hoa" => keyword "poster", major_code "GRAPHIC".
-- If the user asks "moi nhat", use sort "newest"; "xem nhieu" use "views"; "yeu thich/like" use "likes".
+DATABASE SEARCH SCOPE:
+Searchable fields in the system:
+- products.title
+- products.description
+- majors.major_name
+- majors.major_code
+- categories.category_name
+- product_ai.model_used
+- product_ai.framework
+- product_ai.language
+- product_ai.dataset_used
+- product_cntt.programming_language
+- product_cntt.framework
+- product_cntt.database_used
+- product_mmt.network_protocol
+- product_mmt.topology_type
+- product_mmt.simulation_tool
+- product_graphic.design_type
+- product_graphic.tools_used
+
+IMPORTANT RULES:
+- Do not use tags. The product upload form no longer has a tag field.
+- This is a database search system, not a web search engine.
+- Do not invent information that may not exist in the database.
+- Do not generate marketing-style feature words unless the user explicitly typed them.
+- Do not expand the query too broadly.
+- Do not return long unrelated keyword lists.
+- Keep the result close to the user's original query.
+
+KEYWORD EXTRACTION RULES:
+- Remove generic search words from keyword.
+- Keep concrete topic words, product names, project names, feature names, technology names, domain names, design types, model names, framework names, database names, tools, and workflow names.
+- If the user searches only by major, set keyword to empty string and set major_code.
+- If the user searches a concrete topic inside a major, set both keyword and major_code when clear.
+- If the major is unclear, keep major_code as null.
+
+EXPANDED KEYWORD RULES:
+expanded_keywords must only include:
+- abbreviation or full-form variants directly implied by the user query
+- Vietnamese and English variants of the same concept
+- accent and non-accent variants if useful
+- close spelling variants
+- direct technology aliases
+- direct database-related terms
+- direct category or field-related variants
+
+expanded_keywords must NOT include:
+- broad marketing words
+- random popular features
+- unrelated concepts
+- generic words alone
+- words that are not directly connected to the user's original query
+- assumptions about product features that the user did not mention
+
+MAJOR DETECTION RULES:
+Detect major_code only when the query clearly belongs to one of these groups.
+
+AI:
+- Artificial intelligence, machine learning, deep learning, computer vision, NLP, chatbot, recognition, detection, prediction, classification, model, dataset.
+
+CNTT:
+- Software, website, web app, mobile app, application, management system, programming, frontend, backend, API, database, Laravel, React, PHP, JavaScript, MySQL.
+
+MMT:
+- Computer networking, Cisco, Packet Tracer, router, switch, topology, protocol, server, firewall, cybersecurity, network security.
+
+GRAPHIC:
+- Graphic design, logo, poster, banner, branding, visual identity, packaging, UI/UX design, Figma, Photoshop, Illustrator.
+
+SORT RULES:
+- If the user asks for latest/recent/newest, set sort = "newest".
+- If the user asks for most viewed/popular/views, set sort = "views".
+- If the user asks for most liked/favorite/likes, set sort = "likes".
+- Otherwise set sort = "relevance".
+
+STATUS RULES:
+- approved / đã duyệt / da duyet => approved
+- pending / chờ duyệt / cho duyet => pending
+- rejected / từ chối / tu choi => rejected
+- Otherwise status = null
+
+LIMIT RULES:
+- Default limit is 12.
+- Minimum 1.
+- Maximum 30.
+
+STRICT OUTPUT RULES:
+- Return valid JSON only.
+- Use null, not "null".
+- expanded_keywords must be an array.
+- expanded_keywords should normally contain 0 to 6 items.
+- Do not include explanation text outside JSON.
 PROMPT;
 
         try {
@@ -589,21 +619,32 @@ PROMPT;
                 'Authorization' => 'Bearer ' . config('services.openai.key'),
                 'Content-Type' => 'application/json',
             ])->timeout(30)->post('https://api.openai.com/v1/responses', [
-                'model' => 'gpt-4.1-mini',
+                'model' => config('services.openai.text_model', 'gpt-4.1-mini'),
                 'input' => [
                     [
                         'role' => 'system',
-                        'content' => [['type' => 'input_text', 'text' => $systemPrompt]],
+                        'content' => [
+                            [
+                                'type' => 'input_text',
+                                'text' => $systemPrompt,
+                            ],
+                        ],
                     ],
                     [
                         'role' => 'user',
-                        'content' => [['type' => 'input_text', 'text' => $message]],
+                        'content' => [
+                            [
+                                'type' => 'input_text',
+                                'text' => $message,
+                            ],
+                        ],
                     ],
                 ],
             ]);
 
             if ($response->successful()) {
                 $result = $response->json();
+
                 $text = data_get($result, 'output.0.content.0.text')
                     ?? data_get($result, 'output_text');
 
@@ -667,8 +708,25 @@ PROMPT;
         $limit = (int) ($intent['limit'] ?? 12);
         $limit = max(1, min($limit, 30));
 
+        $expandedKeywords = $intent['expanded_keywords'] ?? [];
+
+        if (!is_array($expandedKeywords)) {
+            $expandedKeywords = [];
+        }
+
+        $expandedKeywords = collect($expandedKeywords)
+            ->map(fn($item) => trim((string) $item))
+            ->filter(fn($item) => $item !== '')
+            ->unique()
+            ->take(6)
+            ->values()
+            ->all();
+
+        $keyword = trim((string) ($intent['keyword'] ?? $fallbackKeyword));
+
         return [
-            'keyword' => trim((string) ($intent['keyword'] ?? $fallbackKeyword)),
+            'keyword' => $keyword,
+            'expanded_keywords' => $expandedKeywords,
             'major_code' => $majorCode,
             'category' => $intent['category'] ?? null,
             'status' => $status,
@@ -677,9 +735,126 @@ PROMPT;
         ];
     }
 
+    private function getSearchTerms(array $intent): array
+    {
+        $terms = [];
+
+        if (!empty($intent['keyword'])) {
+            $terms[] = trim((string) $intent['keyword']);
+        }
+
+        foreach (($intent['expanded_keywords'] ?? []) as $keyword) {
+            $keyword = trim((string) $keyword);
+
+            if ($keyword !== '') {
+                $terms[] = $keyword;
+            }
+        }
+
+        $unique = [];
+        $result = [];
+
+        foreach ($terms as $term) {
+            $key = $this->normalizeSearchText($term);
+
+            if ($key === '' || isset($unique[$key])) {
+                continue;
+            }
+
+            $unique[$key] = true;
+            $result[] = $term;
+        }
+
+        return collect($result)
+            ->filter(fn($term) => mb_strlen($term) >= 2)
+            ->take(7)
+            ->values()
+            ->all();
+    }
+
     private function searchProducts(array $intent, string $role, ?int $majorId)
     {
-        $query = DB::table('products')
+        $query = $this->baseProductQuery();
+
+        if (in_array($role, ['student', 'teacher'], true) && $majorId) {
+            $query->where('products.major_id', $majorId);
+        } elseif ($role !== 'admin') {
+            $query->where('products.status', 'approved');
+        }
+
+        if ($intent['major_code']) {
+            $query->whereIn(DB::raw('UPPER(majors.major_code)'), $this->majorCodeAliases($intent['major_code']));
+        }
+
+        if ($intent['category']) {
+            $query->where('categories.category_name', 'like', '%' . $intent['category'] . '%');
+        }
+
+        if ($intent['status']) {
+            $query->where('products.status', $intent['status']);
+        }
+
+        $searchTerms = $this->getSearchTerms($intent);
+
+        if (!empty($searchTerms)) {
+            $query->where(function ($subQuery) use ($searchTerms) {
+                foreach ($searchTerms as $term) {
+                    $like = '%' . $term . '%';
+
+                    $subQuery
+                        ->orWhere('products.title', 'like', $like)
+                        ->orWhere('products.description', 'like', $like)
+                        ->orWhere('majors.major_name', 'like', $like)
+                        ->orWhere('majors.major_code', 'like', $like)
+                        ->orWhere('categories.category_name', 'like', $like)
+                        ->orWhere('product_ai.model_used', 'like', $like)
+                        ->orWhere('product_ai.framework', 'like', $like)
+                        ->orWhere('product_ai.language', 'like', $like)
+                        ->orWhere('product_ai.dataset_used', 'like', $like)
+                        ->orWhere('product_cntt.programming_language', 'like', $like)
+                        ->orWhere('product_cntt.framework', 'like', $like)
+                        ->orWhere('product_cntt.database_used', 'like', $like)
+                        ->orWhere('product_mmt.network_protocol', 'like', $like)
+                        ->orWhere('product_mmt.topology_type', 'like', $like)
+                        ->orWhere('product_mmt.simulation_tool', 'like', $like)
+                        ->orWhere('product_graphic.design_type', 'like', $like)
+                        ->orWhere('product_graphic.tools_used', 'like', $like);
+                }
+            });
+        }
+
+        match ($intent['sort']) {
+            'newest' => $query->orderByDesc('products.submitted_at'),
+            'views' => $query->orderByDesc('views'),
+            'likes' => $query->orderByDesc('likes'),
+            default => $this->orderByRelevance($query, $intent),
+        };
+
+        $products = $query->limit($intent['limit'])->get();
+
+        if ($products->isEmpty() && !empty($searchTerms)) {
+            $fallbackProducts = $this->fallbackSearch($intent, $role, $majorId);
+
+            if ($fallbackProducts->isNotEmpty()) {
+                return $fallbackProducts;
+            }
+
+            if ($intent['major_code']) {
+                $majorOnlyIntent = array_merge($intent, [
+                    'keyword' => '',
+                    'expanded_keywords' => [],
+                ]);
+
+                return $this->searchProducts($majorOnlyIntent, $role, $majorId);
+            }
+        }
+
+        return $products;
+    }
+
+    private function baseProductQuery()
+    {
+        return DB::table('products')
             ->leftJoin('majors', 'products.major_id', '=', 'majors.major_id')
             ->leftJoin('categories', 'products.cate_id', '=', 'categories.cate_id')
             ->leftJoin('product_statistics', 'products.product_id', '=', 'product_statistics.product_id')
@@ -706,6 +881,7 @@ PROMPT;
                 'product_ai.model_used',
                 'product_ai.framework as ai_framework',
                 'product_ai.language as ai_language',
+                'product_ai.dataset_used',
                 'product_ai.accuracy_score',
                 'product_cntt.programming_language',
                 'product_cntt.framework as cntt_framework',
@@ -717,82 +893,6 @@ PROMPT;
                 'product_graphic.tools_used',
                 'product_graphic.behance_link'
             );
-
-        if (in_array($role, ['student', 'teacher'], true) && $majorId) {
-            $query->where('products.major_id', $majorId);
-        } elseif ($role !== 'admin') {
-            $query->where('products.status', 'approved');
-        }
-
-        if ($intent['major_code']) {
-            $query->whereIn(DB::raw('UPPER(majors.major_code)'), $this->majorCodeAliases($intent['major_code']));
-        }
-
-        if ($intent['category']) {
-            $query->where('categories.category_name', 'like', '%' . $intent['category'] . '%');
-        }
-
-        if ($intent['status']) {
-            $query->where('products.status', $intent['status']);
-        }
-
-        if ($intent['keyword'] !== '') {
-            $keyword = $intent['keyword'];
-
-            $query->where(function ($subQuery) use ($keyword) {
-                $like = '%' . $keyword . '%';
-
-                $subQuery
-                    ->where('products.title', 'like', $like)
-                    ->orWhere('products.description', 'like', $like)
-                    ->orWhere('majors.major_name', 'like', $like)
-                    ->orWhere('majors.major_code', 'like', $like)
-                    ->orWhere('categories.category_name', 'like', $like)
-                    ->orWhere('product_ai.model_used', 'like', $like)
-                    ->orWhere('product_ai.framework', 'like', $like)
-                    ->orWhere('product_ai.language', 'like', $like)
-                    ->orWhere('product_ai.dataset_used', 'like', $like)
-                    ->orWhere('product_cntt.programming_language', 'like', $like)
-                    ->orWhere('product_cntt.framework', 'like', $like)
-                    ->orWhere('product_cntt.database_used', 'like', $like)
-                    ->orWhere('product_mmt.network_protocol', 'like', $like)
-                    ->orWhere('product_mmt.topology_type', 'like', $like)
-                    ->orWhere('product_mmt.simulation_tool', 'like', $like)
-                    ->orWhere('product_graphic.design_type', 'like', $like)
-                    ->orWhere('product_graphic.tools_used', 'like', $like)
-                    ->orWhereExists(function ($tagQuery) use ($like) {
-                        $tagQuery->select(DB::raw(1))
-                            ->from('product_tags')
-                            ->whereColumn('product_tags.product_id', 'products.product_id')
-                            ->where('product_tags.tag_name', 'like', $like);
-                    });
-            });
-        }
-
-        match ($intent['sort']) {
-            'newest' => $query->orderByDesc('products.submitted_at'),
-            'views' => $query->orderByDesc('views'),
-            'likes' => $query->orderByDesc('likes'),
-            default => $this->orderByRelevance($query, $intent),
-        };
-
-        $products = $query->limit($intent['limit'])->get();
-
-        if ($products->isEmpty() && $intent['keyword'] !== '') {
-            $fallbackProducts = $this->fallbackSearch($intent, $role, $majorId);
-
-            if ($fallbackProducts->isNotEmpty()) {
-                return $fallbackProducts;
-            }
-
-            if ($intent['major_code']) {
-                $majorOnlyIntent = array_merge($intent, ['keyword' => '']);
-
-                return $this->searchProducts($majorOnlyIntent, $role, $majorId);
-            }
-        }
-
-        return $products;
     }
 
     private function majorCodeAliases(string $majorCode): array
@@ -811,19 +911,34 @@ PROMPT;
         if ($intent['major_code']) {
             $aliases = $this->majorCodeAliases($intent['major_code']);
             $placeholders = implode(',', array_fill(0, count($aliases), '?'));
-            $query->orderByRaw("CASE WHEN UPPER(majors.major_code) IN ({$placeholders}) THEN 0 ELSE 1 END", $aliases);
+
+            $query->orderByRaw(
+                "CASE WHEN UPPER(majors.major_code) IN ({$placeholders}) THEN 0 ELSE 1 END",
+                $aliases
+            );
         }
 
-        if ($intent['keyword'] !== '') {
-            $keyword = $intent['keyword'];
+        $searchTerms = $this->getSearchTerms($intent);
+        $mainKeyword = $searchTerms[0] ?? '';
+
+        if ($mainKeyword !== '') {
             $query->orderByRaw(
                 'CASE
                     WHEN products.title LIKE ? THEN 0
-                    WHEN categories.category_name LIKE ? THEN 1
-                    WHEN majors.major_name LIKE ? OR majors.major_code LIKE ? THEN 2
-                    ELSE 3
+                    WHEN products.title LIKE ? THEN 1
+                    WHEN categories.category_name LIKE ? THEN 2
+                    WHEN products.description LIKE ? THEN 3
+                    WHEN majors.major_name LIKE ? OR majors.major_code LIKE ? THEN 4
+                    ELSE 5
                 END',
-                [$keyword . '%', '%' . $keyword . '%', '%' . $keyword . '%', '%' . $keyword . '%']
+                [
+                    $mainKeyword . '%',
+                    '%' . $mainKeyword . '%',
+                    '%' . $mainKeyword . '%',
+                    '%' . $mainKeyword . '%',
+                    '%' . $mainKeyword . '%',
+                    '%' . $mainKeyword . '%',
+                ]
             );
         }
 
@@ -832,27 +947,7 @@ PROMPT;
 
     private function fallbackSearch(array $intent, string $role, ?int $majorId)
     {
-        $query = DB::table('products')
-            ->leftJoin('majors', 'products.major_id', '=', 'majors.major_id')
-            ->leftJoin('categories', 'products.cate_id', '=', 'categories.cate_id')
-            ->leftJoin('product_statistics', 'products.product_id', '=', 'product_statistics.product_id')
-            ->select(
-                'products.product_id',
-                'products.major_id',
-                'products.cate_id',
-                'products.title',
-                'products.description',
-                'products.thumbnail',
-                'products.status',
-                'products.github_link',
-                'products.demo_link',
-                'products.submitted_at',
-                'majors.major_name',
-                'majors.major_code',
-                'categories.category_name',
-                DB::raw('COALESCE(product_statistics.views, 0) as views'),
-                DB::raw('COALESCE(product_statistics.likes, 0) as likes')
-            );
+        $query = $this->baseProductQuery();
 
         if (in_array($role, ['student', 'teacher'], true) && $majorId) {
             $query->where('products.major_id', $majorId);
@@ -864,9 +959,12 @@ PROMPT;
             $query->whereIn(DB::raw('UPPER(majors.major_code)'), $this->majorCodeAliases($intent['major_code']));
         }
 
-        $words = collect(preg_split('/\s+/', $intent['keyword']))
+        $words = collect($this->getSearchTerms($intent))
+            ->flatMap(fn($term) => preg_split('/\s+/', $term))
+            ->map(fn($word) => trim((string) $word))
             ->filter(fn($word) => mb_strlen($word) >= 2)
-            ->take(5);
+            ->unique()
+            ->take(10);
 
         if ($words->isNotEmpty()) {
             $query->where(function ($subQuery) use ($words) {
@@ -878,7 +976,19 @@ PROMPT;
                         ->orWhere('products.description', 'like', $like)
                         ->orWhere('majors.major_name', 'like', $like)
                         ->orWhere('majors.major_code', 'like', $like)
-                        ->orWhere('categories.category_name', 'like', $like);
+                        ->orWhere('categories.category_name', 'like', $like)
+                        ->orWhere('product_ai.model_used', 'like', $like)
+                        ->orWhere('product_ai.framework', 'like', $like)
+                        ->orWhere('product_ai.language', 'like', $like)
+                        ->orWhere('product_ai.dataset_used', 'like', $like)
+                        ->orWhere('product_cntt.programming_language', 'like', $like)
+                        ->orWhere('product_cntt.framework', 'like', $like)
+                        ->orWhere('product_cntt.database_used', 'like', $like)
+                        ->orWhere('product_mmt.network_protocol', 'like', $like)
+                        ->orWhere('product_mmt.topology_type', 'like', $like)
+                        ->orWhere('product_mmt.simulation_tool', 'like', $like)
+                        ->orWhere('product_graphic.design_type', 'like', $like)
+                        ->orWhere('product_graphic.tools_used', 'like', $like);
                 }
             });
         }
@@ -890,29 +1000,23 @@ PROMPT;
             ->get();
     }
 
-    /**
-     * Check for dangerous patterns in search query
-     */
     private function containsDangerousPatterns(string $message): bool
     {
-        // SQL injection patterns
         $sqlPatterns = [
             '/(\b(UNION|SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|EXECUTE)\b)/i',
-            '/(-{2}|\/\*|\*\/|;)/i', // SQL comments and terminators
+            '/(-{2}|\/\*|\*\/|;)/i',
             '/(CHAR|ASCII|SUBSTRING|LENGTH|CONCAT)/i',
         ];
 
-        // XSS patterns
         $xssPatterns = [
             '/<script[^>]*>.*?<\/script>/i',
             '/javascript:/i',
-            '/on\w+\s*=/i', // onerror=, onclick=, etc
+            '/on\w+\s*=/i',
             '/<iframe/i',
             '/<img[^>]*on/i',
             '/<svg[^>]*on/i',
         ];
 
-        // Command injection patterns
         $commandPatterns = [
             '/[;&|`$(){}]/i',
             '/(cat|ls|rm|wget|curl|exec|system|passthru)\s+/i',
@@ -926,6 +1030,7 @@ PROMPT;
                     'message' => substr($message, 0, 100),
                     'pattern' => $pattern,
                 ]);
+
                 return true;
             }
         }
@@ -933,18 +1038,10 @@ PROMPT;
         return false;
     }
 
-    /**
-     * Sanitize search message
-     */
     private function sanitizeSearchMessage(string $message): string
     {
-        // Remove excess whitespace
         $message = preg_replace('/\s+/', ' ', trim($message));
-
-        // Remove HTML tags
         $message = strip_tags($message);
-
-        // Escape for database queries (though Laravel will handle this)
         $message = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
 
         return $message;
