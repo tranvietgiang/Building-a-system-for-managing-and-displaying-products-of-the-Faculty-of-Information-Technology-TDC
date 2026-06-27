@@ -74,7 +74,7 @@ class userSeeder extends Seeder
                 'user_id' => 'GVAI',
                 'name' => 'Giang vien AI',
                 'email' => 'gvai@tdc.edu.vn',
-                'password' => Hash::make('GVAI'),
+                'password' => Hash::make('GVAI1234'),
                 'role' => 'teacher',
                 'major_id' => 1,
                 'created_at' => $now,
