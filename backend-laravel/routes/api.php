@@ -162,6 +162,10 @@ Route::prefix('v1')->group(function () {
         Route::get('/system-settings', [SystemSettingController::class, 'index']);
         Route::patch('/system-settings', [SystemSettingController::class, 'update']);
 
+        Route::get('/chatbox-training-logs', [AdminController::class, 'chatboxTrainingLogs']);
+        Route::patch('/chatbox-training-logs/{log}', [AdminController::class, 'updateChatboxTrainingLog']);
+        Route::delete('/chatbox-training-logs/{log}', [AdminController::class, 'destroyChatboxTrainingLog']);
+
         Route::get('/users', [AdminController::class, 'users']);
         Route::post('/users', [AdminController::class, 'storeUser']);
         Route::put('/users/{userId}', [AdminController::class, 'updateUser']);

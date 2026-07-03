@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\ChatboxTrainingLog;
 use App\Models\Major;
 use App\Models\Product;
 use App\Models\Support;
@@ -382,6 +383,98 @@ class AdminController extends Controller
                 'role' => $user->role,
                 'class' => $user->class,
             ],
+        ]);
+    }
+
+    public function chatboxTrainingLogs(Request $request)
+    {
+        $perPage = min(max((int) $request->query('per_page', 20), 1), 100);
+        $query = trim((string) $request->query('q', ''));
+        $role = $request->query('role');
+        $source = $request->query('source');
+        $needsTraining = $request->query('needs_training');
+        $reviewed = $request->query('reviewed');
+        $dateFrom = $request->query('date_from');
+        $dateTo = $request->query('date_to');
+
+        $logs = ChatboxTrainingLog::query()
+            ->with([
+                'user:user_id,name,email,role',
+                'major:major_id,major_name,major_code',
+            ])
+            ->when($query, function ($builder) use ($query) {
+                $builder->where(function ($nested) use ($query) {
+                    $nested->where('message', 'like', "%{$query}%")
+                        ->orWhere('normalized_message', 'like', "%{$query}%")
+                        ->orWhere('reply', 'like', "%{$query}%")
+                        ->orWhere('source', 'like', "%{$query}%");
+                });
+            })
+            ->when($role, fn($builder) => $builder->where('role', $role))
+            ->when($source, fn($builder) => $builder->where('source', $source))
+            ->when($needsTraining !== null && $needsTraining !== '', function ($builder) use ($needsTraining) {
+                $builder->where('needs_training', filter_var($needsTraining, FILTER_VALIDATE_BOOLEAN));
+            })
+            ->when($reviewed !== null && $reviewed !== '', function ($builder) use ($reviewed) {
+                $builder->where('reviewed', filter_var($reviewed, FILTER_VALIDATE_BOOLEAN));
+            })
+            ->when($dateFrom, fn($builder) => $builder->whereDate('created_at', '>=', $dateFrom))
+            ->when($dateTo, fn($builder) => $builder->whereDate('created_at', '<=', $dateTo))
+            ->latest()
+            ->paginate($perPage);
+
+        return response()->json([
+            'success' => true,
+            'data' => $logs,
+            'stats' => [
+                'total' => ChatboxTrainingLog::count(),
+                'needs_training' => ChatboxTrainingLog::where('needs_training', true)->count(),
+                'unreviewed' => ChatboxTrainingLog::where('reviewed', false)->count(),
+                'reviewed' => ChatboxTrainingLog::where('reviewed', true)->count(),
+            ],
+        ]);
+    }
+
+    public function updateChatboxTrainingLog(Request $request, ChatboxTrainingLog $log)
+    {
+        $validated = $request->validate([
+            'reviewed' => ['nullable', 'boolean'],
+            'needs_training' => ['nullable', 'boolean'],
+            'admin_note' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        if (array_key_exists('reviewed', $validated)) {
+            $log->reviewed = (bool) $validated['reviewed'];
+            $log->reviewed_at = $log->reviewed ? now() : null;
+        }
+
+        if (array_key_exists('needs_training', $validated)) {
+            $log->needs_training = (bool) $validated['needs_training'];
+        }
+
+        if (array_key_exists('admin_note', $validated)) {
+            $log->admin_note = $validated['admin_note'];
+        }
+
+        $log->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Cap nhat log training chatbot thanh cong.',
+            'data' => $log->load([
+                'user:user_id,name,email,role',
+                'major:major_id,major_name,major_code',
+            ]),
+        ]);
+    }
+
+    public function destroyChatboxTrainingLog(ChatboxTrainingLog $log)
+    {
+        $log->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Xoa log training chatbot thanh cong.',
         ]);
     }
 

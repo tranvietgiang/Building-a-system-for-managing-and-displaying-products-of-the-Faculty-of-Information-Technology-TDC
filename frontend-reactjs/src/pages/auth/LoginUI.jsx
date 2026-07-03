@@ -49,6 +49,9 @@ const stats = [
   { value: "4", label: "Ngành đào tạo chất lượng cao", icon: BookOpen },
 ];
 
+// localStorage.clear();
+// sessionStorage.clear();
+
 export const LoginUI = ({
   animated,
   userRole,
