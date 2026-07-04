@@ -323,23 +323,79 @@ export default function CompareProductAi() {
     return String(url || "")
       .split("?")[0]
       .trim()
+      .replace(/\/$/, "")
       .toLowerCase();
   };
 
   const isSameImageUrl = (imageUrl, otherImages) => {
     const current = normalizeImageUrl(imageUrl);
 
-    return otherImages.some((other) => normalizeImageUrl(other) === current);
+    return (otherImages || []).some(
+      (other) => normalizeImageUrl(other) === current,
+    );
+  };
+
+  const getImageAiDuplicate = (src, duplicateImages, side) => {
+    const current = normalizeImageUrl(src);
+    const key = side === "a" ? "image_a" : "image_b";
+
+    return (duplicateImages || []).find(
+      (item) => normalizeImageUrl(item?.[key]) === current,
+    );
+  };
+
+  const isAiDuplicateImage = (src, duplicateImages, side) => {
+    return Boolean(getImageAiDuplicate(src, duplicateImages, side));
+  };
+
+  const getImageDuplicateBadge = (src, otherImages, duplicateImages, side) => {
+    const urlDuplicated = isSameImageUrl(src, otherImages);
+    const aiDuplicated = isAiDuplicateImage(src, duplicateImages, side);
+
+    if (urlDuplicated && aiDuplicated) {
+      return {
+        text: "Trùng URL + AI",
+        className: "bg-red-900 text-white",
+      };
+    }
+
+    if (urlDuplicated) {
+      return {
+        text: "Trùng URL",
+        className: "bg-red-800 text-white",
+      };
+    }
+
+    if (aiDuplicated) {
+      return {
+        text: "AI nghi trùng",
+        className: "bg-orange-600 text-white",
+      };
+    }
+
+    return null;
   };
 
   const productAImages = getProductImages(productData);
   const productBImages = getProductImages(selectedMatch);
+  const selectedDuplicateImages = selectedMatch?.duplicate_images || [];
 
-  const duplicatedImageCount = productAImages.filter((img) =>
+  const urlDuplicatedImageCount = productAImages.filter((img) =>
     isSameImageUrl(img, productBImages),
   ).length;
+
+  const suspectedDuplicateImageCount =
+    selectedMatch?.duplicate_image_count ?? selectedDuplicateImages.length;
   //
-  const GalleryColumn = ({ title, subtitle, images, otherImages, color }) => {
+  const GalleryColumn = ({
+    title,
+    subtitle,
+    images,
+    otherImages,
+    duplicateImages,
+    side,
+    color,
+  }) => {
     return (
       <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
         <div className="mb-4 flex items-center justify-between gap-3">
@@ -356,7 +412,18 @@ export default function CompareProductAi() {
         {images.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {images.map((src, index) => {
-              const duplicated = isSameImageUrl(src, otherImages);
+              const badge = getImageDuplicateBadge(
+                src,
+                otherImages,
+                duplicateImages,
+                side,
+              );
+              const aiDuplicate = getImageAiDuplicate(
+                src,
+                duplicateImages,
+                side,
+              );
+              const duplicated = Boolean(badge);
 
               return (
                 <div
@@ -366,6 +433,7 @@ export default function CompareProductAi() {
                       ? "border-red-700 ring-2 ring-red-300"
                       : "border-gray-200"
                   }`}
+                  title={aiDuplicate?.reason || ""}
                 >
                   <a href={src} target="_blank" rel="noreferrer">
                     <img
@@ -391,9 +459,11 @@ export default function CompareProductAi() {
                     </div>
                   )}
 
-                  {duplicated && (
-                    <div className="absolute bottom-2 left-2 right-2 rounded-md bg-red-800 px-2 py-1 text-center text-xs font-bold text-white">
-                      Trùng URL ảnh
+                  {badge && (
+                    <div
+                      className={`absolute bottom-2 left-2 right-2 rounded-md px-2 py-1 text-center text-xs font-bold ${badge.className}`}
+                    >
+                      {badge.text}
                     </div>
                   )}
                 </div>
@@ -510,7 +580,32 @@ export default function CompareProductAi() {
 
                     <div className="mt-3 flex items-center gap-2 flex-wrap">
                       <span className="px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold">
-                        AI: {product.ai_similarity ?? 0}%
+                        AI nội dung: {product.ai_similarity ?? 0}%
+                      </span>
+                      <span className="px-2 py-1 rounded-full bg-orange-50 text-orange-700 text-xs font-semibold">
+                        AI hình ảnh: {product.image_similarity ?? 0}%
+                      </span>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                          (product.overall_similarity ?? 0) >= 85
+                            ? "bg-red-800 text-white"
+                            : "bg-emerald-50 text-emerald-700"
+                        }`}
+                      >
+                        Tổng hợp:{" "}
+                        {product.overall_similarity ??
+                          product.ai_similarity ??
+                          0}
+                        %
+                      </span>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                          (product.duplicate_image_count ?? 0) > 0
+                            ? "bg-red-800 text-white"
+                            : "bg-gray-100 text-gray-600"
+                        }`}
+                      >
+                        Ảnh nghi trùng: {product.duplicate_image_count ?? 0}
                       </span>
                       <span
                         className={`px-2 py-1 rounded-full text-xs font-semibold ${
@@ -524,7 +619,8 @@ export default function CompareProductAi() {
                     </div>
 
                     <p className="text-xs text-gray-600 mt-3 line-clamp-2">
-                      {product.duplicate_message ||
+                      {product.overall_reason ||
+                        product.duplicate_message ||
                         "Không có trường chính trùng"}
                     </p>
                   </button>
@@ -788,7 +884,7 @@ export default function CompareProductAi() {
                 </div>
 
                 <div className="p-6">
-                  <div className="mb-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div className="mb-4 grid grid-cols-1 md:grid-cols-4 gap-3">
                     <div className="rounded-lg bg-blue-50 p-4">
                       <p className="text-sm font-semibold text-blue-700">
                         Sản phẩm A
@@ -812,7 +908,16 @@ export default function CompareProductAi() {
                         Ảnh trùng URL
                       </p>
                       <p className="text-2xl font-bold text-red-900">
-                        {duplicatedImageCount}
+                        {urlDuplicatedImageCount}
+                      </p>
+                    </div>
+
+                    <div className="rounded-lg bg-orange-50 p-4">
+                      <p className="text-sm font-semibold text-orange-700">
+                        Ảnh AI nghi trùng
+                      </p>
+                      <p className="text-2xl font-bold text-orange-900">
+                        {suspectedDuplicateImageCount}
                       </p>
                     </div>
                   </div>
@@ -823,6 +928,8 @@ export default function CompareProductAi() {
                       subtitle={productData.title}
                       images={productAImages}
                       otherImages={productBImages}
+                      duplicateImages={selectedDuplicateImages}
+                      side="a"
                       color="bg-blue-600"
                     />
 
@@ -831,15 +938,16 @@ export default function CompareProductAi() {
                       subtitle={selectedMatch.title}
                       images={productBImages}
                       otherImages={productAImages}
+                      duplicateImages={selectedDuplicateImages}
+                      side="b"
                       color="bg-purple-600"
                     />
                   </div>
 
                   <div className="mt-4 rounded-lg bg-yellow-50 border border-yellow-200 p-4 text-sm text-yellow-800">
-                    Lưu ý: phần này chỉ hỗ trợ xem trực quan gallery. Nếu ảnh bị
-                    crop, resize, đổi định dạng hoặc upload lại thành URL khác
-                    thì hệ thống có thể không tự đánh dấu trùng URL. Người duyệt
-                    vẫn nên xem bằng mắt trước khi quyết định.
+                    Lưu ý: phần này đánh dấu cả ảnh trùng URL và ảnh do AI nghi
+                    trùng về mặt nội dung/bố cục. Người duyệt vẫn nên mở ảnh để
+                    kiểm tra lại trước khi quyết định duyệt hoặc từ chối.
                   </div>
                 </div>
               </div>
@@ -853,7 +961,7 @@ export default function CompareProductAi() {
                     <h2 className="text-xl font-bold">🤖 Đánh giá từ AI</h2>
                   </div>
                   <div className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div
                         className={`rounded-lg p-4 ${
                           selectedMatch.ai_similarity >= 85
@@ -861,42 +969,94 @@ export default function CompareProductAi() {
                             : "bg-blue-50"
                         }`}
                       >
-                        <p
-                          className={`text-sm font-semibold ${
-                            selectedMatch.ai_similarity >= 85
-                              ? "text-red-800"
-                              : "text-blue-600"
-                          }`}
-                        >
-                          Độ tương đồng
+                        <p className="text-sm font-semibold text-blue-700">
+                          AI nội dung
                         </p>
-                        <p
-                          className={`text-2xl font-bold ${
-                            selectedMatch.ai_similarity >= 85
-                              ? "text-red-950"
-                              : "text-blue-700"
-                          }`}
-                        >
-                          {selectedMatch.ai_similarity}%
+                        <p className="text-2xl font-bold text-blue-900">
+                          {selectedMatch.ai_similarity ?? 0}%
                         </p>
-                      </div>
-                      <div className="bg-purple-50 rounded-lg p-4">
-                        <p className="text-sm text-purple-600 font-semibold">
-                          Cấp độ
-                        </p>
-                        <p className="text-2xl font-bold text-purple-700">
+                        <p className="text-xs text-gray-600 mt-1">
                           {selectedMatch.ai_level}
                         </p>
                       </div>
+
+                      <div
+                        className={`rounded-lg p-4 ${
+                          (selectedMatch.image_similarity ?? 0) >= 85
+                            ? "bg-red-100 border-2 border-red-700"
+                            : "bg-orange-50"
+                        }`}
+                      >
+                        <p className="text-sm font-semibold text-orange-700">
+                          AI hình ảnh
+                        </p>
+                        <p className="text-2xl font-bold text-orange-900">
+                          {selectedMatch.image_similarity ?? 0}%
+                        </p>
+                        <p className="text-xs text-gray-600 mt-1">
+                          {selectedMatch.image_level || "Thấp"}
+                        </p>
+                      </div>
+
+                      <div
+                        className={`rounded-lg p-4 ${
+                          (selectedMatch.overall_similarity ?? 0) >= 85
+                            ? "bg-red-100 border-2 border-red-700"
+                            : "bg-emerald-50"
+                        }`}
+                      >
+                        <p className="text-sm font-semibold text-emerald-700">
+                          Tổng hợp
+                        </p>
+                        <p className="text-2xl font-bold text-emerald-900">
+                          {selectedMatch.overall_similarity ??
+                            selectedMatch.ai_similarity ??
+                            0}
+                          %
+                        </p>
+                        <p className="text-xs text-gray-600 mt-1">
+                          {selectedMatch.overall_level ||
+                            selectedMatch.ai_level}
+                        </p>
+                      </div>
                     </div>
-                    {selectedMatch.ai_reason && (
-                      <div className="mt-4 bg-gray-50 rounded-lg p-4">
-                        <p className="text-sm text-gray-600 font-semibold mb-1">
-                          Lý do
-                        </p>
-                        <p className="text-gray-700 leading-relaxed">
-                          {selectedMatch.ai_reason}
-                        </p>
+
+                    {(selectedMatch.ai_reason ||
+                      selectedMatch.image_reason ||
+                      selectedMatch.overall_reason) && (
+                      <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {selectedMatch.ai_reason && (
+                          <div className="bg-gray-50 rounded-lg p-4">
+                            <p className="text-sm text-gray-600 font-semibold mb-1">
+                              Lý do nội dung
+                            </p>
+                            <p className="text-gray-700 leading-relaxed">
+                              {selectedMatch.ai_reason}
+                            </p>
+                          </div>
+                        )}
+
+                        {selectedMatch.image_reason && (
+                          <div className="bg-orange-50 rounded-lg p-4">
+                            <p className="text-sm text-orange-700 font-semibold mb-1">
+                              Lý do hình ảnh
+                            </p>
+                            <p className="text-gray-700 leading-relaxed">
+                              {selectedMatch.image_reason}
+                            </p>
+                          </div>
+                        )}
+
+                        {selectedMatch.overall_reason && (
+                          <div className="bg-emerald-50 rounded-lg p-4">
+                            <p className="text-sm text-emerald-700 font-semibold mb-1">
+                              Lý do tổng hợp
+                            </p>
+                            <p className="text-gray-700 leading-relaxed">
+                              {selectedMatch.overall_reason}
+                            </p>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
