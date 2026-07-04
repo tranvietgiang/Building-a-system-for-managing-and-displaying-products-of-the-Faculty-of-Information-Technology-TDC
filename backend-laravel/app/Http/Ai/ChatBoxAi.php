@@ -99,6 +99,10 @@ class ChatBoxAi
             'aws',
             'azure',
             'firebase',
+            'hybrid',
+            'hybrid cloud',
+            'káº¿t ná»‘i hybrid',
+            'ket noi hybrid',
 
             // ── AI ───────────────────────────────────────────────────
             'trí tuệ nhân tạo',
@@ -407,8 +411,8 @@ class ChatBoxAi
                 $majorName = DB::table('majors')->where('major_id', $majorId)->value('major_name') ?? 'ngành của bạn';
 
                 $payload = [
-                    'reply' => "Xin lỗi {$userName}, bạn chỉ có thể xem thông tin trong phạm vi {$majorName} thôi nhé 😊"
-                    , 'products' => [],
+                    'reply' => "Xin lỗi {$userName}, bạn chỉ có thể xem thông tin trong phạm vi {$majorName} thôi nhé 😊",
+                    'products' => [],
                     'source' => 'scope_guard',
                 ];
 
@@ -421,8 +425,8 @@ class ChatBoxAi
                 $majorName = DB::table('majors')->where('major_id', $majorId)->value('major_name') ?? 'ngành của bạn';
 
                 $payload = [
-                    'reply' => "Xin lỗi thầy/cô {$userName}, thầy/cô chỉ có thể xem thông tin trong phạm vi {$majorName} thôi nhé 📝"
-                    , 'products' => [],
+                    'reply' => "Xin lỗi thầy/cô {$userName}, thầy/cô chỉ có thể xem thông tin trong phạm vi {$majorName} thôi nhé 📝",
+                    'products' => [],
                     'source' => 'scope_guard',
                 ];
 
@@ -987,38 +991,61 @@ class ChatBoxAi
 
     private function extractMentionedProducts(string $reply, ?int $majorId, string $role): array
     {
+        $normalizedReply = $this->normalizeSearchText($reply);
+
+        // Nếu câu trả lời không phải đang giới thiệu/tìm thấy sản phẩm
+        // thì không gắn thẻ "Đồ án liên quan" bên dưới.
+        if (!$this->containsAny($normalizedReply, [
+            'tim thay san pham',
+            'san pham phu hop',
+            'san pham lien quan',
+            'do an lien quan',
+            'du an lien quan',
+            'xem chi tiet',
+            'chi tiet san pham',
+            'bam vao san pham',
+            'bam vao the san pham',
+        ])) {
+            return [];
+        }
+
         $query = DB::table('products')
             ->leftJoin('product_statistics', 'products.product_id', '=', 'product_statistics.product_id')
-            ->select('products.product_id as id', 'products.title', 'product_statistics.views')
-            ->where('products.status', 'approved'); // ✅ Luôn chỉ lấy approved
+            ->select(
+                'products.product_id as id',
+                'products.product_id',
+                'products.title',
+                'product_statistics.views'
+            )
+            ->where('products.status', 'approved');
 
-        if (in_array($role, ['student', 'teacher']) && $majorId) {
-            $query->where('products.major_id', $majorId); // ✅ Filter ngành cho student/teacher
+        if (in_array($role, ['student', 'teacher'], true) && $majorId) {
+            $query->where('products.major_id', $majorId);
         }
-        // guest và admin không filter major → lấy tất cả ngành
 
         $allProducts = $query->get();
 
         $mentioned = $allProducts
-            ->filter(fn($product) => str_contains($reply, $product->title))
-            ->unique('id'); // ✅ Tránh trùng lặp
+            ->filter(function ($product) use ($reply, $normalizedReply) {
+                $title = trim((string) ($product->title ?? ''));
 
+                if ($title === '') {
+                    return false;
+                }
+
+                return str_contains($reply, $title)
+                    || str_contains($normalizedReply, $this->normalizeSearchText($title));
+            })
+            ->unique('id')
+            ->values();
+
+        // Quan trọng: không tự lấy top sản phẩm nữa.
+        // Không nhắc đúng tên sản phẩm thì không trả products.
         if ($mentioned->isEmpty()) {
-            return DB::table('products')
-                ->leftJoin('product_statistics', 'products.product_id', '=', 'product_statistics.product_id')
-                ->select('products.product_id as id', 'products.title', 'product_statistics.views')
-                ->where('products.status', 'approved')
-                ->when(
-                    in_array($role, ['student', 'teacher']) && $majorId,
-                    fn($q) => $q->where('products.major_id', $majorId)
-                )
-                ->orderByDesc('product_statistics.views')
-                ->limit(5)
-                ->get()
-                ->toArray();
+            return [];
         }
 
-        return $mentioned->values()->toArray();
+        return $mentioned->toArray();
     }
 
     private function buildNonRelevantReply(string $message, ?object $user): string
@@ -1421,22 +1448,12 @@ class ChatBoxAi
     private function localProductSearchResponse(string $message, string $role, ?int $majorId, ?object $user = null)
     {
         $analysis = $this->analyzeLocalSearchQuery($message);
-        $scopeWarning = $this->detectedMajorOutsideUserScope($analysis, $role, $majorId);
-
-        if ($scopeWarning) {
-            return response()->json([
-                'reply' => "Mình hiểu câu này thuộc {$scopeWarning['detected_major']}, nhưng tài khoản của bạn hiện chỉ xem được dữ liệu trong {$scopeWarning['user_major']}. Vì vậy mình không trả sản phẩm ngoài phạm vi ngành của bạn.",
-                'products' => [],
-                'source' => 'local_search_scope_guard',
-                'analysis' => $analysis,
-            ]);
-        }
 
         $products = $this->safeFindLocalProductsForMessage($message, $majorId, $role);
 
         if (empty($products)) {
             return response()->json([
-                'reply' => 'Mình chưa tìm thấy sản phẩm phù hợp trong dữ liệu hiện có. Bạn thử gõ cụ thể hơn, ví dụ: "du lịch", "AI Python", "web Laravel", "thiết kế Figma", "xâm nhập mạng".',
+                'reply' => $this->buildNoLocalProductsReply($analysis),
                 'products' => [],
                 'source' => 'local_search',
                 'analysis' => $analysis,
@@ -1455,12 +1472,47 @@ class ChatBoxAi
         }
 
         return response()->json([
-            'reply' => "AI đang tạm mất kết nối, nên mình trả kết quả tìm trực tiếp từ MySQL trước:\n" . $this->formatProductList($products),
+            'reply' => "AI đang tạm mất kết nối, nhưng mình vẫn thấy vài sản phẩm liên quan:\n" . $this->formatProductList($products, $role, $analysis),
             'products' => $products,
             'source' => 'local_search_fallback',
             'ai_unavailable' => true,
             'analysis' => $analysis,
         ]);
+    }
+
+    private function buildNoLocalProductsReply(array $analysis): string
+    {
+        $suggestions = $this->noResultSearchSuggestions($analysis);
+
+        if (!empty($suggestions)) {
+            return 'Mình chưa thấy sản phẩm này trong danh sách đã duyệt. Bạn thử tìm bằng: '
+                . implode(', ', $suggestions)
+                . '.';
+        }
+
+        return 'Mình chưa thấy sản phẩm này trong danh sách đã duyệt. Bạn thử gõ thêm tên chủ đề, công nghệ hoặc một phần tiêu đề sản phẩm nha.';
+    }
+
+    private function noResultSearchSuggestions(array $analysis): array
+    {
+        $majorCode = strtoupper((string) ($analysis['major_code'] ?? ''));
+        $text = $this->normalizeSearchText(implode(' ', $analysis['terms'] ?? []));
+
+        if ($this->containsAny($text, ['hybrid', 'cloud', 'dam may', 'vpn', 'zero trust'])) {
+            return ['hybrid cloud', 'điện toán đám mây', 'VPN', 'Zero Trust'];
+        }
+
+        if ($this->containsAny($text, ['xam nhap', 'ids', 'intrusion', 'suricata'])) {
+            return ['IDS', 'xâm nhập mạng', 'Suricata', 'bảo mật mạng'];
+        }
+
+        return match ($majorCode) {
+            'AI' => ['AI Python', 'machine learning', 'nhận diện hình ảnh', 'dự đoán dữ liệu'],
+            'CNTT' => ['web Laravel', 'React', 'quản lý bán hàng', 'API'],
+            'MMT' => ['bảo mật mạng', 'VPN', 'Wi-Fi doanh nghiệp', 'Packet Tracer'],
+            'GRAPHIC' => ['thiết kế Figma', 'UI/UX', 'logo', 'poster'],
+            default => ['du lịch', 'AI Python', 'web Laravel', 'thiết kế Figma'],
+        };
     }
 
     private function searchGuideText(): string
@@ -1562,33 +1614,30 @@ class ChatBoxAi
                 'role' => $role,
                 'name' => $user?->name ?? $user?->username ?? null,
             ],
-            'analysis' => $analysis,
-            'retrieved_products' => $this->formatRetrievedProductsForPrompt($products),
+            'products' => $this->formatRetrievedProductsForPrompt($products, $role),
         ];
 
         $json = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
         return <<<PROMPT
-        Bạn là trợ lý tiếng Việt của hệ thống quản lý đồ án sinh viên.
+        Bạn là trợ lý tiếng Việt của hệ thống đồ án sinh viên.
 
-        Backend đã phân tích câu hỏi, tìm trong MySQL và chỉ đưa cho bạn các sản phẩm phù hợp nhất bên dưới.
+        Hãy trả lời dựa duy nhất trên danh sách sản phẩm được cung cấp.
 
         QUY TẮC BẮT BUỘC:
-        1. Chỉ trả lời dựa trên "retrieved_products"; không bịa sản phẩm, số liệu hoặc link ngoài danh sách.
-        2. Nếu sản phẩm có mô tả/công nghệ/ngành/danh mục, hãy dùng các dữ liệu đó để giải thích vì sao liên quan.
-        3. Trả lời bằng tiếng Việt tự nhiên, ngắn gọn, hữu ích.
-        4. Nếu người dùng hỏi "xem sản phẩm", hãy liệt kê 3-5 sản phẩm phù hợp nhất theo danh sách đã đưa.
-        5. Nếu chỉ có ít kết quả, nói rõ hệ thống hiện chỉ tìm thấy từng đó sản phẩm.
-        6. Không nhắc tên bảng, tên cột kỹ thuật hoặc chi tiết database.
-        7. Không nói "không tìm thấy" khi retrieved_products đang có dữ liệu.
-        8. Có thể nhắc người dùng bấm vào chip/nút sản phẩm bên dưới chat để xem chi tiết.
+        1. Trả lời ngắn gọn, tự nhiên, thân thiện.
+        2. Không bịa thêm sản phẩm, số liệu hoặc đường dẫn ngoài danh sách.
+        3. Không nhắc cách hệ thống xử lý, tìm kiếm, lưu trữ hoặc tên kỹ thuật bên trong.
+        4. Nếu có sản phẩm, liệt kê tối đa 3-5 sản phẩm. Mỗi sản phẩm gồm: tên sản phẩm, lý do liên quan ngắn, và link chi tiết nếu có.
+        5. Nếu không có link chi tiết, nhắc người dùng bấm vào thẻ sản phẩm bên dưới chat để xem chi tiết.
+        6. Không nói "không tìm thấy" khi danh sách sản phẩm đang có dữ liệu.
 
-        DỮ LIỆU ĐÃ TRUY XUẤT:
+        DANH SÁCH SẢN PHẨM:
         {$json}
         PROMPT;
     }
 
-    private function formatRetrievedProductsForPrompt(array $products): array
+    private function formatRetrievedProductsForPrompt(array $products, string $role = 'guest'): array
     {
         return collect($products)
             ->take(5)
@@ -1599,27 +1648,40 @@ class ChatBoxAi
                 'major_name' => $product->major_name ?? null,
                 'major_code' => $product->major_code ?? null,
                 'category_name' => $product->category_name ?? null,
-                'views' => $product->views ?? 0,
-                'likes' => $product->likes ?? 0,
+                'detail_url' => $this->productDetailUrl($product, $role),
                 'github_link' => $product->github_link ?? null,
                 'demo_link' => $product->demo_link ?? null,
-                'technical' => array_filter([
-                    'model_used' => $product->model_used ?? null,
-                    'ai_framework' => $product->ai_framework ?? null,
-                    'ai_language' => $product->ai_language ?? null,
-                    'dataset_used' => $product->dataset_used ?? null,
-                    'accuracy_score' => $product->accuracy_score ?? null,
-                    'programming_language' => $product->programming_language ?? null,
-                    'cntt_framework' => $product->cntt_framework ?? null,
-                    'database_used' => $product->database_used ?? null,
-                    'network_protocol' => $product->network_protocol ?? null,
-                    'topology_type' => $product->topology_type ?? null,
-                    'simulation_tool' => $product->simulation_tool ?? null,
-                    'design_type' => $product->design_type ?? null,
-                    'tools_used' => $product->tools_used ?? null,
-                    'behance_link' => $product->behance_link ?? null,
-                ], fn($value) => $value !== null && $value !== ''),
+                'highlights' => $this->productHighlightValues($product),
             ])
+            ->values()
+            ->all();
+    }
+
+    private function productHighlightValues(object $product): array
+    {
+        $values = [
+            $product->model_used ?? null,
+            $product->ai_framework ?? null,
+            $product->ai_language ?? null,
+            $product->dataset_used ?? null,
+            $product->accuracy_score ?? null,
+            $product->programming_language ?? null,
+            $product->cntt_framework ?? null,
+            $product->database_used ?? null,
+            $product->network_protocol ?? null,
+            $product->topology_type ?? null,
+            $product->simulation_tool ?? null,
+            $product->design_type ?? null,
+            $product->tools_used ?? null,
+        ];
+
+        return collect($values)
+            ->filter(fn($value) => $value !== null && $value !== '')
+            ->flatMap(fn($value) => preg_split('/[,;]+/', (string) $value, -1, PREG_SPLIT_NO_EMPTY))
+            ->map(fn($value) => trim((string) $value))
+            ->filter()
+            ->unique(fn($value) => mb_strtolower($value, 'UTF-8'))
+            ->take(8)
             ->values()
             ->all();
     }
@@ -1659,13 +1721,84 @@ class ChatBoxAi
         }
     }
 
-    private function formatProductList(array $products): string
+    private function formatProductList(array $products, string $role = 'guest', ?array $analysis = null): string
     {
         return collect($products)
             ->take(5)
             ->values()
-            ->map(fn($product, $index) => ($index + 1) . '. ' . $product->title)
+            ->map(function ($product, $index) use ($role, $analysis) {
+                $line = ($index + 1) . '. ' . ($product->title ?? 'Sản phẩm phù hợp')
+                    . ' - ' . $this->productRelevanceText($product, $analysis);
+                $detailUrl = $this->productDetailUrl($product, $role);
+
+                return $detailUrl
+                    ? "{$line} Xem: {$detailUrl}"
+                    : "{$line} Bấm thẻ sản phẩm bên dưới để xem chi tiết.";
+            })
             ->implode("\n");
+    }
+
+    private function productRelevanceText(object $product, ?array $analysis = null): string
+    {
+        $haystack = $this->normalizeSearchText(implode(' ', array_filter([
+            $product->title ?? null,
+            $product->description ?? null,
+            $product->major_name ?? null,
+            $product->major_code ?? null,
+            $product->category_name ?? null,
+            $product->model_used ?? null,
+            $product->ai_framework ?? null,
+            $product->ai_language ?? null,
+            $product->dataset_used ?? null,
+            $product->programming_language ?? null,
+            $product->cntt_framework ?? null,
+            $product->database_used ?? null,
+            $product->network_protocol ?? null,
+            $product->topology_type ?? null,
+            $product->simulation_tool ?? null,
+            $product->design_type ?? null,
+            $product->tools_used ?? null,
+        ])));
+
+        if ($this->containsAny($haystack, ['hybrid', 'cloud', 'ipsec', 'bgp', 'vpn', 'zero trust'])) {
+            return 'liên quan đến hybrid cloud, kết nối an toàn và bảo mật mạng.';
+        }
+
+        if ($this->containsAny($haystack, ['xam nhap', 'ids', 'intrusion', 'suricata', 'an ninh mang', 'bao mat mang'])) {
+            return 'liên quan đến an ninh mạng, IDS và phát hiện xâm nhập.';
+        }
+
+        $majorCode = strtoupper((string) ($product->major_code ?? $analysis['major_code'] ?? ''));
+
+        return match ($majorCode) {
+            'AI' => 'phù hợp với chủ đề AI, học máy hoặc xử lý dữ liệu.',
+            'CNTT', 'IT' => 'phù hợp với chủ đề phần mềm, web hoặc ứng dụng quản lý.',
+            'MMT', 'NETWORK' => 'phù hợp với chủ đề mạng máy tính và hạ tầng kết nối.',
+            'TKDH', 'GRAPHIC', 'GRAPHICS' => 'phù hợp với chủ đề thiết kế, đồ họa hoặc UI/UX.',
+            default => 'có nội dung gần với chủ đề bạn đang hỏi.',
+        };
+    }
+
+    private function productDetailUrl(object $product, string $role): ?string
+    {
+        $id = $product->id ?? $product->product_id ?? null;
+
+        if (!$id) {
+            return null;
+        }
+
+        $frontendUrl = rtrim(
+            config('app.frontend_url')
+                ?? env('FRONTEND_URL')
+                ?? config('app.url'),
+            '/'
+        );
+
+        if ($role === 'teacher') {
+            return "{$frontendUrl}/giang-vien/chi-tiet-san-pham/{$id}";
+        }
+
+        return "{$frontendUrl}/chi-tiet-san-pham/{$id}";
     }
 
     private function containsAny(string $value, array $needles): bool
@@ -1682,44 +1815,115 @@ class ChatBoxAi
     private function openAiFallbackResponse(string $message, ?int $majorId, string $role)
     {
         $products = $this->safeFindLocalProductsForMessage($message, $majorId, $role);
+        $analysis = $this->analyzeLocalSearchQuery($message);
 
         if (!empty($products)) {
             return response()->json([
-                'reply' => "AI đang tạm mất kết nối nên mình tìm trực tiếp trong hệ thống trước.\n\nSản phẩm liên quan:\n" . $this->formatProductList($products),
+                'reply' => "AI đang tạm mất kết nối, nhưng mình vẫn thấy vài sản phẩm liên quan:\n" . $this->formatProductList($products, $role, $analysis),
                 'products' => $products,
                 'source' => 'local_fallback',
                 'ai_unavailable' => true,
+                'analysis' => $analysis,
             ]);
         }
 
         return response()->json([
-            'reply' => 'AI đang tạm mất kết nối nên mình chưa thể phân tích câu hỏi lúc này. Mình cũng chưa tìm thấy sản phẩm phù hợp trong dữ liệu hiện có, bạn thử đổi từ khóa hoặc thử lại sau nhé.',
+            'reply' => $this->buildNoLocalProductsReply($analysis),
             'products' => [],
             'source' => 'local_fallback',
             'ai_unavailable' => true,
+            'analysis' => $analysis,
         ]);
     }
 
     private function findLocalProductsForMessage(string $message, ?int $majorId, string $role, int $limit = 5): array
     {
         $analysis = $this->analyzeLocalSearchQuery($message);
-        $terms = $analysis['terms'];
+        $stages = $this->fallbackProductSearchStages($message, $analysis);
 
-        if (empty($terms) && !$this->looksLikeProductListingRequest($message) && !$analysis['major_code']) {
+        if (empty($stages)) {
             return [];
         }
 
-        $query = DB::table('products')
+        foreach ($stages as $stage) {
+            $query = $this->localProductSearchBaseQuery();
+
+            // ✅ Chatbot product search vẫn chỉ lấy sản phẩm đã duyệt
+            // ✅ Student/Teacher vẫn bị khóa theo ngành của tài khoản
+            // ✅ Guest/Admin được tìm toàn bộ sản phẩm đã duyệt
+            if (in_array($role, ['student', 'teacher'], true)) {
+                if (!$majorId) {
+                    return [];
+                }
+
+                $query->where('products.major_id', $majorId);
+            }
+
+            $stageMajorCode = $stage['major_code'] ?? null;
+
+            // ✅ Major semantic chỉ dùng để lọc thêm khi phù hợp
+            // Ví dụ guest/admin hỏi CNTT thì lọc CNTT
+            // Student/Teacher thì vẫn đã bị khóa bởi major_id bên trên
+            if ($stageMajorCode) {
+                $query->whereIn(
+                    DB::raw('UPPER(majors.major_code)'),
+                    $this->majorCodeAliasesForSearch($stageMajorCode)
+                );
+            }
+
+            $stageTerms = $this->uniqueSearchTerms($stage['terms'] ?? []);
+            $listAll = (bool) ($stage['list_all'] ?? false);
+
+            if (!empty($stageTerms)) {
+                $this->applyLocalProductSearchTerms($query, $stageTerms);
+            } elseif (!$listAll) {
+                continue;
+            }
+
+            $stageAnalysis = array_merge($analysis, [
+                'terms' => !empty($stageTerms) ? $stageTerms : ($analysis['terms'] ?? []),
+            ]);
+
+            $this->orderLocalSearchByRelevance($query, $stageAnalysis);
+
+            $products = $query
+                ->limit($limit)
+                ->get()
+                ->unique('id')
+                ->values()
+                ->toArray();
+
+            if (!empty($products)) {
+                return $products;
+            }
+        }
+
+        return [];
+    }
+
+    private function localProductSearchBaseQuery()
+    {
+        $tagSummary = DB::table('product_tags')
+            ->select(
+                'product_id',
+                DB::raw('GROUP_CONCAT(DISTINCT tag_name SEPARATOR ", ") as tags')
+            )
+            ->groupBy('product_id');
+
+        return DB::table('products')
             ->leftJoin('product_statistics', 'products.product_id', '=', 'product_statistics.product_id')
             ->leftJoin('majors', 'products.major_id', '=', 'majors.major_id')
             ->leftJoin('categories', 'products.cate_id', '=', 'categories.cate_id')
-            ->leftJoin('product_tags', 'products.product_id', '=', 'product_tags.product_id')
+            ->leftJoinSub($tagSummary, 'tag_summary', function ($join) {
+                $join->on('products.product_id', '=', 'tag_summary.product_id');
+            })
             ->leftJoin('product_ai', 'products.product_id', '=', 'product_ai.product_id')
             ->leftJoin('product_cntt', 'products.product_id', '=', 'product_cntt.product_id')
             ->leftJoin('product_mmt', 'products.product_id', '=', 'product_mmt.product_id')
             ->leftJoin('product_graphic', 'products.product_id', '=', 'product_graphic.product_id')
             ->select(
                 'products.product_id as id',
+                'products.product_id',
                 'products.title',
                 'products.description',
                 'products.github_link',
@@ -1729,6 +1933,7 @@ class ChatBoxAi
                 'categories.category_name',
                 DB::raw('COALESCE(product_statistics.views, 0) as views'),
                 DB::raw('COALESCE(product_statistics.likes, 0) as likes'),
+                DB::raw('COALESCE(tag_summary.tags, "") as tags'),
                 'product_ai.model_used',
                 'product_ai.framework as ai_framework',
                 'product_ai.language as ai_language',
@@ -1736,6 +1941,7 @@ class ChatBoxAi
                 'product_ai.accuracy_score',
                 'product_cntt.programming_language',
                 'product_cntt.framework as cntt_framework',
+                DB::raw('COALESCE(product_cntt.framework, product_ai.framework) as framework'),
                 'product_cntt.database_used',
                 'product_mmt.network_protocol',
                 'product_mmt.topology_type',
@@ -1745,27 +1951,40 @@ class ChatBoxAi
                 'product_graphic.behance_link'
             )
             ->where('products.status', 'approved');
+    }
 
-        if (in_array($role, ['student', 'teacher'], true) && $majorId) {
-            $query->where('products.major_id', $majorId);
+    private function applyLocalProductSearchTerms($query, array $terms): void
+    {
+        $terms = $this->uniqueSearchTerms($terms);
+
+        if (empty($terms)) {
+            return;
         }
 
-        if (!in_array($role, ['student', 'teacher'], true) && $analysis['major_code']) {
-            $query->whereIn(DB::raw('UPPER(majors.major_code)'), $this->majorCodeAliasesForSearch($analysis['major_code']));
-        }
+        $query->where(function ($subQuery) use ($terms) {
+            foreach ($terms as $term) {
+                $variants = $this->uniqueSearchTerms([
+                    $term,
+                    $this->normalizeSearchText($term),
+                    $this->normalizeTagText($term),
+                ]);
 
-        if (!empty($terms)) {
-            $query->where(function ($subQuery) use ($terms) {
-                foreach ($terms as $term) {
-                    $like = '%' . $term . '%';
+                foreach ($variants as $variant) {
+                    if ($variant === '') {
+                        continue;
+                    }
+
+                    $like = '%' . $variant . '%';
 
                     $subQuery
                         ->orWhere('products.title', 'like', $like)
                         ->orWhere('products.description', 'like', $like)
+                        ->orWhere('products.github_link', 'like', $like)
+                        ->orWhere('products.demo_link', 'like', $like)
                         ->orWhere('majors.major_name', 'like', $like)
                         ->orWhere('majors.major_code', 'like', $like)
                         ->orWhere('categories.category_name', 'like', $like)
-                        ->orWhere('product_tags.tag_name', 'like', $like)
+                        ->orWhere('tag_summary.tags', 'like', $like)
                         ->orWhere('product_ai.model_used', 'like', $like)
                         ->orWhere('product_ai.framework', 'like', $like)
                         ->orWhere('product_ai.language', 'like', $like)
@@ -1779,16 +1998,199 @@ class ChatBoxAi
                         ->orWhere('product_graphic.design_type', 'like', $like)
                         ->orWhere('product_graphic.tools_used', 'like', $like);
                 }
-            });
+            }
+        });
+    }
+
+    private function fallbackProductSearchStages(string $message, array $analysis): array
+    {
+        $terms = $this->uniqueSearchTerms($analysis['terms'] ?? []);
+        $tokens = $this->importantSearchTokens($message);
+        $majorCode = $analysis['major_code'] ?? null;
+
+        $stages = [];
+
+        if (!empty($terms)) {
+            $stages[] = [
+                'terms' => $terms,
+                'major_code' => $majorCode,
+                'list_all' => false,
+            ];
         }
 
-        $this->orderLocalSearchByRelevance($query, $analysis);
+        if (!empty($tokens)) {
+            $stages[] = [
+                'terms' => $tokens,
+                'major_code' => $majorCode,
+                'list_all' => false,
+            ];
+        }
 
-        return $query
-            ->distinct()
-            ->limit($limit)
-            ->get()
-            ->toArray();
+        if ($this->isClearlyCnttWebRelated($message)) {
+            $stages[] = [
+                'terms' => $this->uniqueSearchTerms([
+                    'java',
+                    'spring',
+                    'spring boot',
+                    'react',
+                    'reactjs',
+                    'mysql',
+                    'api',
+                    'web',
+                    'website',
+                    'web application',
+                    'ứng dụng web',
+                    'he thong quan ly',
+                    'hệ thống quản lý',
+                    'quan ly',
+                    'quản lý',
+                    'crud',
+                    'backend',
+                    'frontend',
+                    'fullstack',
+                    'cntt',
+                    'công nghệ thông tin',
+                ]),
+                'major_code' => 'CNTT',
+                'list_all' => false,
+            ];
+        }
+
+        if (empty($stages) && $majorCode) {
+            $stages[] = [
+                'terms' => [],
+                'major_code' => $majorCode,
+                'list_all' => true,
+            ];
+        }
+
+        return $stages;
+    }
+
+    private function importantSearchTokens(string $message): array
+    {
+        $normalized = $this->normalizeSearchText($message);
+
+        $tokens = [
+            'java',
+            'spring',
+            'spring boot',
+            'react',
+            'reactjs',
+            'mysql',
+            'api',
+            'rest api',
+            'restful api',
+            'web',
+            'website',
+            'application',
+            'web application',
+            'web app',
+            'quan ly',
+            'he thong quan ly',
+            'ban hang',
+            'don hang',
+            'san pham',
+            'crud',
+            'ecommerce',
+            'e commerce',
+            'shop online',
+            'dashboard',
+            'admin panel',
+            'backend',
+            'frontend',
+            'fullstack',
+            'jwt',
+            'auth',
+            'login',
+        ];
+
+        $matched = [];
+
+        foreach ($tokens as $token) {
+            if ($this->containsSemanticKeyword($normalized, $token)) {
+                $matched[] = $token;
+            }
+        }
+
+        foreach (preg_split('/\s+/', $normalized, -1, PREG_SPLIT_NO_EMPTY) as $word) {
+            if ($this->isUsefulSearchWord($word)) {
+                $matched[] = $word;
+            }
+        }
+
+        return array_slice($this->uniqueSearchTerms($matched), 0, 20);
+    }
+
+    private function isClearlyCnttWebRelated(string $message): bool
+    {
+        $normalized = $this->normalizeSearchText($message);
+
+        return $this->containsAny($normalized, [
+            'java',
+            'spring',
+            'spring boot',
+            'react',
+            'reactjs',
+            'mysql',
+            'api',
+            'rest api',
+            'restful api',
+            'web',
+            'website',
+            'web application',
+            'web app',
+            'ung dung web',
+            'he thong quan ly',
+            'quan ly',
+            'ban hang',
+            'don hang',
+            'san pham',
+            'crud',
+            'dashboard',
+            'admin panel',
+            'backend',
+            'frontend',
+            'fullstack',
+            'ecommerce',
+            'e commerce',
+            'shop online',
+            'jwt',
+            'auth',
+            'login',
+        ]);
+    }
+
+    private function uniqueSearchTerms(array $terms): array
+    {
+        $unique = [];
+        $result = [];
+
+        foreach ($terms as $term) {
+            $term = trim((string) $term);
+
+            if ($term === '') {
+                continue;
+            }
+
+            $key = $this->normalizeTagText($term);
+
+            if ($key === '' || isset($unique[$key])) {
+                continue;
+            }
+
+            $unique[$key] = true;
+            $result[] = $term;
+        }
+
+        return array_values($result);
+    }
+
+    private function normalizeTagText(string $value): string
+    {
+        $value = str_replace('#', ' ', $value);
+
+        return $this->normalizeSearchText($value);
     }
 
     private function extractLocalSearchTerms(string $message): array
@@ -1820,7 +2222,7 @@ class ChatBoxAi
         return [
             'major_code' => $majorCode,
             'major_name' => $majorCode ? $this->majorLabel($majorCode) : null,
-            'terms' => array_slice($result, 0, 18),
+            'terms' => array_slice($result, 0, 30),
         ];
     }
 
@@ -1958,13 +2360,30 @@ class ChatBoxAi
                 'bao mat mang',
                 'xam nhap',
                 'phat hien xam nhap',
+                'intrusion detection',
                 'intrusion',
                 'ids',
                 'suricata',
+                'network security',
+                'secure cloud',
                 'firewall',
                 'vlan',
                 'ospf',
                 'vpn',
+                'ipsec',
+                'bgp',
+                'hybrid',
+                'hybrid cloud',
+                'ket noi hybrid',
+                'ket noi hybrid cloud',
+                'cloud',
+                'cloud computing',
+                'dien toan dam may',
+                'private cloud',
+                'public cloud',
+                'cloud an toan',
+                'aws vpc',
+                'hub and spoke',
                 'radius',
                 'zero trust',
                 'packet tracer',
@@ -2067,6 +2486,74 @@ class ChatBoxAi
                 'an ninh mạng',
                 'bảo mật mạng',
                 'intrusion detection',
+            ]);
+        }
+
+        if ($this->containsAny($normalized, [
+            'phat hien xam nhap',
+            'xam nhap',
+            'intrusion',
+            'ids',
+        ])) {
+            $terms = array_merge($terms, [
+                'he thong phat hien xam nhap mang',
+                'phat hien xam nhap mang',
+                'xam nhap mang',
+                'an ninh mang',
+                'bao mat mang',
+                'network security',
+                'MMT',
+            ]);
+        }
+
+        if ($this->containsAny($normalized, [
+            'hybrid',
+            'hybrid cloud',
+            'ket noi hybrid',
+            'ket noi hybrid cloud',
+            'cloud',
+            'cloud computing',
+            'dien toan dam may',
+            'dam may',
+            'private cloud',
+            'public cloud',
+            'secure cloud',
+            'network security',
+            'zero trust',
+            'vpn',
+            'cloud an toan',
+            'aws vpc',
+            'ipsec',
+            'bgp',
+        ])) {
+            $terms = array_merge($terms, [
+                'Ket noi hybrid cloud an toan',
+                'Kết nối hybrid cloud an toàn',
+                'ket noi hybrid cloud an toan',
+                'kết nối hybrid cloud',
+                'ket noi hybrid cloud',
+                'ket noi hybrid',
+                'hybrid cloud',
+                'điện toán đám mây',
+                'dien toan dam may',
+                'cloud computing',
+                'bảo mật cloud',
+                'bao mat cloud',
+                'network security',
+                'secure cloud',
+                'cloud an toan',
+                'VPN',
+                'Zero Trust',
+                'Mạng máy tính',
+                'mang may tinh',
+                'MMT',
+                'AWS VPC',
+                'IPsec',
+                'BGP',
+                'hub-and-spoke',
+                'hub and spoke',
+                'duong ham ma hoa',
+                'mo hinh ket noi ha tang',
             ]);
         }
 
@@ -2233,32 +2720,67 @@ class ChatBoxAi
 
     private function orderLocalSearchByRelevance($query, array $analysis): void
     {
-        $mainTerm = $analysis['terms'][0] ?? '';
+        $terms = $this->uniqueSearchTerms($analysis['terms'] ?? []);
 
-        if ($mainTerm !== '') {
-            $query->orderByRaw(
-                'CASE
-                    WHEN products.title LIKE ? THEN 0
-                    WHEN products.title LIKE ? THEN 1
-                    WHEN products.description LIKE ? THEN 2
-                    WHEN product_tags.tag_name LIKE ? THEN 3
-                    WHEN categories.category_name LIKE ? THEN 4
-                    WHEN majors.major_name LIKE ? OR majors.major_code LIKE ? THEN 5
-                    ELSE 6
-                END',
-                [
-                    $mainTerm . '%',
-                    '%' . $mainTerm . '%',
-                    '%' . $mainTerm . '%',
-                    '%' . $mainTerm . '%',
-                    '%' . $mainTerm . '%',
-                    '%' . $mainTerm . '%',
-                    '%' . $mainTerm . '%',
-                ]
-            );
+        if (!empty($terms)) {
+            $scoreParts = [];
+            $bindings = [];
+
+            foreach (array_slice($terms, 0, 12) as $term) {
+                $normalizedTerm = $this->normalizeTagText($term);
+
+                if ($normalizedTerm === '') {
+                    continue;
+                }
+
+                $like = '%' . $normalizedTerm . '%';
+
+                $scoreParts[] = '
+                CASE
+                    WHEN products.title LIKE ? THEN 120
+                    WHEN tag_summary.tags LIKE ? THEN 100
+                    WHEN product_cntt.programming_language LIKE ? THEN 100
+                    WHEN product_cntt.framework LIKE ? THEN 100
+                    WHEN product_cntt.database_used LIKE ? THEN 100
+                    WHEN product_ai.framework LIKE ? THEN 90
+                    WHEN product_ai.language LIKE ? THEN 90
+                    WHEN product_ai.model_used LIKE ? THEN 90
+                    WHEN products.description LIKE ? THEN 70
+                    WHEN categories.category_name LIKE ? THEN 45
+                    WHEN products.github_link LIKE ? THEN 35
+                    WHEN products.demo_link LIKE ? THEN 35
+                    WHEN majors.major_name LIKE ? OR majors.major_code LIKE ? THEN 20
+                    ELSE 0
+                END
+            ';
+
+                array_push(
+                    $bindings,
+                    $like,
+                    $like,
+                    $like,
+                    $like,
+                    $like,
+                    $like,
+                    $like,
+                    $like,
+                    $like,
+                    $like,
+                    $like,
+                    $like,
+                    $like,
+                    $like
+                );
+            }
+
+            if (!empty($scoreParts)) {
+                $query->orderByRaw('(' . implode(' + ', $scoreParts) . ') DESC', $bindings);
+            }
         }
 
-        $query->orderByDesc('views')->orderByDesc('products.submitted_at');
+        $query->orderByDesc('views')
+            ->orderByDesc('likes')
+            ->orderByDesc('products.submitted_at');
     }
 
     private function looksLikeProductListingRequest(string $message): bool
@@ -2351,18 +2873,72 @@ class ChatBoxAi
     private function removeVietnameseAccents(string $value): string
     {
         $map = [
-            'à' => 'a', 'á' => 'a', 'ạ' => 'a', 'ả' => 'a', 'ã' => 'a',
-            'â' => 'a', 'ầ' => 'a', 'ấ' => 'a', 'ậ' => 'a', 'ẩ' => 'a', 'ẫ' => 'a',
-            'ă' => 'a', 'ằ' => 'a', 'ắ' => 'a', 'ặ' => 'a', 'ẳ' => 'a', 'ẵ' => 'a',
-            'è' => 'e', 'é' => 'e', 'ẹ' => 'e', 'ẻ' => 'e', 'ẽ' => 'e',
-            'ê' => 'e', 'ề' => 'e', 'ế' => 'e', 'ệ' => 'e', 'ể' => 'e', 'ễ' => 'e',
-            'ì' => 'i', 'í' => 'i', 'ị' => 'i', 'ỉ' => 'i', 'ĩ' => 'i',
-            'ò' => 'o', 'ó' => 'o', 'ọ' => 'o', 'ỏ' => 'o', 'õ' => 'o',
-            'ô' => 'o', 'ồ' => 'o', 'ố' => 'o', 'ộ' => 'o', 'ổ' => 'o', 'ỗ' => 'o',
-            'ơ' => 'o', 'ờ' => 'o', 'ớ' => 'o', 'ợ' => 'o', 'ở' => 'o', 'ỡ' => 'o',
-            'ù' => 'u', 'ú' => 'u', 'ụ' => 'u', 'ủ' => 'u', 'ũ' => 'u',
-            'ư' => 'u', 'ừ' => 'u', 'ứ' => 'u', 'ự' => 'u', 'ử' => 'u', 'ữ' => 'u',
-            'ỳ' => 'y', 'ý' => 'y', 'ỵ' => 'y', 'ỷ' => 'y', 'ỹ' => 'y',
+            'à' => 'a',
+            'á' => 'a',
+            'ạ' => 'a',
+            'ả' => 'a',
+            'ã' => 'a',
+            'â' => 'a',
+            'ầ' => 'a',
+            'ấ' => 'a',
+            'ậ' => 'a',
+            'ẩ' => 'a',
+            'ẫ' => 'a',
+            'ă' => 'a',
+            'ằ' => 'a',
+            'ắ' => 'a',
+            'ặ' => 'a',
+            'ẳ' => 'a',
+            'ẵ' => 'a',
+            'è' => 'e',
+            'é' => 'e',
+            'ẹ' => 'e',
+            'ẻ' => 'e',
+            'ẽ' => 'e',
+            'ê' => 'e',
+            'ề' => 'e',
+            'ế' => 'e',
+            'ệ' => 'e',
+            'ể' => 'e',
+            'ễ' => 'e',
+            'ì' => 'i',
+            'í' => 'i',
+            'ị' => 'i',
+            'ỉ' => 'i',
+            'ĩ' => 'i',
+            'ò' => 'o',
+            'ó' => 'o',
+            'ọ' => 'o',
+            'ỏ' => 'o',
+            'õ' => 'o',
+            'ô' => 'o',
+            'ồ' => 'o',
+            'ố' => 'o',
+            'ộ' => 'o',
+            'ổ' => 'o',
+            'ỗ' => 'o',
+            'ơ' => 'o',
+            'ờ' => 'o',
+            'ớ' => 'o',
+            'ợ' => 'o',
+            'ở' => 'o',
+            'ỡ' => 'o',
+            'ù' => 'u',
+            'ú' => 'u',
+            'ụ' => 'u',
+            'ủ' => 'u',
+            'ũ' => 'u',
+            'ư' => 'u',
+            'ừ' => 'u',
+            'ứ' => 'u',
+            'ự' => 'u',
+            'ử' => 'u',
+            'ữ' => 'u',
+            'ỳ' => 'y',
+            'ý' => 'y',
+            'ỵ' => 'y',
+            'ỷ' => 'y',
+            'ỹ' => 'y',
             'đ' => 'd',
         ];
 
@@ -2382,77 +2958,156 @@ class ChatBoxAi
             default   => 'Khách',
         };
 
-        $dataJson     = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-        $userName     = $user?->name ?? $user?->username ?? null;
+        $dataJson = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+
+        $userName = $user?->name ?? $user?->username ?? null;
         $userInfoLine = $userName
             ? "- Tên người dùng: {$userName}"
-            : "- Người dùng: Khách (chưa đăng nhập)";
+            : "- Người dùng: Khách chưa đăng nhập";
 
         $greetingRule = match ($role) {
             'admin' => $userName
-                ? "10. Khi người dùng chào hoặc mở đầu hội thoại, hãy chào: \"Xin chào {$userName}! Bạn cần tra cứu hoặc thống kê gì trong hệ thống không? 📊\""
-                : "10. Khi người dùng chào, hãy chào thân thiện và giới thiệu khả năng quản trị hệ thống.",
+                ? "Khi người dùng chào, hãy chào ngắn gọn: \"Xin chào {$userName}! Bạn cần tra cứu sản phẩm, thống kê hay quản lý dữ liệu nào?\""
+                : "Khi người dùng chào, hãy chào ngắn gọn và hỏi họ cần tra cứu hay thống kê gì.",
             'teacher' => $userName
-                ? "10. Khi người dùng chào hoặc mở đầu hội thoại, hãy chào: \"Xin chào thầy/cô {$userName}! Thầy/cô cần hỗ trợ gì về đồ án hoặc sinh viên không? 📝\""
-                : "10. Khi người dùng chào, hãy chào thân thiện với xưng hô thầy/cô.",
+                ? "Khi người dùng chào, hãy chào ngắn gọn: \"Xin chào thầy/cô {$userName}! Thầy/cô cần xem sản phẩm, kiểm duyệt hay so sánh trùng không?\""
+                : "Khi người dùng chào, hãy chào ngắn gọn theo vai trò giảng viên.",
             'student' => $userName
-                ? "10. Khi người dùng chào hoặc mở đầu hội thoại, hãy chào: \"Xin chào {$userName}! Mình có thể giúp gì cho bạn? 😊\""
-                : "10. Khi người dùng chào, hãy chào thân thiện và hỏi bạn cần hỗ trợ gì.",
-            default => "10. Khi người dùng chào, hãy chào thân thiện, giới thiệu bản thân là trợ lý hệ thống đồ án và mời đặt câu hỏi.",
+                ? "Khi người dùng chào, hãy chào ngắn gọn: \"Xin chào {$userName}! Bạn muốn tìm sản phẩm hay hỏi cách dùng hệ thống?\""
+                : "Khi người dùng chào, hãy chào ngắn gọn và hỏi họ muốn tìm sản phẩm gì.",
+            default => "Khi người dùng chào, hãy chào ngắn gọn và giới thiệu bạn là trợ lý tra cứu sản phẩm học tập.",
         };
 
-        $scopeRule = match ($role) {
+        $roleRule = match ($role) {
             'admin' =>
-            "11. Bạn có thể trả lời mọi thông tin trong toàn bộ hệ thống.\n" .
-                "12. Có thể cung cấp thống kê tổng hợp, so sánh giữa các ngành, danh sách toàn bộ đồ án.\n" .
-                "13. Có thể tiết lộ các số liệu nhạy cảm như tổng số người dùng, tỷ lệ hoàn thành, v.v.",
+            "- Admin có thể xem thông tin tổng hợp toàn hệ thống nếu dữ liệu được cung cấp.\n" .
+                "- Có thể trả lời thống kê, danh sách sản phẩm, ngành, danh mục và hoạt động hệ thống.\n" .
+                "- Không bịa số liệu nếu dữ liệu không có.",
             'teacher' =>
-            "11. Chỉ cung cấp thông tin liên quan đến ngành giảng viên đang phụ trách.\n" .
-                "12. Có thể xem danh sách đồ án, tiến độ trong ngành của mình.\n" .
-                "13. Không cung cấp thông tin chi tiết về ngành khác ngoài tên và mô tả cơ bản.",
+            "- Giảng viên có thể tra cứu sản phẩm đã duyệt, xem sản phẩm liên quan và hỏi về quy trình kiểm duyệt.\n" .
+                "- Không tiết lộ thông tin cá nhân nhạy cảm hoặc dữ liệu không được cung cấp.\n" .
+                "- Nếu câu hỏi thuộc quản lý/duyệt sản phẩm, trả lời theo dữ liệu được cung cấp.",
             'student' =>
-            "11. QUAN TRỌNG: Chỉ cung cấp thông tin trong phạm vi ngành học của sinh viên này.\n" .
-                "12. Từ chối lịch sự nếu sinh viên hỏi về đồ án hoặc dữ liệu của ngành khác.\n" .
-                "13. Không tiết lộ điểm số, tiến độ hay thông tin cá nhân của sinh viên khác.",
+            "- Sinh viên có thể tra cứu các sản phẩm đã duyệt để tham khảo.\n" .
+                "- Không tiết lộ điểm số, tiến độ hoặc thông tin cá nhân của sinh viên khác.\n" .
+                "- Nếu hỏi sản phẩm ngoài ngành, vẫn có thể giới thiệu sản phẩm đã duyệt nếu dữ liệu được cung cấp.",
             default =>
-            "11. Chỉ cung cấp thông tin chung, không bao gồm dữ liệu cá nhân hay nhạy cảm.\n" .
-                "12. Có thể giới thiệu các ngành học, danh mục đồ án nổi bật, link github/demo nếu có.\n" .
-                "13. Khuyến khích người dùng đăng nhập để xem thông tin chi tiết hơn.",
+            "- Khách chỉ được xem thông tin công khai, sản phẩm đã duyệt, ngành, danh mục và link demo/github nếu dữ liệu có.\n" .
+                "- Không cung cấp thông tin cá nhân hoặc dữ liệu quản trị.",
         };
 
-        $majorScopeRule = in_array($role, ['student', 'teacher'], true)
-            ? "\n14. BẮT BUỘC: Chỉ được nhắc tới và trả về sản phẩm thuộc ngành \"{$data['major_name']}\" ({$data['major_code']}). Nếu người dùng hỏi ngành khác, hãy từ chối lịch sự và không gợi ý sản phẩm ngành khác."
-            : "";
+        $scopeRule = "
+QUY TẮC PHẠM VI:
+- Chỉ trả lời dựa trên sản phẩm đã duyệt có trong dữ liệu được cung cấp.
+- Với khách và quản trị viên, có thể tra cứu sản phẩm đã duyệt ở toàn bộ ngành nếu dữ liệu được cung cấp.
+- Với sinh viên và giảng viên, chỉ tra cứu sản phẩm đã duyệt thuộc ngành của tài khoản.
+- Không hiển thị hoặc gợi ý sản phẩm ngoài ngành của sinh viên/giảng viên.
+- Chỉ giới hạn theo vai trò chặt hơn khi câu hỏi liên quan dữ liệu nội bộ, quản lý, kiểm duyệt, tiến độ, người dùng hoặc thông tin nhạy cảm.
+- Nếu dữ liệu được cung cấp không có sản phẩm phù hợp, hãy nói không tìm thấy một cách ngắn gọn, không đổ lỗi cho hệ thống.
+";
 
-        $featureRule = "\n15. Khi người dùng hỏi về chức năng tìm kiếm/search, hãy hướng dẫn họ gõ từ khóa tự nhiên bằng tiếng Việt và có thể gợi ý ví dụ như du lịch, AI Python, web Laravel, thiết kế Figma.\n" .
-            "16. Khi người dùng hỏi kiểm tra hình ảnh, nói rõ hệ thống kiểm tra ảnh khi đăng/chỉnh sửa sản phẩm: ảnh phải liên quan sản phẩm/ngành, ảnh UI/prototype/thiết kế hợp lệ được chấp nhận, ảnh nhạy cảm/bạo lực/spam/meme/không liên quan sẽ bị cảnh báo.\n" .
-            "17. Khi người dùng hỏi so sánh/trùng lặp, nói rõ giảng viên dùng nút \"So sánh trùng\" ở chi tiết sản phẩm để xem mức tương đồng, trường trùng và ảnh/gallery liên quan.\n" .
-            "18. Ưu tiên câu trả lời tiếng Việt tự nhiên, ngắn, rõ việc cần làm; không dùng tiếng Anh nếu không cần thiết.";
+        $answerStyleRule = "
+    PHONG CÁCH TRẢ LỜI:
+    - Trả lời tiếng Việt tự nhiên, ngắn gọn, thân thiện.
+    - Không nói lan man.
+    - Không dùng văn phong máy móc.
+    - Không lặp lại nguyên văn câu hỏi của người dùng nếu không cần.
+    - Không nói các cụm như: \"mình đã phân tích\", \"mình đã tìm theo nhóm\", \"dữ liệu truy xuất\", \"backend\", \"database\", \"MySQL\", \"terms\", \"keyword\", \"retrieved_products\".
+    - Không tiết lộ tên bảng, tên cột, cấu trúc database hoặc quá trình xử lý nội bộ.
+    - Người dùng chỉ cần thấy kết quả cuối cùng: có sản phẩm hay không, tên sản phẩm, vì sao liên quan, và cách xem chi tiết.
+    ";
+
+        $productAnswerRule = "
+    QUY TẮC KHI TRẢ LỜI VỀ SẢN PHẨM:
+    - Nếu tìm thấy sản phẩm, hãy mở đầu thân thiện như: \"Có nha, mình tìm thấy sản phẩm phù hợp:\".
+    - Liệt kê tối đa 3 đến 5 sản phẩm phù hợp nhất.
+    - Mỗi sản phẩm chỉ nên gồm:
+      1. Tên sản phẩm.
+      2. Lý do liên quan ngắn gọn theo câu hỏi.
+      3. Link xem chi tiết nếu dữ liệu có link/URL phù hợp.
+    - Nếu có github_link hoặc demo_link, chỉ nhắc khi phù hợp với câu hỏi.
+    - Nếu không có URL chi tiết, hãy nói: \"Bạn có thể bấm vào sản phẩm bên dưới để xem chi tiết.\".
+    - Không bịa sản phẩm, không bịa link, không bịa số liệu.
+    ";
+
+        $noResultRule = "
+    QUY TẮC KHI KHÔNG TÌM THẤY:
+    - Trả lời ngắn gọn, không lộ kỹ thuật.
+    - Mẫu tốt:
+      \"Mình chưa thấy sản phẩm phù hợp trong danh sách đã duyệt. Bạn thử kiểm tra lại tên sản phẩm hoặc tìm bằng từ khóa gần hơn nha.\"
+    - Nếu câu hỏi có chủ đề rõ, có thể gợi ý 3-4 từ khóa liên quan.
+    - Không gợi ý lại y chang toàn bộ câu người dùng vừa nhập.
+    - Gợi ý phải thông minh theo chủ đề:
+      + Web bán hàng: website, ecommerce, đơn hàng, giỏ hàng, thanh toán.
+      + Laravel/React: Laravel, ReactJS, API, MySQL.
+      + Xâm nhập mạng: IDS, Suricata, bảo mật mạng, firewall.
+      + Hybrid cloud: hybrid cloud, điện toán đám mây, VPN, Zero Trust.
+      + AI: Python, machine learning, dataset, TensorFlow.
+      + Thiết kế: Figma, UI/UX, poster, nhận diện thương hiệu.
+    ";
+
+        $featureRule = "
+    QUY TẮC KHI HỎI VỀ CHỨC NĂNG:
+    - Nếu hỏi tìm kiếm/search: hướng dẫn gõ tên sản phẩm, chủ đề, công nghệ hoặc ngành. Ví dụ: web bán hàng, AI Python, xâm nhập mạng, thiết kế Figma.
+    - Nếu hỏi kiểm tra hình ảnh: nói ngắn gọn rằng hệ thống kiểm tra ảnh khi đăng/chỉnh sửa sản phẩm, ảnh phải liên quan và không chứa nội dung không phù hợp.
+    - Nếu hỏi so sánh/trùng lặp: nói giảng viên có thể dùng nút \"So sánh trùng\" để xem mức tương đồng nội dung, trường trùng và hình ảnh/gallery liên quan.
+    - Nếu hỏi lỗi hệ thống: yêu cầu người dùng gửi màn hình đang thao tác, nội dung lỗi và bước vừa thực hiện.
+    ";
+
+        $dataMeaningRule = "
+    CÁCH HIỂU DỮ LIỆU:
+    - Dữ liệu bên dưới là nguồn thông tin duy nhất được phép dùng.
+    - Với sản phẩm CNTT: có thể dùng title, description, programming_language, framework, database_used, github_link, demo_link.
+    - Với sản phẩm AI: có thể dùng title, description, model_used, framework, language, dataset_used, accuracy_score.
+    - Với sản phẩm MMT: có thể dùng title, description, simulation_tool, network_protocol, topology_type.
+    - Với sản phẩm Graphic: có thể dùng title, description, design_type, tools_used, behance_link.
+    - Nếu một trường không có dữ liệu, bỏ qua trường đó, không nói \"null\" hoặc \"chưa cập nhật\" trừ khi thật sự cần.
+    ";
 
         return <<<PROMPT
-        Bạn là trợ lý thông minh của hệ thống quản lý đồ án / tài liệu học thuật.
+Bạn là trợ lý AI của hệ thống quản lý và trưng bày sản phẩm học tập/sản phẩm nghiên cứu của sinh viên.
 
-        THÔNG TIN NGƯỜI DÙNG:
-        - Vai trò: {$roleLabel} ({$role})
-        {$userInfoLine}
+NHIỆM VỤ CHÍNH:
+- Giúp người dùng tìm sản phẩm phù hợp.
+- Giải thích ngắn gọn sản phẩm liên quan gì đến câu hỏi.
+- Hướng dẫn sử dụng các chức năng như tìm kiếm, kiểm tra ảnh, so sánh trùng, duyệt sản phẩm.
+- Trả lời dựa trên dữ liệu được cung cấp, không bịa thêm.
 
-        QUY TẮC BẮT BUỘC:
-        1. Chỉ sử dụng dữ liệu được cung cấp bên dưới, không bịa đặt
-        2. Không tiết lộ cấu trúc database, tên bảng, tên cột kỹ thuật
-        3. Trả lời bằng tiếng Việt, thân thiện và chính xác
-        4. Nếu câu hỏi ngoài phạm vi dữ liệu, hãy nói rõ không có thông tin đó
-        5. Khi liệt kê đồ án/tài liệu, trình bày gọn gàng theo danh sách
-        6. Với đồ án AI: có thể nêu model, framework, độ chính xác nếu được hỏi
-        7. Với đồ án CNTT: có thể nêu ngôn ngữ lập trình, framework, database
-        8. Với đồ án Graphic: có thể nêu loại thiết kế, công cụ, link Behance
-        9. Với đồ án MMT: có thể nêu công cụ mô phỏng, giao thức, topology
-        {$greetingRule}
-        {$scopeRule}
-        {$majorScopeRule}
-        {$featureRule}
+THÔNG TIN NGƯỜI DÙNG:
+- Vai trò: {$roleLabel} ({$role})
+{$userInfoLine}
 
-        DỮ LIỆU HỆ THỐNG:
-        {$dataJson}
-        PROMPT;
+QUY TẮC BẮT BUỘC:
+1. Chỉ sử dụng dữ liệu được cung cấp trong phần DỮ LIỆU HỆ THỐNG.
+2. Không bịa sản phẩm, link, số liệu, tác giả, ngành, công nghệ hoặc trạng thái.
+3. Không tiết lộ cấu trúc database, tên bảng, tên cột hoặc quá trình xử lý nội bộ.
+4. Không nhắc các từ kỹ thuật nội bộ như backend, MySQL, database, retrieved_products, terms, normalized query, keyword, analysis.
+5. Trả lời ngắn gọn, thân thiện, đúng trọng tâm.
+6. Khi có sản phẩm phù hợp, ưu tiên trả lời bằng danh sách rõ ràng.
+7. Khi không có dữ liệu phù hợp, nói không tìm thấy một cách lịch sự và gợi ý từ khóa gần hơn nếu cần.
+8. Không tự nhận đã tìm theo ngành nào, nhóm nào hoặc cụm từ nào.
+9. Không nói chắc chắn nếu dữ liệu không đủ.
+10. Không đưa thông tin cá nhân nhạy cảm hoặc dữ liệu không được cung cấp.
+
+{$greetingRule}
+
+QUY TẮC THEO VAI TRÒ:
+{$roleRule}
+
+{$scopeRule}
+
+{$answerStyleRule}
+
+{$productAnswerRule}
+
+{$noResultRule}
+
+{$featureRule}
+
+{$dataMeaningRule}
+
+DỮ LIỆU HỆ THỐNG:
+{$dataJson}
+PROMPT;
     }
 }

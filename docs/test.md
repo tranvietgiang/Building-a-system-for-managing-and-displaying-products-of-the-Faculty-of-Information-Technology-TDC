@@ -3,18 +3,18 @@
 ## Tổng quan
 
 ```plaintext
-Tổng số test files: 10 (5 Unit + 5 Feature)
-Tổng số test cases: 149 tests
-Tổng số assertions: 253
-Pass: 142 tests
+Tổng số test files: 11 (5 Unit + 6 Feature)
+Tổng số test cases: 171 tests
+Tổng số assertions: 515
+Pass: 164 tests
 Fail: 7 tests (intentional - phát hiện bugs thật)
 ```
 
 ## Kết quả chạy
 
 ```plaintext
-Tests:    7 failed, 142 passed (253 assertions)
-Duration: 24.24s
+Tests:    7 failed, 164 passed (515 assertions)
+Duration: 83.06s
 ```
 
 ---
@@ -279,7 +279,38 @@ Kiểm thử **ngoài phạm vi code** - tìm lỗi bằng các input không h�
 | `test_teacher_data_invalid_status` | 422 | Pass |
 | `test_teacher_data_invalid_per_page` | 422 | Pass |
 
-### 10. `backend-laravel/tests/Feature/ChatBoxAiIntentTest.php` (4 tests, 0 fail)
+### 10. `backend-laravel/tests/Feature/ChatBoxAiCommonQuestionsTest.php` (22 tests, 0 fail)
+
+**Class:** `App\Http\Ai\ChatBoxAi` — endpoint `/api/v1/ai/send`
+
+Kiểm thử các câu hỏi thường gặp của người dùng thực tế theo từng role.
+
+| Test | Input | Expected | Status |
+|------|-------|----------|--------|
+| `test_visitor_asks_out_of_scope_questions` | Chào bạn, Cảm ơn, Bạn có thể làm gì? | 200, `reply` + `products[]` | Pass |
+| `test_visitor_asks_about_majors` | Có những ngành nào, Cho xem sản phẩm AI... | 200 | Pass |
+| `test_visitor_edge_cases` | empty, quá ngắn, quá dài, ký tự đặc biệt | 422 / 200 | Pass |
+| `test_student_ai_asks_common_questions` | 6 câu hỏi về AI (ML, học sâu, thống kê...) | 200 | Pass |
+| `test_student_ai_cannot_access_other_majors` | "Cho em xem đồ án CNTT/MMT/TKDH" | scope_guard message | Pass |
+| `test_student_cntt_asks_common_questions` | 6 câu hỏi về CNTT (web, laravel, mobile...) | 200 | Pass |
+| `test_student_cntt_cannot_access_other_majors` | "Cho xem sản phẩm AI" | scope_guard | Pass |
+| `test_student_mmt_asks_common_questions` | 6 câu hỏi về MMT (bảo mật, cloud, IDS...) | 200 | Pass |
+| `test_student_mmt_cannot_access_other_majors` | "Cho xem đồ án CNTT" | scope_guard | Pass |
+| `test_student_tkdh_asks_common_questions` | 4 câu hỏi về TKDH (UI/UX, poster...) | 200 | Pass |
+| `test_student_tkdh_cannot_access_other_majors` | "Cho xem đồ án MMT" | scope_guard | Pass |
+| `test_student_without_major_gets_instructed` | Student không major_id | 403 "chưa được gán ngành" | Pass |
+| `test_teacher_ai_asks_common_questions` | 5 câu hỏi AI + review + thống kê | 200 | Pass |
+| `test_teacher_ai_cannot_access_other_majors` | "Cho xem đồ án mạng máy tính" | scope_guard | Pass |
+| `test_teacher_cntt_asks_common_questions` | 3 câu hỏi CNTT | 200 | Pass |
+| `test_teacher_cntt_cannot_access_other_majors` | "Cho xem đồ án AI" | scope_guard | Pass |
+| `test_teacher_mmt_asks_common_questions` | 3 câu hỏi MMT + bảo mật | 200 | Pass |
+| `test_teacher_tkdh_asks_common_questions` | 3 câu hỏi TKDH | 200 | Pass |
+| `test_admin_asks_system_wide_questions` | 8 câu hỏi — tổng quan, thống kê, tất cả ngành | 200 | Pass |
+| `test_teacher_asks_feature_questions` | Duyệt đồ án, so sánh trùng, upload lỗi... | 200 | Pass |
+| `test_student_asks_feature_questions` | Nộp đồ án, upload, lỗi... | 200 | Pass |
+| `test_teacher_without_major_gets_instructed` | Teacher không major_id | 403 "chưa được gán ngành" | Pass |
+
+### 11. `backend-laravel/tests/Feature/ChatBoxAiIntentTest.php` (4 tests, 0 fail)
 
 **Class:** `App\Http\Ai\ChatBoxAi`
 
@@ -296,8 +327,8 @@ Kiểm thử **ngoài phạm vi code** - tìm lỗi bằng các input không h�
 
 ```plaintext
 Test coverage (out of scope):
-├── 149 tests, 253 assertions
-├── 142 pass
+├── 171 tests, 515 assertions
+├── 164 pass
 ├── 7 fail (phát hiện bugs thật)
 │
 ├── Loại test phá vỡ đã thực hiện:
@@ -315,6 +346,14 @@ Test coverage (out of scope):
 │   ├── Wrong HTTP methods
 │   ├── Non-existent routes
 │   └── Database constraint violations
+│
+├── Loại test câu hỏi thường gặp (Common Questions):
+│   ├── Visitor không auth — out-of-scope, greeting, major questions
+│   ├── Student mỗi ngành (AI, CNTT, MMT, TKDH) — câu hỏi theo ngành
+│   ├── Teacher mỗi ngành — câu hỏi chuyên môn + feature guides
+│   ├── Admin — toàn quyền, hỏi tất cả ngành
+│   ├── Scope guard — cross-major bị chặn cho student và teacher
+│   └── Thiếu major_id — response 403 hướng dẫn
 │
 └── 7 bugs thật được phát hiện trong codebase
 ```

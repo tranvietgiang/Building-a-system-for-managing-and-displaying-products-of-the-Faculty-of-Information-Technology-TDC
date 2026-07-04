@@ -21,6 +21,10 @@ class ChatBoxAiIntentTest extends TestCase
         $this->assertSame(['search'], $method->invoke($chat, 'Hệ thống phát hiện xâm nhập mạng'));
         $this->assertSame(['search'], $method->invoke($chat, 'cho tui xem các sản phẩm về năng suất cây'));
         $this->assertSame(['search'], $method->invoke($chat, 'mạng wifi'));
+        $this->assertSame(['search'], $method->invoke($chat, 'cho tui xem sản phẩm kết nối hybrid'));
+        $this->assertSame(['search'], $method->invoke($chat, 'có đồ án MMT nào về cloud không'));
+        $this->assertSame(['search'], $method->invoke($chat, 'tìm sản phẩm bảo mật mạng'));
+        $this->assertSame(['search'], $method->invoke($chat, 'xem sản phẩm mạng máy tính'));
     }
 
     public function test_it_extracts_vietnamese_search_terms(): void
@@ -83,6 +87,21 @@ class ChatBoxAiIntentTest extends TestCase
         $this->assertContains('Wi-Fi', $wifi['terms']);
         $this->assertContains('CAPWAP', $wifi['terms']);
 
+        $hybrid = $method->invoke($chat, 'cho tui xem sản phẩm kết nối hybrid');
+        $this->assertSame('MMT', $hybrid['major_code']);
+        $this->assertContains('Ket noi hybrid cloud an toan', $hybrid['terms']);
+        $this->assertContains('Kết nối hybrid cloud an toàn', $hybrid['terms']);
+        $this->assertContains('cloud computing', $hybrid['terms']);
+        $this->assertContains('network security', $hybrid['terms']);
+        $this->assertContains('MMT', $hybrid['terms']);
+        $this->assertContains('IPsec', $hybrid['terms']);
+        $this->assertContains('BGP', $hybrid['terms']);
+
+        $cloud = $method->invoke($chat, 'có đồ án MMT nào về cloud không');
+        $this->assertSame('MMT', $cloud['major_code']);
+        $this->assertContains('hybrid cloud', $cloud['terms']);
+        $this->assertContains('VPN', $cloud['terms']);
+
         $generic = $method->invoke($chat, 'giải pháp quản lý');
         $this->assertNull($generic['major_code']);
     }
@@ -113,9 +132,37 @@ class ChatBoxAiIntentTest extends TestCase
             ],
         ]);
 
-        $this->assertStringContainsString('retrieved_products', $prompt);
-        $this->assertStringContainsString('Ước lượng năng suất cây trồng', $prompt);
-        $this->assertStringContainsString('Chỉ trả lời dựa trên "retrieved_products"', $prompt);
-        $this->assertStringContainsString('không bịa sản phẩm', $prompt);
+        $this->assertStringContainsString('products', $prompt);
+        $this->assertStringContainsString('detail_url', $prompt);
+        $this->assertStringContainsString('highlights', $prompt);
+        $this->assertStringContainsString('Random Forest', $prompt);
+        $this->assertStringNotContainsString('retrieved_products', $prompt);
+        $this->assertStringNotContainsString('MySQL', $prompt);
+        $this->assertStringNotContainsString('Backend', $prompt);
+        $this->assertStringNotContainsString('"analysis"', $prompt);
+        $this->assertStringNotContainsString('model_used', $prompt);
+        $this->assertStringNotContainsString('ai_framework', $prompt);
+    }
+
+    public function test_no_result_reply_is_short_and_topic_aware(): void
+    {
+        $chat = app(ChatBoxAi::class);
+        $reflection = new ReflectionClass($chat);
+        $analyze = $reflection->getMethod('analyzeLocalSearchQuery');
+        $reply = $reflection->getMethod('buildNoLocalProductsReply');
+        $analyze->setAccessible(true);
+        $reply->setAccessible(true);
+
+        $idsReply = $reply->invoke($chat, $analyze->invoke($chat, 'Hệ thống phát hiện xâm nhập mạng nè sao kêu không có'));
+        $this->assertStringContainsString('Mình chưa thấy sản phẩm này trong danh sách đã duyệt', $idsReply);
+        $this->assertStringContainsString('IDS', $idsReply);
+        $this->assertStringContainsString('Suricata', $idsReply);
+        $this->assertStringNotContainsString('MySQL', $idsReply);
+        $this->assertStringNotContainsString('database', $idsReply);
+
+        $hybridReply = $reply->invoke($chat, $analyze->invoke($chat, 'cho tui xem sản phẩm kết nối hybrid'));
+        $this->assertStringContainsString('hybrid cloud', $hybridReply);
+        $this->assertStringContainsString('Zero Trust', $hybridReply);
+        $this->assertStringNotContainsString('IDS', $hybridReply);
     }
 }

@@ -170,11 +170,25 @@ export default function ChatBoxAi({ user }) {
     try {
       const res = await sendMessage(messageToSend);
 
+      const replyText = res?.reply ?? "AI không trả về dữ liệu";
+      const normalizedReply = replyText
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+
+      const shouldShowProducts =
+        normalizedReply.includes("tim thay san pham") ||
+        normalizedReply.includes("san pham phu hop") ||
+        normalizedReply.includes("san pham lien quan") ||
+        normalizedReply.includes("do an lien quan") ||
+        normalizedReply.includes("xem chi tiet") ||
+        normalizedReply.includes("chi tiet san pham");
+
       const botReply = {
         id: `bot_${Date.now()}_${Math.random()}`,
-        text: res?.reply ?? "AI không trả về dữ liệu",
+        text: replyText,
         sender: "bot",
-        products: res?.products || [],
+        products: shouldShowProducts ? res?.products || [] : [],
       };
 
       const updated = [...newMessages, botReply];
@@ -219,6 +233,62 @@ export default function ChatBoxAi({ user }) {
     });
 
     setIsOpen(false);
+  };
+  const getProductId = (product) => {
+    return product?.id ?? product?.product_id;
+  };
+
+  const openDetailUrl = (url) => {
+    try {
+      const parsedUrl = new URL(url, window.location.origin);
+      const match = parsedUrl.pathname.match(/\/chi-tiet-san-pham\/(\d+)/);
+
+      if (match?.[1]) {
+        handleViewDetail(Number(match[1]));
+        return;
+      }
+
+      window.open(url, "_blank", "noopener,noreferrer");
+    } catch {
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+  };
+
+  const renderMessageWithLinks = (text) => {
+    if (!text) return null;
+
+    // Hỗ trợ cả raw URL và markdown kiểu [tại đây](https://...)
+    const markdownLinkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
+    const rawUrlRegex = /(https?:\/\/[^\s]+)/g;
+
+    const normalizedText = text.replace(markdownLinkRegex, (_, label, url) => {
+      return `${label} ${url}`;
+    });
+
+    const parts = normalizedText.split(rawUrlRegex);
+    const urlOnlyRegex = /^https?:\/\/[^\s]+$/;
+
+    return parts.map((part, index) => {
+      if (!urlOnlyRegex.test(part)) {
+        return <span key={index}>{part}</span>;
+      }
+
+      const cleanUrl = part.replace(/[.,!?)]$/, "");
+      const trailing = part.slice(cleanUrl.length);
+
+      return (
+        <span key={index}>
+          <button
+            type="button"
+            onClick={() => openDetailUrl(cleanUrl)}
+            className="text-blue-600 underline font-medium hover:text-blue-800"
+          >
+            Xem chi tiết
+          </button>
+          {trailing}
+        </span>
+      );
+    });
   };
 
   // Guest không hiển thị chatbox
@@ -307,7 +377,9 @@ export default function ChatBoxAi({ user }) {
                           : "bg-white text-gray-800 shadow-sm border"
                       }`}
                     >
-                      <p className="text-sm whitespace-pre-line">{msg.text}</p>
+                      <p className="text-sm whitespace-pre-line">
+                        {renderMessageWithLinks(msg.text)}
+                      </p>
                     </div>
                   </div>
 
@@ -326,15 +398,19 @@ export default function ChatBoxAi({ user }) {
                       Đồ án liên quan:
                     </p>
                     <div className="flex flex-wrap gap-1">
-                      {msg.products.map((p) => (
-                        <button
-                          key={p.id}
-                          onClick={() => handleViewDetail(p.id)}
-                          className="text-xs bg-blue-50 text-blue-600 border border-blue-200 rounded-full px-2 py-0.5 hover:bg-blue-100 transition"
-                        >
-                          {p.title}
-                        </button>
-                      ))}
+                      {msg.products.map((p) => {
+                        const productId = getProductId(p);
+
+                        return (
+                          <button
+                            key={productId}
+                            onClick={() => handleViewDetail(productId)}
+                            className="text-xs bg-blue-50 text-blue-600 border border-blue-200 rounded-full px-2 py-0.5 hover:bg-blue-100 transition"
+                          >
+                            {p.title}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
