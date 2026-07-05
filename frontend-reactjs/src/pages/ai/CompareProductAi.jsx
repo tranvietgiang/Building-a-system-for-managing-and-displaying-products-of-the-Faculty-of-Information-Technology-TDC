@@ -5,7 +5,8 @@ import { Icons } from "../../components/common/Icon";
 import BackButton from "../../components/common/BackButton";
 import useMajorName from "../../hooks/common/useMajorName";
 import { getStatusBadge } from "../../utils/getStatusBadge";
-
+import useCompareProduct from "../../hooks/ai/useCompareProduct";
+import { toast } from "react-toastify";
 export default function CompareProductAi() {
   const location = useLocation();
   const [productData, setProductData] = useState(null);
@@ -17,6 +18,86 @@ export default function CompareProductAi() {
 
   const { majorName } = useMajorName(currentProduct?.major_id);
 
+  const { checkCompareProductImages, loadingImageCompare, errorImageCompare } =
+    useCompareProduct(currentProduct?.product_id);
+
+  const handleCheckSelectedImages = async () => {
+    const matchProductId = selectedMatch?.product_id;
+
+    if (!matchProductId || loadingImageCompare) return;
+
+    try {
+      const data = await checkCompareProductImages(
+        matchProductId,
+        selectedMatch.ai_similarity ?? 0,
+      );
+
+      if (!data) return;
+
+      const imageResultFields = {
+        image_checked: true,
+        images: Array.isArray(data.product_b_images)
+          ? data.product_b_images
+          : selectedMatch.images,
+        image_similarity: data.image_similarity ?? 0,
+        image_level: data.image_level,
+        image_level_code: data.image_level_code,
+        image_reason: data.image_reason,
+        duplicate_images: data.duplicate_images || [],
+        duplicate_image_count: data.duplicate_image_count ?? 0,
+        has_duplicate_images: data.has_duplicate_images ?? false,
+        ai_unavailable: data.ai_unavailable ?? false,
+        overall_similarity:
+          data.overall_similarity ?? selectedMatch.ai_similarity ?? 0,
+        overall_level: data.overall_level,
+        overall_reason: data.overall_reason,
+      };
+
+      setSelectedMatch((current) =>
+        current?.product_id === matchProductId
+          ? { ...current, ...imageResultFields }
+          : current,
+      );
+
+      setAllMatches((prev) =>
+        prev.map((item) =>
+          item.product_id === matchProductId
+            ? { ...item, ...imageResultFields }
+            : item,
+        ),
+      );
+
+      if (Array.isArray(data.product_a_images)) {
+        setProductData((current) =>
+          current ? { ...current, images: data.product_a_images } : current,
+        );
+      }
+
+      const imageReason =
+        data.image_reason || data.message || "Đã kiểm tra hình ảnh.";
+      const duplicateCount = data.duplicate_image_count ?? 0;
+      const shouldWarn =
+        data.has_duplicate_images ||
+        duplicateCount > 0 ||
+        /ai chưa thể|không thể|lỗi/i.test(imageReason);
+
+      if (shouldWarn) {
+        toast.warning(
+          duplicateCount > 0
+            ? `Phát hiện ${duplicateCount} ảnh nghi trùng. ${imageReason}`
+            : imageReason,
+          { toastId: `compare-image-${matchProductId}` },
+        );
+      } else {
+        toast.success(imageReason, {
+          toastId: `compare-image-${matchProductId}`,
+        });
+      }
+    } catch {
+      // error đã được hook lưu vào errorImageCompare
+    }
+  };
+
   useEffect(() => {
     // Xử lý data khi có currentProduct
     if (currentProduct) {
@@ -27,22 +108,29 @@ export default function CompareProductAi() {
     }
 
     // Xử lý matches - có thể là object {approved: [], unapproved: []} hoặc array
-    if (initialMatches) {
-      let combined = [];
-      if (Array.isArray(initialMatches)) {
-        combined = initialMatches;
-      } else if (initialMatches.approved || initialMatches.unapproved) {
-        // Gộp cả approved và unapproved lại
-        combined = [
-          ...(initialMatches.approved || []),
-          ...(initialMatches.unapproved || []),
-        ];
-      }
-      setAllMatches(combined);
-      if (combined.length > 0 && !selectedMatch) {
-        setSelectedMatch(combined[0]);
-      }
+    let combined = [];
+
+    if (Array.isArray(initialMatches)) {
+      combined = initialMatches;
+    } else if (initialMatches?.approved || initialMatches?.unapproved) {
+      // Gộp cả approved và unapproved lại
+      combined = [
+        ...(initialMatches.approved || []),
+        ...(initialMatches.unapproved || []),
+      ];
     }
+
+    setAllMatches(combined);
+    setSelectedMatch((current) => {
+      if (combined.length === 0) return null;
+
+      if (!current?.product_id) return combined[0];
+
+      return (
+        combined.find((item) => item.product_id === current.product_id) ||
+        combined[0]
+      );
+    });
   }, [currentProduct, majorName, initialMatches]);
 
   const _getComparisonFields = (product, majorName) => {
@@ -505,9 +593,9 @@ export default function CompareProductAi() {
               value={selectedMatch?.product_id || ""}
               onChange={(e) => {
                 const selected = allMatches.find(
-                  (m) => m.product_id === parseInt(e.target.value),
+                  (m) => String(m.product_id) === e.target.value,
                 );
-                setSelectedMatch(selected);
+                if (selected) setSelectedMatch(selected);
               }}
             >
               {allMatches.map((product) => (
@@ -530,8 +618,46 @@ export default function CompareProductAi() {
               Đã duyệt: {initialMatches?.approved?.length || 0}
             </span>
             <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm">
-              Chưa duyệt/Từ chối: {initialMatches?.unapproved?.length || 0}
+              Chờ duyệt: {initialMatches?.unapproved?.length || 0}
             </span>
+            <button
+              type="button"
+              onClick={handleCheckSelectedImages}
+              disabled={
+                loadingImageCompare ||
+                !selectedMatch?.product_id ||
+                selectedMatch?.image_checked
+              }
+              className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {loadingImageCompare
+                ? "Đang kiểm tra ảnh..."
+                : selectedMatch?.image_checked
+                  ? "Đã kiểm tra ảnh"
+                  : "Kiểm tra hình ảnh"}
+            </button>
+
+            {errorImageCompare && (
+              <p className="text-sm text-red-700 mt-2">{errorImageCompare}</p>
+            )}
+
+            {selectedMatch?.image_checked && !errorImageCompare && (
+              <p
+                className={`w-full text-sm mt-1 ${
+                  /ai chưa thể|không thể|lỗi/i.test(
+                    selectedMatch.image_reason || "",
+                  )
+                    ? "text-orange-700"
+                    : (selectedMatch.duplicate_image_count ?? 0) > 0
+                      ? "text-red-700"
+                      : "text-emerald-700"
+                }`}
+              >
+                {selectedMatch.image_reason ||
+                  selectedMatch.overall_reason ||
+                  "Đã kiểm tra hình ảnh."}
+              </p>
+            )}
           </div>
         )}
 
@@ -619,7 +745,8 @@ export default function CompareProductAi() {
                     </div>
 
                     <p className="text-xs text-gray-600 mt-3 line-clamp-2">
-                      {product.overall_reason ||
+                      {(product.image_checked && product.image_reason) ||
+                        product.overall_reason ||
                         product.duplicate_message ||
                         "Không có trường chính trùng"}
                     </p>

@@ -5,6 +5,7 @@ import useImageViewer from "../../shared/useImageViewer";
 import { formatDate } from "../../utils/formatDate";
 import { STATUS } from "../../utils/constants";
 import { Icons } from "../../components/common/Icon";
+import ProjectTeamCard from "./ProjectTeamCard";
 const GraphicDetail = ({ product, theme }) => {
   useTitle("Chi tiết sản phẩm Thiết kế đồ họa");
 
@@ -418,6 +419,8 @@ const GraphicDetail = ({ product, theme }) => {
                 </div>
               </div>
             </div>
+
+            <ProjectTeamCard product={product} theme={theme} />
 
             {/* Tags Card */}
             {product.tags?.length > 0 && (

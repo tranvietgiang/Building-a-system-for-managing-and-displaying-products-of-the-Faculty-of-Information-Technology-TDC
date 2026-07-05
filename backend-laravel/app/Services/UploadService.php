@@ -20,7 +20,8 @@ class UploadService extends BaseRepository
         protected CheckImage $Check_ai_image,
         protected NormalizeMajorCode $normalizeMajorCode,
         protected ContentModeration $contentModeration,
-        protected ProductDuplicateService $productDuplicateService
+        protected ProductDuplicateService $productDuplicateService,
+        protected ProductImageDuplicateService $productImageDuplicateService
     ) {}
 
 
@@ -59,6 +60,17 @@ class UploadService extends BaseRepository
                 // 'message' => 'Sản phẩm bị trùng với “'.$duplicate['title'].'” ('.$duplicate['similarity'].'%).',
                 'message' => 'Sản phẩm có mức tương đồng cao với một sản phẩm đã tồn tại trong hệ thống!',
                 'detail' => $duplicate,
+            ];
+        }
+
+        $imageDuplicate = $this->productImageDuplicateService->check($data);
+
+        if ($imageDuplicate) {
+            return [
+                'error' => true,
+                'message' => 'Ảnh sản phẩm bị trùng hoặc gần như trùng với sản phẩm "' . ($imageDuplicate['title'] ?? 'đã tồn tại') . '". Vui lòng thay ảnh khác trước khi gửi duyệt.',
+                'image_index' => $imageDuplicate['image_index'] ?? null,
+                'detail' => $imageDuplicate,
             ];
         }
 

@@ -97,6 +97,9 @@ Route::prefix('v1')->group(function () {
         Route::post('/product/{product_id}/approve', [TeacherController::class, 'teacherApprove']);
         Route::post('/product/{product_id}/reviews', [TeacherController::class, 'storeReview']);
         Route::post('/product/reject', [TeacherController::class, 'teacherReject']);
+
+        // Kiểm tra hình ảnh chỉ khi teacher/admin chọn 1 sản phẩm để so sánh
+        Route::post('/product/{productId}/compare-images/{matchProductId}', [CompareAi::class, 'compareProductImages']);
     });
     /*
 |--------------------------------------------------------------------------

@@ -11,11 +11,114 @@ use Illuminate\Support\Facades\DB;
 
 class CompareAi
 {
+    private array $imageSignatureCache = [];
+
     public function __construct(
         protected ProductRepository $productRepository,
         protected SystemSettingService $settings
     ) {}
 
+    public function compareProductImages(Request $request, int $productId, int $matchProductId)
+    {
+        try {
+            if (!$this->settings->enabled(SystemSettingService::AI_PRODUCT_CHECK)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tính năng kiểm tra sản phẩm bằng AI hiện đang bị quản trị viên tắt.',
+                ], 503);
+            }
+
+            if (!$this->productRepository->productExists($productId)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Sản phẩm gốc không tồn tại.',
+                ], 404);
+            }
+
+            if (!$this->productRepository->productExists($matchProductId)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Sản phẩm so sánh không tồn tại.',
+                ], 404);
+            }
+
+            $currentProduct = $this->productRepository->compareData($productId);
+            $matchProductObject = $this->productRepository->compareData($matchProductId);
+
+            if (!$currentProduct || !$matchProductObject) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không tìm thấy dữ liệu sản phẩm để so sánh hình ảnh.',
+                ], 404);
+            }
+
+            $matchProduct = (array) $matchProductObject;
+
+            $textSimilarity = max(0, min(100, (int) $request->input('text_similarity', 0)));
+
+            $imageComparison = $this->compareImagesWithAi($currentProduct, $matchProduct);
+            $imageSimilarity = max(0, min(100, (int) ($imageComparison['image_similarity'] ?? 0)));
+
+            $imageLevelCode = $this->normalizeImageLevelCode(
+                $imageComparison['level'] ?? $imageComparison['image_level'] ?? null,
+                $imageSimilarity
+            );
+
+            $duplicateImages = $this->formatDuplicateImages($imageComparison['duplicate_images'] ?? []);
+
+            $imagesA = $this->getProductImages((int) $productId);
+            $imagesB = $this->getProductImages((int) $matchProductId);
+            $bothHaveImages = count($imagesA) > 0 && count($imagesB) > 0;
+            $aiUnavailable = !empty($imageComparison['ai_unavailable']);
+
+            $overallSimilarity = $aiUnavailable
+                ? max(0, min(100, $textSimilarity))
+                : $this->calculateOverallSimilarity(
+                    $textSimilarity,
+                    $imageSimilarity,
+                    $bothHaveImages
+                );
+
+            $overallLevelCode = $this->normalizeAiLevelCode(null, $overallSimilarity);
+
+            return response()->json([
+                'success' => true,
+                'message' => $imageComparison['message'] ?? 'Đã kiểm tra hình ảnh giữa hai sản phẩm.',
+                'image_checked' => true,
+                'image_similarity' => $imageSimilarity,
+                'image_level_code' => $imageLevelCode,
+                'image_level' => $this->formatAiLevel($imageLevelCode),
+                'image_reason' => $imageComparison['reason'] ?? $imageComparison['image_reason'] ?? '',
+                'duplicate_images' => $duplicateImages,
+                'duplicate_image_count' => count($duplicateImages),
+                'has_duplicate_images' => count($duplicateImages) > 0,
+                'product_a_images' => $imagesA,
+                'product_b_images' => $imagesB,
+                'ai_unavailable' => $aiUnavailable,
+                'overall_similarity' => $overallSimilarity,
+                'overall_level' => $this->formatAiLevel($overallLevelCode),
+                'overall_reason' => $aiUnavailable
+                    ? 'Tổng hợp tạm dựa trên độ tương đồng nội dung và kết quả kiểm tra URL/hash ảnh.'
+                    : ($bothHaveImages
+                    ? 'Tổng hợp 70% độ tương đồng nội dung và 30% độ tương đồng hình ảnh.'
+                    : 'Sản phẩm thiếu hình ảnh nên tổng hợp dựa trên độ tương đồng nội dung.'),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Compare product images failed: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể kiểm tra hình ảnh lúc này.',
+                'image_checked' => false,
+                'image_similarity' => 0,
+                'image_level' => 'Thấp',
+                'image_reason' => 'Hệ thống AI hình ảnh đang gặp lỗi.',
+                'duplicate_images' => [],
+                'duplicate_image_count' => 0,
+                'has_duplicate_images' => false,
+            ], 500);
+        }
+    }
     public function compareProduct(int $productId)
     {
         try {
@@ -67,7 +170,6 @@ class CompareAi
             $matchingProducts = array_slice($matchingProducts, 0, 5);
 
             $enriched = [];
-            $currentProductImages = $this->getProductImages((int) $currentProduct->product_id);
 
             foreach ($matchingProducts as $product) {
 
@@ -80,38 +182,31 @@ class CompareAi
                 $similarity = (int) ($gpt['similarity'] ?? 0);
                 $levelCode = $this->normalizeAiLevelCode($gpt['level'] ?? null, $similarity);
 
-                // So sánh ảnh riêng cho từng cặp: A-B, A-C, A-D, A-E, A-F.
-                // Nếu trùng URL thì đánh dấu ngay. Nếu URL khác thì dùng OpenAI vision.
-                $imageComparison = $this->compareImagesWithAi($currentProduct, $product);
-                $imageSimilarity = (int) ($imageComparison['image_similarity'] ?? 0);
-                $imageLevelCode = $this->normalizeImageLevelCode(
-                    $imageComparison['level'] ?? $imageComparison['image_level'] ?? null,
-                    $imageSimilarity
-                );
-                $duplicateImages = $this->formatDuplicateImages($imageComparison['duplicate_images'] ?? []);
-
-                $bothHaveImages = count($currentProductImages) > 0 && count($matchImages) > 0;
-                $overallSimilarity = $this->calculateOverallSimilarity($similarity, $imageSimilarity, $bothHaveImages);
-                $overallLevelCode = $this->normalizeAiLevelCode(null, $overallSimilarity);
+                // Không kiểm tra hình ảnh ở bước load danh sách.
+                // Lý do: danh sách có nhiều sản phẩm, nếu gọi AI hình ảnh cho từng cặp sẽ làm trang load chậm,
+                // tốn API và dễ lỗi rate limit/API key. Hình ảnh chỉ kiểm khi teacher chọn 1 sản phẩm cụ thể.
+                $imageSimilarity = null;
+                $imageLevelCode = null;
+                $duplicateImages = [];
+                $overallSimilarity = $similarity;
+                $overallLevelCode = $levelCode;
 
                 $enriched[] = array_merge($product, [
                     'images' => $matchImages,
-                    'ai_similarity' => $similarity,
-                    'ai_level_code' => $levelCode,
-                    'ai_level' => $this->formatAiLevel($levelCode),
-                    'ai_reason' => $gpt['reason'] ?? '',
+                    'image_count' => count($matchImages),
                     'image_similarity' => $imageSimilarity,
                     'image_level_code' => $imageLevelCode,
-                    'image_level' => $this->formatAiLevel($imageLevelCode),
-                    'image_reason' => $imageComparison['reason'] ?? $imageComparison['image_reason'] ?? '',
+                    'image_level' => null,
+                    'image_reason' => 'Chưa kiểm tra hình ảnh. Chọn sản phẩm này để kiểm tra ảnh nếu cần.',
                     'duplicate_images' => $duplicateImages,
-                    'duplicate_image_count' => count($duplicateImages),
-                    'has_duplicate_images' => count($duplicateImages) > 0,
+                    'duplicate_image_count' => 0,
+                    'has_duplicate_images' => false,
+                    'image_checked' => false,
+
+                    // Ở danh sách chỉ dùng điểm nội dung, không cộng 30% hình ảnh.
                     'overall_similarity' => $overallSimilarity,
                     'overall_level' => $this->formatAiLevel($overallLevelCode),
-                    'overall_reason' => $bothHaveImages
-                        ? 'Tổng hợp 70% độ tương đồng nội dung và 30% độ tương đồng hình ảnh.'
-                        : 'Sản phẩm thiếu hình ảnh nên tổng hợp dựa trên độ tương đồng nội dung.',
+                    'overall_reason' => 'Tổng hợp hiện dựa trên độ tương đồng nội dung. Hình ảnh sẽ được kiểm tra khi chọn sản phẩm để so sánh.',
                     'has_duplicate_fields' => count($duplicateFields) > 0,
                     'duplicate_count' => count($duplicateFields),
                     'duplicate_fields' => $duplicateFields,
@@ -122,7 +217,7 @@ class CompareAi
             }
 
             $approved = array_values(array_filter($enriched, fn($p) => $p['status'] === 'approved'));
-            $unapproved = array_values(array_filter($enriched, fn($p) => $p['status'] !== 'approved'));
+            $pending = array_values(array_filter($enriched, fn($p) => $p['status'] === 'pending'));
 
             return response()->json([
                 'success' => true,
@@ -134,13 +229,14 @@ class CompareAi
 
                 'matches' => [
                     'approved' => $approved,
-                    'unapproved' => $unapproved,
+                    'unapproved' => $pending,
                 ],
 
                 'summary' => [
                     'match_count' => count($enriched),
                     'approved_count' => count($approved),
-                    'unapproved_count' => count($unapproved),
+                    'pending_count' => count($pending),
+                    'unapproved_count' => count($pending),
                 ]
             ]);
         } catch (\Exception $e) {
@@ -477,10 +573,12 @@ class CompareAi
         $currentProductId = (int) ($currentProduct->product_id ?? 0);
         $matchProductId = (int) ($matchProduct['product_id'] ?? 0);
 
-        $imagesA = array_slice($this->getProductImages($currentProductId), 0, 5);
-        $imagesB = array_slice($this->getProductImages($matchProductId), 0, 5);
+        $allImagesA = $this->getProductImages($currentProductId);
+        $allImagesB = $this->getProductImages($matchProductId);
+        $imagesA = array_slice($allImagesA, 0, 5);
+        $imagesB = array_slice($allImagesB, 0, 5);
 
-        if (count($imagesA) === 0 || count($imagesB) === 0) {
+        if (count($allImagesA) === 0 || count($allImagesB) === 0) {
             return [
                 'image_similarity' => 0,
                 'level' => 'Thấp',
@@ -489,28 +587,10 @@ class CompareAi
             ];
         }
 
-        $urlDuplicates = [];
+        $localComparison = $this->compareImagesLocally($allImagesA, $allImagesB);
 
-        foreach ($imagesA as $imageA) {
-            foreach ($imagesB as $imageB) {
-                if ($this->normalizeImageUrl($imageA) !== '' && $this->normalizeImageUrl($imageA) === $this->normalizeImageUrl($imageB)) {
-                    $urlDuplicates[] = [
-                        'image_a' => $imageA,
-                        'image_b' => $imageB,
-                        'similarity' => 100,
-                        'reason' => 'Hai ảnh có cùng URL nên được đánh dấu trùng trực tiếp.',
-                    ];
-                }
-            }
-        }
-
-        if (count($urlDuplicates) > 0) {
-            return [
-                'image_similarity' => 100,
-                'level' => 'Cao',
-                'reason' => 'Phát hiện ' . count($urlDuplicates) . ' ảnh trùng URL giữa hai sản phẩm.',
-                'duplicate_images' => $urlDuplicates,
-            ];
+        if (!empty($localComparison['duplicate_images'])) {
+            return $localComparison;
         }
 
         try {
@@ -549,7 +629,8 @@ class CompareAi
                 'Authorization' => 'Bearer ' . config('services.openai.key'),
                 'Content-Type' => 'application/json',
             ])->timeout(60)->post('https://api.openai.com/v1/chat/completions', [
-                'model' => 'gpt-4o-mini',
+                'model' => config('services.openai.vision_model', 'gpt-4o-mini'),
+                'response_format' => ['type' => 'json_object'],
                 'messages' => [
                     [
                         'role' => 'system',
@@ -561,11 +642,12 @@ class CompareAi
                     ],
                 ],
                 'temperature' => 0.1,
+                'max_tokens' => 800,
             ]);
 
             if ($response->failed()) {
                 Log::warning('GPT Image Compare HTTP Error: ' . $response->body());
-                return $this->imageCompareFallback();
+                return $this->imageCompareFallback('OpenAI image compare HTTP error');
             }
 
             $rawContent = $response->json()['choices'][0]['message']['content'] ?? null;
@@ -573,7 +655,7 @@ class CompareAi
 
             if (!is_array($decoded)) {
                 Log::warning('GPT Image Compare Invalid JSON: ' . (string) $rawContent);
-                return $this->imageCompareFallback();
+                return $this->imageCompareFallback('OpenAI image compare invalid JSON');
             }
 
             $imageSimilarity = max(0, min(100, (int) ($decoded['image_similarity'] ?? 0)));
@@ -587,7 +669,7 @@ class CompareAi
             ];
         } catch (\Exception $e) {
             Log::error('GPT Image Compare Error: ' . $e->getMessage());
-            return $this->imageCompareFallback();
+            return $this->imageCompareFallback($e->getMessage());
         }
     }
 
@@ -718,13 +800,235 @@ class CompareAi
         return null;
     }
 
-    private function imageCompareFallback(): array
+    private function compareImagesLocally(array $imagesA, array $imagesB): array
+    {
+        $duplicates = [];
+
+        foreach (array_slice($imagesA, 0, 10) as $imageA) {
+            foreach (array_slice($imagesB, 0, 10) as $imageB) {
+                $urlA = $this->normalizeImageUrl($imageA);
+                $urlB = $this->normalizeImageUrl($imageB);
+
+                if ($urlA !== '' && $urlA === $urlB) {
+                    $duplicates[] = [
+                        'image_a' => $imageA,
+                        'image_b' => $imageB,
+                        'similarity' => 100,
+                        'reason' => 'Hai ảnh có cùng URL nên được đánh dấu trùng trực tiếp.',
+                    ];
+
+                    continue;
+                }
+
+                $signatureA = $this->imageSignatureFromUrl((string) $imageA);
+                $signatureB = $this->imageSignatureFromUrl((string) $imageB);
+
+                if (!$signatureA || !$signatureB) {
+                    continue;
+                }
+
+                $match = $this->compareImageSignatures($signatureA, $signatureB);
+
+                if (!$match) {
+                    continue;
+                }
+
+                $duplicates[] = [
+                    'image_a' => $imageA,
+                    'image_b' => $imageB,
+                    'similarity' => $match['similarity'],
+                    'reason' => $match['reason'],
+                ];
+            }
+        }
+
+        if (empty($duplicates)) {
+            return [
+                'image_similarity' => 0,
+                'level' => 'Thấp',
+                'reason' => 'Chưa phát hiện ảnh trùng bằng URL hoặc dấu vân tay ảnh.',
+                'duplicate_images' => [],
+            ];
+        }
+
+        $maxSimilarity = max(array_map(fn($item) => (int) $item['similarity'], $duplicates));
+
+        return [
+            'image_similarity' => $maxSimilarity,
+            'level' => $maxSimilarity >= 85 ? 'Cao' : 'Trung bình',
+            'reason' => 'Phát hiện ' . count($duplicates) . ' ảnh trùng hoặc gần trùng giữa hai sản phẩm.',
+            'duplicate_images' => $duplicates,
+            'local_checked' => true,
+        ];
+    }
+
+    private function imageSignatureFromUrl(string $url): ?array
+    {
+        $normalizedUrl = $this->normalizeImageUrl($url);
+
+        if ($normalizedUrl === '') {
+            return null;
+        }
+
+        if (array_key_exists($normalizedUrl, $this->imageSignatureCache)) {
+            return $this->imageSignatureCache[$normalizedUrl];
+        }
+
+        try {
+            $response = Http::connectTimeout(4)
+                ->timeout(8)
+                ->get($url);
+
+            if (!$response->successful()) {
+                $this->imageSignatureCache[$normalizedUrl] = null;
+                return null;
+            }
+
+            $bytes = $response->body();
+
+            if ($bytes === '' || strlen($bytes) > (8 * 1024 * 1024)) {
+                $this->imageSignatureCache[$normalizedUrl] = null;
+                return null;
+            }
+
+            $this->imageSignatureCache[$normalizedUrl] = $this->imageSignatureFromBytes($bytes);
+
+            return $this->imageSignatureCache[$normalizedUrl];
+        } catch (\Throwable $exception) {
+            Log::warning('Compare image signature fetch failed', [
+                'url' => $url,
+                'message' => $exception->getMessage(),
+            ]);
+
+            $this->imageSignatureCache[$normalizedUrl] = null;
+            return null;
+        }
+    }
+
+    private function imageSignatureFromBytes(string $bytes): ?array
+    {
+        $averageHash = $this->averageImageHash($bytes);
+
+        if (!$averageHash) {
+            return null;
+        }
+
+        return [
+            'sha256' => hash('sha256', $bytes),
+            'average_hash' => $averageHash,
+        ];
+    }
+
+    private function compareImageSignatures(array $first, array $second): ?array
+    {
+        if (
+            !empty($first['sha256'])
+            && !empty($second['sha256'])
+            && hash_equals($first['sha256'], $second['sha256'])
+        ) {
+            return [
+                'similarity' => 100,
+                'reason' => 'Hai ảnh có nội dung file giống hệt nhau.',
+            ];
+        }
+
+        if (empty($first['average_hash']) || empty($second['average_hash'])) {
+            return null;
+        }
+
+        $distance = $this->hammingDistance($first['average_hash'], $second['average_hash']);
+        $threshold = (int) config('product.image_duplicate_hamming_threshold', 4);
+
+        if ($distance > $threshold) {
+            return null;
+        }
+
+        return [
+            'similarity' => max(0, min(100, (int) round(((64 - $distance) / 64) * 100))),
+            'reason' => 'Hai ảnh có dấu vân tay hình ảnh gần như trùng nhau.',
+        ];
+    }
+
+    private function averageImageHash(string $bytes): ?string
+    {
+        if (!function_exists('imagecreatefromstring')) {
+            return null;
+        }
+
+        $source = @imagecreatefromstring($bytes);
+
+        if (!$source) {
+            return null;
+        }
+
+        $resized = imagecreatetruecolor(8, 8);
+
+        if (!$resized) {
+            imagedestroy($source);
+            return null;
+        }
+
+        imagecopyresampled(
+            $resized,
+            $source,
+            0,
+            0,
+            0,
+            0,
+            8,
+            8,
+            imagesx($source),
+            imagesy($source)
+        );
+
+        $values = [];
+
+        for ($y = 0; $y < 8; $y++) {
+            for ($x = 0; $x < 8; $x++) {
+                $rgb = imagecolorat($resized, $x, $y);
+                $red = ($rgb >> 16) & 0xFF;
+                $green = ($rgb >> 8) & 0xFF;
+                $blue = $rgb & 0xFF;
+
+                $values[] = (int) round(($red * 299 + $green * 587 + $blue * 114) / 1000);
+            }
+        }
+
+        imagedestroy($source);
+        imagedestroy($resized);
+
+        $average = array_sum($values) / count($values);
+
+        return implode('', array_map(
+            fn($value) => $value >= $average ? '1' : '0',
+            $values
+        ));
+    }
+
+    private function hammingDistance(string $first, string $second): int
+    {
+        $length = min(strlen($first), strlen($second));
+        $distance = abs(strlen($first) - strlen($second));
+
+        for ($index = 0; $index < $length; $index++) {
+            if ($first[$index] !== $second[$index]) {
+                $distance++;
+            }
+        }
+
+        return $distance;
+    }
+
+    private function imageCompareFallback(?string $technicalReason = null): array
     {
         return [
             'image_similarity' => 0,
             'level' => 'Thấp',
-            'reason' => 'AI chưa thể so sánh hình ảnh lúc này.',
+            'message' => 'Đã kiểm tra ảnh bằng URL và dấu vân tay ảnh.',
+            'reason' => 'Chưa phát hiện ảnh trùng rõ ràng bằng URL hoặc dấu vân tay ảnh. Người duyệt có thể mở ảnh để kiểm tra thủ công nếu cần.',
             'duplicate_images' => [],
+            'ai_unavailable' => true,
+            'technical_reason' => $technicalReason,
         ];
     }
 

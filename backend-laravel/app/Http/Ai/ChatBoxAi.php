@@ -447,6 +447,13 @@ class ChatBoxAi
             return $featureResponse;
         }
 
+        if ($this->shouldAnswerProductSearchLocally($message)) {
+            $localResponse = $this->localProductSearchResponse($message, $role, $majorId, $user);
+            $this->recordTrainingFromJsonResponse($request, $message, $user, $role, $majorId, $localResponse);
+
+            return $localResponse;
+        }
+
         /* ── 3. BUILD CONTEXT THEO ROLE ──────────────────────────── */
         $data = match ($role) {
             'admin'   => $this->buildAdminContext(),
@@ -1462,7 +1469,11 @@ class ChatBoxAi
 
         $aiReply = $this->askOpenAiForRetrievedProducts($message, $role, $analysis, $products, $user);
 
-        if ($aiReply) {
+        if (
+            $aiReply
+            && !$this->looksLikeNoProductReply($aiReply)
+            && $this->replyMentionsAnyProduct($aiReply, $products)
+        ) {
             return response()->json([
                 'reply' => $aiReply,
                 'products' => $products,
@@ -1472,10 +1483,9 @@ class ChatBoxAi
         }
 
         return response()->json([
-            'reply' => "AI đang tạm mất kết nối, nhưng mình vẫn thấy vài sản phẩm liên quan:\n" . $this->formatProductList($products, $role, $analysis),
+            'reply' => $this->buildFoundLocalProductsReply($products, $role, $analysis),
             'products' => $products,
-            'source' => 'local_search_fallback',
-            'ai_unavailable' => true,
+            'source' => 'local_search',
             'analysis' => $analysis,
         ]);
     }
@@ -1736,6 +1746,50 @@ class ChatBoxAi
                     : "{$line} Bấm thẻ sản phẩm bên dưới để xem chi tiết.";
             })
             ->implode("\n");
+    }
+
+    private function buildFoundLocalProductsReply(array $products, string $role = 'guest', ?array $analysis = null): string
+    {
+        $topic = $analysis['major_name'] ?? null;
+        $prefix = $topic
+            ? "Có nha, mình tìm thấy vài sản phẩm phù hợp về {$topic}:"
+            : 'Có nha, mình tìm thấy vài sản phẩm phù hợp:';
+
+        return $prefix . "\n" . $this->formatProductList($products, $role, $analysis);
+    }
+
+    private function replyMentionsAnyProduct(string $reply, array $products): bool
+    {
+        $normalizedReply = $this->normalizeSearchText($reply);
+
+        foreach ($products as $product) {
+            $title = trim((string) ($product->title ?? ''));
+
+            if ($title === '') {
+                continue;
+            }
+
+            if (str_contains($normalizedReply, $this->normalizeSearchText($title))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function looksLikeNoProductReply(string $reply): bool
+    {
+        $normalized = $this->normalizeSearchText($reply);
+
+        return $this->containsAny($normalized, [
+            'khong co thong tin',
+            'khong tim thay',
+            'chua tim thay',
+            'chua thay san pham',
+            'khong thay san pham',
+            'khong co san pham',
+            'danh sach san pham khong co',
+        ]);
     }
 
     private function productRelevanceText(object $product, ?array $analysis = null): string
