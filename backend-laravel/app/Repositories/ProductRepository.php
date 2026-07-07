@@ -50,6 +50,7 @@ class ProductRepository extends BaseRepository
                 'p.awards',
                 'p.github_link',
                 'p.demo_link',
+                'p.video_url',
                 'p.submitted_at',
                 'p.approved_at',
                 'p.created_at',
@@ -144,6 +145,7 @@ class ProductRepository extends BaseRepository
             'awards' => $product->awards,
             'github_link' => $product->github_link,
             'demo_link' => $product->demo_link,
+            'video_url' => $product->video_url,
 
             'submitted_at' => $product->submitted_at,
             'approved_at' => $product->approved_at,
@@ -333,6 +335,7 @@ class ProductRepository extends BaseRepository
                 'products.thumbnail',
                 'products.github_link',
                 'products.demo_link',
+                'products.video_url',
                 'products.status',
                 'products.user_id',
                 'products.major_id',
@@ -382,6 +385,7 @@ class ProductRepository extends BaseRepository
                 'products.thumbnail',
                 'products.github_link',
                 'products.demo_link',
+                'products.video_url',
                 'products.status',
                 'products.user_id',
                 'products.major_id',
@@ -570,6 +574,7 @@ class ProductRepository extends BaseRepository
                 'p.title',
                 'p.description',
                 'p.thumbnail',
+                'p.video_url',
                 'p.created_at',
                 'p.cate_id',
                 'm.major_id',
@@ -590,6 +595,7 @@ class ProductRepository extends BaseRepository
             'cate_id' => $p->cate_id,
             'description' => $p->description,
             'thumbnail' => $p->thumbnail,
+            'video_url' => $p->video_url,
             'year' => $p->created_at ? date('Y', strtotime($p->created_at)) : null,
             'student' => $p->student ?? 'Ẩn danh',
             'studentId' => $p->studentId ?? null,
@@ -641,6 +647,7 @@ class ProductRepository extends BaseRepository
                 'p.title',
                 'p.description',
                 'p.thumbnail',
+                'p.video_url',
                 'p.created_at',
                 'p.cate_id',
 
@@ -665,6 +672,7 @@ class ProductRepository extends BaseRepository
                 'cate_id' => $p->cate_id,
                 'description' => $p->description,
                 'thumbnail' => $p->thumbnail,
+                'video_url' => $p->video_url,
 
                 'year' => $p->created_at
                     ? date('Y', strtotime($p->created_at))
@@ -835,6 +843,7 @@ class ProductRepository extends BaseRepository
         $resources = [
             'github' => $product->github_link ?? null,
             'demo' => $product->demo_link ?? null,
+            'video' => $product->video_url ?? null,
             'behance' => $detail->behance_link ?? null,
             'config_file' => $detail->config_file ?? null,
         ];
@@ -845,6 +854,7 @@ class ProductRepository extends BaseRepository
             'title' => $product->title,
             'description' => $product->description,
             'thumbnail' => $product->thumbnail,
+            'video_url' => $product->video_url ?? null,
 
             'images' => $images,
 

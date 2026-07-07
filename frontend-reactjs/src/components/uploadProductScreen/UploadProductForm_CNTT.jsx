@@ -6,6 +6,7 @@ import { AuthContext } from "../../contexts/AuthContext";
 import LoadingSpinner from "../common/LoadingOverlay";
 import { Icons } from "../../components/common/Icon";
 import CustomCategoryInput from "./CustomCategoryInput";
+import VideoUploadField from "./VideoUploadField";
 
 const UploadProductForm_CNTT = ({
   formData,
@@ -15,9 +16,12 @@ const UploadProductForm_CNTT = ({
   currentStep,
   handleSelectCategory,
   handleImageUpload,
+  handleVideoUpload,
   images,
+  videoFile,
   thumbnailIndex,
   removeImage,
+  removeVideo,
   setAsThumbnail,
   handlePrevStep,
   handleNextStep,
@@ -457,6 +461,14 @@ const UploadProductForm_CNTT = ({
                   <p className="mt-2 text-sm text-red-600">{errors.images}</p>
                 )}
               </div>
+
+              <VideoUploadField
+                videoFile={videoFile}
+                handleVideoUpload={handleVideoUpload}
+                removeVideo={removeVideo}
+                error={errors.video}
+                disabled={loading}
+              />
             </div>
           </div>
 

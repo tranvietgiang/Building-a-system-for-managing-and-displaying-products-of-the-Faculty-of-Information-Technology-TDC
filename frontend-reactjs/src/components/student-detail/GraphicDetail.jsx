@@ -6,6 +6,7 @@ import { formatDate } from "../../utils/formatDate";
 import { STATUS } from "../../utils/constants";
 import { Icons } from "../../components/common/Icon";
 import ProjectTeamCard from "./ProjectTeamCard";
+import ProductVideoSection from "../common/ProductVideoSection";
 const GraphicDetail = ({ product, theme }) => {
   useTitle("Chi tiết sản phẩm Thiết kế đồ họa");
 
@@ -240,6 +241,8 @@ const GraphicDetail = ({ product, theme }) => {
                 </div>
               )}
             </div>
+
+            <ProductVideoSection videoUrl={product.video_url} theme={theme} />
 
             {/* Graphic Specific Info Card - ĐÃ SỬA: bỏ các icon không tồn tại */}
             <div className="bg-white rounded-2xl shadow-lg p-6">

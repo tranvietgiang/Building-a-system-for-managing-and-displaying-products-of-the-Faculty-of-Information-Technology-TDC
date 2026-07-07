@@ -23,6 +23,7 @@ import useCompareProduct from "../../hooks/ai/useCompareProduct";
 import LoadingSpinner from "../../components/common/LoadingOverlay";
 import { confirmToast } from "../../components/common/ConfirmToast";
 import BackButton from "../../components/common/BackButton";
+import ProductVideoSection from "../../components/common/ProductVideoSection";
 
 import { Icons } from "../../components/common/Icon";
 import { STATUS } from "../../utils/constants";
@@ -405,6 +406,11 @@ const TeacherProductDetailScreen = () => {
                 </div>
               </div>
             )}
+
+            <ProductVideoSection
+              videoUrl={productData?.video_url}
+              theme={theme}
+            />
 
             {/* Nhóm thực hiện và giảng viên hướng dẫn */}
             <div className="overflow-hidden rounded-2xl bg-white shadow-lg">

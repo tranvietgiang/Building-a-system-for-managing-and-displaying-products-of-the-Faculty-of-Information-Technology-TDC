@@ -28,6 +28,7 @@ class Product extends Model
         'awards',
         'github_link',
         'demo_link',
+        'video_url',
         'approved_at',
         'submitted_at'
     ];

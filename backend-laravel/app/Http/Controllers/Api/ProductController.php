@@ -220,6 +220,7 @@ class ProductController extends Controller
                 'products.status',
                 'products.github_link',
                 'products.demo_link',
+                'products.video_url',
                 'products.submitted_at',
                 'products.created_at',
                 'users.name as student_name',

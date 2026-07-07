@@ -28,6 +28,7 @@ class ProductRequest extends FormRequest
             'thumbnail'     => 'nullable|url|max:255',
             'github_link'   => 'nullable|url|max:500',
             'demo_link'     => 'nullable|url|max:500',
+            'video_url'     => 'nullable|url|max:1000',
             'awards'        => 'nullable|string|max:255',
             'status'        => 'required|in:pending,approved,rejected',
             'user_id'       => 'required|string|min:3|max:15|exists:users,user_id',
