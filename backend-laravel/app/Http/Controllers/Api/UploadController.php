@@ -23,7 +23,7 @@ class UploadController extends Controller
     {
         $return = $this->upload_service->countPublishedProducts();
 
-        if (!$return) {
+        if ($return === null) {
             return response()->json([
                 'message' => 'Không thể tải số lượng sản phẩm.',
                 'uploadCount_result' => false

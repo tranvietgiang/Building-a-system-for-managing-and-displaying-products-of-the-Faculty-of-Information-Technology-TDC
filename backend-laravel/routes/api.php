@@ -118,7 +118,7 @@ Route::prefix('v1')->group(function () {
 */
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/upload/count-published', [UploadController::class, 'countPublishedProducts']);
-        Route::post('/upload', [UploadController::class, 'upload']);
+        Route::post('/upload', [UploadController::class, 'upload'])->middleware('role:student');
     });
 
     /*

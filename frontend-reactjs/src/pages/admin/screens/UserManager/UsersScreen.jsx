@@ -38,7 +38,7 @@ const UsersScreen = () => {
         page: nextPage,
         per_page: perPage,
       });
-      const nextPaginator = res.data?.data || null;
+      const nextPaginator = res.data || null;
       setPaginator(nextPaginator);
       setUsers(nextPaginator?.data || []);
     } finally {

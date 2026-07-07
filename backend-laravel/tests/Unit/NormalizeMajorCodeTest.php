@@ -68,8 +68,8 @@ class NormalizeMajorCodeTest extends TestCase
 
     public function test_partial_match_works(): void
     {
-        $this->assertSame('ai', $this->normalizer->NormalizeMajorCode('hoc ve tri tue nhan tao'));
-        $this->assertSame('cntt', $this->normalizer->NormalizeMajorCode('chuyen nganh cntt'));
+        $this->assertSame('ai', $this->normalizer->NormalizeMajorCode('học về trí tuệ nhân tạo'));
+        $this->assertSame('cntt', $this->normalizer->NormalizeMajorCode('chuyên ngành cntt'));
     }
 
     public function test_very_long_input_returns_mapped_code(): void

@@ -1,6 +1,6 @@
 import axiosClient from "../../api/axiosClient";
 
-export const UPLOAD_PRODUCT_TIMEOUT_MS = 120_000;
+export const UPLOAD_PRODUCT_TIMEOUT_MS = 300_000;
 
 export const uploadApi = {
   uploadProduct: async (formData) => {
@@ -32,7 +32,7 @@ export const uploadApi = {
           success: false,
           isTimeout: true,
           message:
-            "Đăng sản phẩm mất quá nhiều thời gian (trên 2 phút). Vui lòng kiểm tra kết nối hoặc giảm dung lượng tệp rồi thử lại.",
+            "Đăng sản phẩm mất quá nhiều thời gian (trên 5 phút). Vui lòng kiểm tra kết nối hoặc giảm dung lượng tệp rồi thử lại.",
         };
       }
 
