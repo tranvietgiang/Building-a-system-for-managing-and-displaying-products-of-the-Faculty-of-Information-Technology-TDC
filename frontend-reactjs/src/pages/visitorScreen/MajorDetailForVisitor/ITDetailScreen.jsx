@@ -7,6 +7,7 @@ import { productApi } from "../../../api";
 import VisitorTeam from "../../../components/visitor/VisitorTeam";
 import VisitorReviews from "../../../components/visitor/VisitorReviews";
 import VisitorShareButton from "../../../components/visitor/VisitorShareButton";
+import ProductVideoSection from "../../../components/common/ProductVideoSection";
 
 const ITDetailScreen = ({
   productVisitorDetail,
@@ -219,6 +220,14 @@ const ITDetailScreen = ({
                 })}
               </div>
             )}
+
+            <ProductVideoSection
+              videoUrl={
+                productVisitorDetail?.video_url ||
+                productVisitorDetail?.resources?.video
+              }
+              theme={theme}
+            />
 
             {/* Tabs */}
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden">

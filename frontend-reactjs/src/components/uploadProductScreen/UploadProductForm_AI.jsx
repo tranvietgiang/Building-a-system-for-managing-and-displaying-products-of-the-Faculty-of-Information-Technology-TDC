@@ -5,6 +5,7 @@ import useMajorName from "../../hooks/common/useMajorName";
 import { AuthContext } from "../../contexts/AuthContext";
 import LoadingSpinner from "../common/LoadingOverlay";
 import CustomCategoryInput from "./CustomCategoryInput";
+import VideoUploadField from "./VideoUploadField";
 
 const UploadProductForm_AI = ({
   formData,
@@ -14,9 +15,12 @@ const UploadProductForm_AI = ({
   currentStep,
   handleSelectCategory,
   handleImageUpload,
+  handleVideoUpload,
   images,
+  videoFile,
   thumbnailIndex,
   removeImage,
+  removeVideo,
   setAsThumbnail,
   handlePrevStep,
   handleNextStep,
@@ -463,6 +467,14 @@ const UploadProductForm_AI = ({
                   <p className="mt-2 text-sm text-red-600">{errors.images}</p>
                 )}
               </div>
+
+              <VideoUploadField
+                videoFile={videoFile}
+                handleVideoUpload={handleVideoUpload}
+                removeVideo={removeVideo}
+                error={errors.video}
+                disabled={loading}
+              />
             </div>
           </div>
 

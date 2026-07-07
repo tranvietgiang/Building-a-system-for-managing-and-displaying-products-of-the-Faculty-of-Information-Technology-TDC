@@ -80,6 +80,11 @@ class UploadFeatureTest extends TestCase
         return $this->actingAs($this->student);
     }
 
+    private function fakeJpg(string $name = 'test.jpg'): UploadedFile
+    {
+        return UploadedFile::fake()->create($name, 100, 'image/jpeg');
+    }
+
     /* ─── Upload endpoint ─── */
 
     public function test_upload_without_auth_returns_401(): void
@@ -160,11 +165,47 @@ class UploadFeatureTest extends TestCase
         $response->assertStatus(422);
     }
 
+    public function test_upload_with_invalid_video_type_fails(): void
+    {
+        $response = $this->actingAsStudent()->postJson('/api/v1/upload', [
+            'title' => 'Valid Product Title Here',
+            'major_code' => 'CNTT',
+            'major_id' => 1,
+            'cate_id' => 1,
+            'programming_language' => 'PHP',
+            'framework' => 'Laravel',
+            'database_used' => 'MySQL',
+            'images' => [$this->fakeJpg()],
+            'video' => UploadedFile::fake()->create('demo.txt', 100, 'text/plain'),
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['video']);
+    }
+
+    public function test_upload_with_too_large_video_fails(): void
+    {
+        $response = $this->actingAsStudent()->postJson('/api/v1/upload', [
+            'title' => 'Valid Product Title Here',
+            'major_code' => 'CNTT',
+            'major_id' => 1,
+            'cate_id' => 1,
+            'programming_language' => 'PHP',
+            'framework' => 'Laravel',
+            'database_used' => 'MySQL',
+            'images' => [$this->fakeJpg()],
+            'video' => UploadedFile::fake()->create('demo.mp4', 51201, 'video/mp4'),
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['video']);
+    }
+
     public function test_upload_with_too_many_images_fails(): void
     {
         $images = [];
         for ($i = 0; $i < 15; $i++) {
-            $images[] = UploadedFile::fake()->image("image{$i}.jpg", 100, 100);
+            $images[] = $this->fakeJpg("image{$i}.jpg");
         }
 
         $response = $this->actingAsStudent()->postJson('/api/v1/upload', [
@@ -197,7 +238,7 @@ class UploadFeatureTest extends TestCase
             'major_id' => 1,
             'cate_id' => 1,
             'github_link' => 'not-a-url',
-            'images' => [UploadedFile::fake()->image('test.jpg', 100, 100)],
+            'images' => [$this->fakeJpg()],
         ]);
         $response->assertStatus(422);
     }
@@ -209,7 +250,7 @@ class UploadFeatureTest extends TestCase
             'major_code' => 'CNTT',
             'major_id' => 1,
             'cate_id' => 1,
-            'images' => [UploadedFile::fake()->image('test.jpg', 100, 100)],
+            'images' => [$this->fakeJpg()],
         ]);
 
         $response->assertStatus(422);
@@ -222,7 +263,7 @@ class UploadFeatureTest extends TestCase
             'major_code' => 'AI',
             'major_id' => 2,
             'cate_id' => 1,
-            'images' => [UploadedFile::fake()->image('test.jpg', 100, 100)],
+            'images' => [$this->fakeJpg()],
         ]);
 
         $response->assertStatus(422);
@@ -236,7 +277,7 @@ class UploadFeatureTest extends TestCase
             'major_code' => 'CNTT',
             'major_id' => 1,
             'cate_id' => 1,
-            'images' => [UploadedFile::fake()->image('test.jpg', 100, 100)],
+            'images' => [$this->fakeJpg()],
         ]);
 
         $response->assertStatus(422);
@@ -250,7 +291,7 @@ class UploadFeatureTest extends TestCase
             'major_code' => 'MMT',
             'major_id' => 3,
             'cate_id' => 1,
-            'images' => [UploadedFile::fake()->image('test.jpg', 100, 100)],
+            'images' => [$this->fakeJpg()],
         ]);
 
         $response->assertStatus(422);
@@ -264,7 +305,7 @@ class UploadFeatureTest extends TestCase
             'major_code' => 'TKDH',
             'major_id' => 4,
             'cate_id' => 1,
-            'images' => [UploadedFile::fake()->image('test.jpg', 100, 100)],
+            'images' => [$this->fakeJpg()],
         ]);
 
         $response->assertStatus(422);

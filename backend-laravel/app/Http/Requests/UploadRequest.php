@@ -52,6 +52,8 @@ class UploadRequest extends FormRequest
             'existing_thumbnail_url' => 'nullable|string|max:1000',
             'image_meta' => 'nullable|array|max:10',
             'image_meta.*' => 'nullable|string',
+            'video' => 'nullable|file|mimes:mp4,mov,avi,webm,mkv|max:51200',
+            'existing_video_url' => 'nullable|url|max:1000',
 
             'github_link' => 'nullable|url',
             'demo_link' => 'nullable|url',
@@ -137,6 +139,9 @@ class UploadRequest extends FormRequest
             'images.*.image' => 'Tệp đã chọn phải là hình ảnh',
             'images.*.mimes' => 'Ảnh chỉ hỗ trợ định dạng JPG, JPEG, PNG hoặc WEBP',
             'images.*.max' => 'Mỗi ảnh không được vượt quá 5 MB',
+            'video.file' => 'Tệp video không hợp lệ',
+            'video.mimes' => 'Video chỉ hỗ trợ MP4, MOV, AVI, WEBM hoặc MKV',
+            'video.max' => 'Video không được vượt quá 50 MB',
 
             // LINKS
             'github_link.url' => 'Link GitHub không hợp lệ',

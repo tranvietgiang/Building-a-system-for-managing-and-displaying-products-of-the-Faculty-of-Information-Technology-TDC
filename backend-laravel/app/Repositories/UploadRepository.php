@@ -72,6 +72,7 @@ class UploadRepository extends BaseRepository
                 'demo_link' => $data['demo_link'] ?? null,
                 'approved_by' => null,
                 'advisor_name' => $data['advisor_name'] ?? null,
+                'video_url' => $data['video_url'] ?? null,
                 'submitted_at' => Carbon::now(),
                 'approved_at' => null,
             ]);

@@ -24,4 +24,17 @@ class CloudinaryService
 
         return $result['secure_url']; // 🔥 URL ảnh
     }
+
+    public function uploadVideo($file)
+    {
+        $result = $this->cloudinary->uploadApi()->upload(
+            $file->getRealPath(),
+            [
+                'folder' => 'products/videos',
+                'resource_type' => 'video',
+            ]
+        );
+
+        return $result['secure_url'];
+    }
 }

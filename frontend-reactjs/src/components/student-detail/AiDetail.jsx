@@ -5,6 +5,7 @@ import { formatDate } from "../../utils/formatDate";
 import { STATUS } from "../../utils/constants";
 import { Icons } from "../../components/common/Icon";
 import ProjectTeamCard from "./ProjectTeamCard";
+import ProductVideoSection from "../common/ProductVideoSection";
 
 const AiDetail = ({ product, theme }) => {
   useTitle("Chi tiết sản phẩm AI");
@@ -240,6 +241,8 @@ const AiDetail = ({ product, theme }) => {
                 </div>
               )}
             </div>
+
+            <ProductVideoSection videoUrl={product.video_url} theme={theme} />
 
             {/* AI Specific Info Card */}
             <div className="bg-white rounded-2xl shadow-lg p-6">

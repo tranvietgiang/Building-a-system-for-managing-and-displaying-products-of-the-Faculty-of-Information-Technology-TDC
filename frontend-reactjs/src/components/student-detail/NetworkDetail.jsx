@@ -5,6 +5,7 @@ import { formatDate } from "../../utils/formatDate";
 import { STATUS } from "../../utils/constants";
 import { Icons } from "../../components/common/Icon";
 import ProjectTeamCard from "./ProjectTeamCard";
+import ProductVideoSection from "../common/ProductVideoSection";
 
 const NetworkDetail = ({ product, theme }) => {
   useTitle("Chi tiết sản phẩm Mạng máy tính");
@@ -243,6 +244,8 @@ const NetworkDetail = ({ product, theme }) => {
                 </div>
               )}
             </div>
+
+            <ProductVideoSection videoUrl={product.video_url} theme={theme} />
 
             {/* Network Specific Info Card */}
             <div className="bg-white rounded-2xl shadow-lg p-6">

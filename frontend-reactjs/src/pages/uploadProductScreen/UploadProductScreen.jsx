@@ -50,6 +50,7 @@ const UploadProductScreen = () => {
       awards: editProduct.awards || "",
       github_link: editProduct.github_link || "",
       demo_link: editProduct.demo_link || "",
+      video_url: editProduct.video_url || "",
       model_used: editProduct.model_used || aiDetail.model_used || "",
       framework:
         editProduct.framework || aiDetail.framework || itDetail.framework || "",
@@ -144,8 +145,11 @@ const UploadProductScreen = () => {
     handleAddTag,
     removeTag,
     handleImageUpload,
+    handleVideoUpload,
     removeImage,
+    removeVideo,
     setAsThumbnail,
+    videoFile,
     handleSubmit,
 
     setSelectedImage,
@@ -343,9 +347,12 @@ const UploadProductScreen = () => {
           currentStep={currentStep}
           handleSelectCategory={handleSelectCategory}
           handleImageUpload={handleImageUpload}
+          handleVideoUpload={handleVideoUpload}
           images={images}
+          videoFile={videoFile}
           thumbnailIndex={thumbnailIndex}
           removeImage={removeImage}
+          removeVideo={removeVideo}
           setAsThumbnail={setAsThumbnail}
           tagInput={tagInput}
           setTagInput={setTagInput}

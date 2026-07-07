@@ -77,6 +77,7 @@ class UploadService extends BaseRepository
 
         $uploadedImages = array_values($data['existing_images'] ?? []);
         $tags = $data['tags'] ?? [];
+        $videoUrl = $data['existing_video_url'] ?? null;
         $existingThumbnailUrl = $data['existing_thumbnail_url'] ?? null;
         $thumbnailIndex = $existingThumbnailUrl
             ? (int) (array_search($existingThumbnailUrl, $uploadedImages, true) ?: 0)
@@ -122,6 +123,10 @@ class UploadService extends BaseRepository
                 $uploadedImages[] = $url;
             }
 
+            if (!empty($data['video'])) {
+                $videoUrl = $cloudinary->uploadVideo($data['video']);
+            }
+
             if (! $existingThumbnailUrl && ($data['images'] ?? []) !== []) {
                 $thumbnailIndex = $newThumbnailOffset + $newThumbnailIndex;
             }
@@ -141,6 +146,7 @@ class UploadService extends BaseRepository
                 'replace_product_id' => $replaceProductId ?: null,
                 'github_link' => $data['github_link'] ?? null,
                 'demo_link' => $data['demo_link'] ?? null,
+                'video_url' => $videoUrl,
             ];
 
 
@@ -189,6 +195,7 @@ class UploadService extends BaseRepository
 
             $product->thumbnail = $uploadedImages[$thumbnailIndex] ?? ($uploadedImages[0] ?? null);
             $product->images = $uploadedImages;
+            $product->video_url = $videoUrl;
 
             DB::commit();
 

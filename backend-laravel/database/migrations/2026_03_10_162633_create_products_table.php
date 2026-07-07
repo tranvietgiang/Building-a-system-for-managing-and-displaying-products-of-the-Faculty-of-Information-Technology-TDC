@@ -47,6 +47,8 @@ return new class extends Migration
 
             $table->string("demo_link", 500)->nullable();
 
+            $table->string('video_url', 1000)->nullable();
+
             $table->foreign("approved_by")
                 ->references("user_id")
                 ->on("users")
@@ -56,6 +58,7 @@ return new class extends Migration
             $table->date('submitted_at')->nullable();
 
             $table->timestamp('approved_at')->nullable();
+
 
             $table->timestamps();
         });

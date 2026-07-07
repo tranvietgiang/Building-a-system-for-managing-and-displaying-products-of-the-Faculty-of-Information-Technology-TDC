@@ -29,6 +29,21 @@ const FIELD_LABELS = {
   tools_used: "Công cụ thiết kế",
 };
 
+const MAX_VIDEO_SIZE_MB = 50;
+const ALLOWED_VIDEO_TYPES = [
+  "video/mp4",
+  "video/quicktime",
+  "video/webm",
+  "video/x-msvideo",
+  "video/x-matroska",
+];
+
+const withoutVideoUrl = (data = {}) => {
+  const rest = { ...(data || {}) };
+  delete rest.video_url;
+  return rest;
+};
+
 export default function useUploadBaseForm({
   initialData,
   editData,
@@ -40,10 +55,21 @@ export default function useUploadBaseForm({
   stepsConfig,
 } = {}) {
   const [formData, setFormData] = useState(() => ({
-    ...(initialData || {}),
-    ...(editData || {}),
+    ...withoutVideoUrl(initialData),
+    ...withoutVideoUrl(editData),
   }));
   const [images, setImages] = useState(editImages || []);
+  const [videoFile, setVideoFile] = useState(() =>
+    editData?.video_url
+      ? {
+          id: "existing-video",
+          url: editData.video_url,
+          name: "Video hiện tại",
+          size: "",
+          existing: true,
+        }
+      : null,
+  );
   const [tags, setTags] = useState(editTags || []);
   const [tagInput, setTagInput] = useState("");
   const [errors, setErrors] = useState({});
@@ -253,6 +279,70 @@ export default function useUploadBaseForm({
     setThumbnailIndex(index);
   };
 
+  /* ================= VIDEO ================= */
+  const handleVideoUpload = useCallback(
+    (e) => {
+      const file = e.target.files?.[0];
+
+      if (!file) return;
+
+      const sizeMb = file.size / 1024 / 1024;
+      const extension = file.name.split(".").pop()?.toLowerCase();
+      const allowedExtensions = ["mp4", "mov", "avi", "webm", "mkv"];
+
+      if (
+        !ALLOWED_VIDEO_TYPES.includes(file.type) &&
+        !allowedExtensions.includes(extension)
+      ) {
+        const message = "Video chỉ hỗ trợ MP4, MOV, AVI, WEBM hoặc MKV";
+        setErrors((prev) => ({ ...prev, video: message }));
+        toast.error(message);
+        e.target.value = "";
+        return;
+      }
+
+      if (sizeMb > MAX_VIDEO_SIZE_MB) {
+        const message = `Video không được vượt quá ${MAX_VIDEO_SIZE_MB} MB`;
+        setErrors((prev) => ({ ...prev, video: message }));
+        toast.error(message);
+        e.target.value = "";
+        return;
+      }
+
+      setVideoFile((prev) => {
+        if (prev?.file && prev.url) {
+          URL.revokeObjectURL(prev.url);
+        }
+
+        return {
+          id: Date.now(),
+          file,
+          url: URL.createObjectURL(file),
+          name: file.name,
+          size: sizeMb.toFixed(2),
+        };
+      });
+
+      setErrors((prev) => ({
+        ...prev,
+        video: null,
+      }));
+      e.target.value = "";
+    },
+    [],
+  );
+
+  const removeVideo = useCallback(() => {
+    setVideoFile((prev) => {
+      if (prev?.file && prev.url) {
+        URL.revokeObjectURL(prev.url);
+      }
+
+      return null;
+    });
+    setErrors((prev) => ({ ...prev, video: null }));
+  }, []);
+
   /* ================= TAG ================= */
   const handleAddTag = useCallback(
     (e) => {
@@ -295,6 +385,7 @@ export default function useUploadBaseForm({
       studentId,
       formData,
       images,
+      videoFile: videoFile && !videoFile.file ? videoFile : null,
       tags: [...tags],
       currentStep,
       thumbnailIndex,
@@ -329,8 +420,12 @@ export default function useUploadBaseForm({
 
   const handleLoadDraft = (draft) => {
     setLoadedDraftId(draft.id ?? null);
-    setFormData({ ...(initialData || {}), ...(draft.formData || {}) });
+    setFormData({
+      ...withoutVideoUrl(initialData),
+      ...withoutVideoUrl(draft.formData),
+    });
     setImages(restoreDraftImages(draft.images));
+    setVideoFile(draft.videoFile || null);
     setTags(draft.tags || []);
     setCurrentStep(Math.min(3, Math.max(1, draft.currentStep || 1)));
     setThumbnailIndex(
@@ -421,6 +516,12 @@ export default function useUploadBaseForm({
           }
         });
 
+        if (videoFile?.file) {
+          payload.append("video", videoFile.file);
+        } else if (videoFile?.url) {
+          payload.append("existing_video_url", videoFile.url);
+        }
+
         const res = await uploadApi.uploadProduct(payload);
 
         if (!res.success) {
@@ -472,6 +573,7 @@ export default function useUploadBaseForm({
       formData,
       tags,
       images,
+      videoFile,
       thumbnailIndex,
       user,
       loadedDraftId,
@@ -486,6 +588,7 @@ export default function useUploadBaseForm({
     formData,
     errors,
     images,
+    videoFile,
     tags,
     tagInput,
     currentStep,
@@ -510,7 +613,9 @@ export default function useUploadBaseForm({
     handleNextStep,
     handlePrevStep,
     handleImageUpload,
+    handleVideoUpload,
     removeImage,
+    removeVideo,
     setAsThumbnail,
     handleAddTag,
     removeTag,
