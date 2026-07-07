@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <title>Dashboard for D:\nckh-tdc\backend-laravel\app\Http\Controllers\Api</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="../../../_css/bootstrap.min.css?v=11.0.12" rel="stylesheet" type="text/css">
+  <link href="../../../_css/nv.d3.min.css?v=11.0.12" rel="stylesheet" type="text/css">
+  <link href="../../../_css/style.css?v=11.0.12" rel="stylesheet" type="text/css">
+  <link href="../../../_css/custom.css" rel="stylesheet" type="text/css">
+ </head>
+ <body>
+  <header>
+   <div class="container-fluid">
+    <div class="row">
+     <div class="col-md-12">
+      <nav aria-label="breadcrumb">
+       <ol class="breadcrumb">
+         <li class="breadcrumb-item"><a href="../../../index.html">D:\nckh-tdc\backend-laravel\app</a></li>
+         <li class="breadcrumb-item"><a href="../../index.html">Http</a></li>
+         <li class="breadcrumb-item"><a href="../index.html">Controllers</a></li>
+         <li class="breadcrumb-item"><a href="index.html">Api</a></li>
+         <li class="breadcrumb-item active">(Dashboard)</li>
+
+       </ol>
+      </nav>
+     </div>
+    </div>
+   </div>
+  </header>
+  <div class="container-fluid">
+   <div class="row">
+    <div class="col-md-12">
+     <h2>Classes</h2>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Coverage Distribution</h3>
+     <div id="classCoverageDistribution" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Complexity</h3>
+     <div id="classComplexity" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Insufficient Coverage</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Class</th>
+         <th class="text-right">Coverage</th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="AdminController.php.html#22">App\Http\Controllers\Api\AdminController</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="UserController.php.html#13">App\Http\Controllers\Api\UserController</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="MajorController.php.html#8">App\Http\Controllers\Api\MajorController</a></td><td class="text-right">15%</td></tr>
+       <tr><td><a href="AuthController.php.html#13">App\Http\Controllers\Api\AuthController</a></td><td class="text-right">16%</td></tr>
+       <tr><td><a href="UploadController.php.html#15">App\Http\Controllers\Api\UploadController</a></td><td class="text-right">26%</td></tr>
+       <tr><td><a href="SystemSettingController.php.html#9">App\Http\Controllers\Api\SystemSettingController</a></td><td class="text-right">29%</td></tr>
+       <tr><td><a href="ProductController.php.html#14">App\Http\Controllers\Api\ProductController</a></td><td class="text-right">71%</td></tr>
+       <tr><td><a href="TeacherController.php.html#11">App\Http\Controllers\Api\TeacherController</a></td><td class="text-right">78%</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Project Risks</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Class</th>
+         <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="AdminController.php.html#22">App\Http\Controllers\Api\AdminController</a></td><td class="text-right">4422</td></tr>
+       <tr><td><a href="UserController.php.html#13">App\Http\Controllers\Api\UserController</a></td><td class="text-right">306</td></tr>
+       <tr><td><a href="ProductController.php.html#14">App\Http\Controllers\Api\ProductController</a></td><td class="text-right">148</td></tr>
+       <tr><td><a href="AuthController.php.html#13">App\Http\Controllers\Api\AuthController</a></td><td class="text-right">82</td></tr>
+       <tr><td><a href="MajorController.php.html#8">App\Http\Controllers\Api\MajorController</a></td><td class="text-right">27</td></tr>
+       <tr><td><a href="UploadController.php.html#15">App\Http\Controllers\Api\UploadController</a></td><td class="text-right">26</td></tr>
+       <tr><td><a href="TeacherController.php.html#11">App\Http\Controllers\Api\TeacherController</a></td><td class="text-right">12</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-12">
+     <h2>Methods</h2>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Coverage Distribution</h3>
+     <div id="methodCoverageDistribution" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Complexity</h3>
+     <div id="methodComplexity" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Insufficient Coverage</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Method</th>
+         <th class="text-right">Coverage</th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="AdminController.php.html#24"><abbr title="App\Http\Controllers\Api\AdminController::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="AdminController.php.html#28"><abbr title="App\Http\Controllers\Api\AdminController::dashboard">dashboard</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="AdminController.php.html#114"><abbr title="App\Http\Controllers\Api\AdminController::buildDashboardAiInsights">buildDashboardAiInsights</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="AdminController.php.html#180"><abbr title="App\Http\Controllers\Api\AdminController::buildDashboardInsightPrompt">buildDashboardInsightPrompt</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="AdminController.php.html#200"><abbr title="App\Http\Controllers\Api\AdminController::decodeDashboardInsightJson">decodeDashboardInsightJson</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="AdminController.php.html#217"><abbr title="App\Http\Controllers\Api\AdminController::buildFallbackDashboardInsights">buildFallbackDashboardInsights</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="AdminController.php.html#255"><abbr title="App\Http\Controllers\Api\AdminController::users">users</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="AdminController.php.html#284"><abbr title="App\Http\Controllers\Api\AdminController::storeUser">storeUser</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="AdminController.php.html#312"><abbr title="App\Http\Controllers\Api\AdminController::updateUser">updateUser</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="AdminController.php.html#345"><abbr title="App\Http\Controllers\Api\AdminController::destroyUser">destroyUser</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="AdminController.php.html#362"><abbr title="App\Http\Controllers\Api\AdminController::lookupPasswordRecoveryUser">lookupPasswordRecoveryUser</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="AdminController.php.html#389"><abbr title="App\Http\Controllers\Api\AdminController::chatboxTrainingLogs">chatboxTrainingLogs</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="AdminController.php.html#438"><abbr title="App\Http\Controllers\Api\AdminController::updateChatboxTrainingLog">updateChatboxTrainingLog</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="AdminController.php.html#471"><abbr title="App\Http\Controllers\Api\AdminController::destroyChatboxTrainingLog">destroyChatboxTrainingLog</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="AdminController.php.html#481"><abbr title="App\Http\Controllers\Api\AdminController::supportRequests">supportRequests</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="AdminController.php.html#498"><abbr title="App\Http\Controllers\Api\AdminController::markSupportProcessed">markSupportProcessed</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="AdminController.php.html#513"><abbr title="App\Http\Controllers\Api\AdminController::sendPasswordRecovery">sendPasswordRecovery</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="AdminController.php.html#577"><abbr title="App\Http\Controllers\Api\AdminController::findPasswordRecoveryUser">findPasswordRecoveryUser</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="AdminController.php.html#589"><abbr title="App\Http\Controllers\Api\AdminController::products">products</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="AdminController.php.html#637"><abbr title="App\Http\Controllers\Api\AdminController::updateProductStatus">updateProductStatus</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="AdminController.php.html#660"><abbr title="App\Http\Controllers\Api\AdminController::destroyProduct">destroyProduct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="AdminController.php.html#670"><abbr title="App\Http\Controllers\Api\AdminController::majors">majors</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="AdminController.php.html#683"><abbr title="App\Http\Controllers\Api\AdminController::storeMajor">storeMajor</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="AdminController.php.html#704"><abbr title="App\Http\Controllers\Api\AdminController::updateMajor">updateMajor</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="AdminController.php.html#727"><abbr title="App\Http\Controllers\Api\AdminController::destroyMajor">destroyMajor</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="AdminController.php.html#747"><abbr title="App\Http\Controllers\Api\AdminController::categories">categories</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="AdminController.php.html#755"><abbr title="App\Http\Controllers\Api\AdminController::rejectUnsafeInput">rejectUnsafeInput</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="AuthController.php.html#28"><abbr title="App\Http\Controllers\Api\AuthController::logout">logout</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="AuthController.php.html#71"><abbr title="App\Http\Controllers\Api\AuthController::me">me</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="AuthController.php.html#79"><abbr title="App\Http\Controllers\Api\AuthController::submitPasswordRecovery">submitPasswordRecovery</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="AuthController.php.html#110"><abbr title="App\Http\Controllers\Api\AuthController::submitContact">submitContact</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="MajorController.php.html#14"><abbr title="App\Http\Controllers\Api\MajorController::majorName">majorName</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="MajorController.php.html#36"><abbr title="App\Http\Controllers\Api\MajorController::majorNameCode">majorNameCode</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ProductController.php.html#261"><abbr title="App\Http\Controllers\Api\ProductController::cleanKeywordForMajor">cleanKeywordForMajor</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ProductController.php.html#303"><abbr title="App\Http\Controllers\Api\ProductController::majorAliases">majorAliases</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ProductController.php.html#314"><abbr title="App\Http\Controllers\Api\ProductController::majorKeywordAliases">majorKeywordAliases</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="ProductController.php.html#451"><abbr title="App\Http\Controllers\Api\ProductController::getMatchingAiProducts">getMatchingAiProducts</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="SystemSettingController.php.html#23"><abbr title="App\Http\Controllers\Api\SystemSettingController::update">update</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="UploadController.php.html#39"><abbr title="App\Http\Controllers\Api\UploadController::upload">upload</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="UserController.php.html#18"><abbr title="App\Http\Controllers\Api\UserController::profile">profile</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="UserController.php.html#29"><abbr title="App\Http\Controllers\Api\UserController::show">show</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="UserController.php.html#49"><abbr title="App\Http\Controllers\Api\UserController::update">update</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="UserController.php.html#78"><abbr title="App\Http\Controllers\Api\UserController::statistics">statistics</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="UserController.php.html#120"><abbr title="App\Http\Controllers\Api\UserController::updatePassword">updatePassword</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="UserController.php.html#162"><abbr title="App\Http\Controllers\Api\UserController::search">search</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="TeacherController.php.html#18"><abbr title="App\Http\Controllers\Api\TeacherController::getTeacherStatistic">getTeacherStatistic</abbr></a></td><td class="text-right">60%</td></tr>
+       <tr><td><a href="TeacherController.php.html#54"><abbr title="App\Http\Controllers\Api\TeacherController::teacherApprove">teacherApprove</abbr></a></td><td class="text-right">60%</td></tr>
+       <tr><td><a href="UploadController.php.html#22"><abbr title="App\Http\Controllers\Api\UploadController::countPublishedProducts">countPublishedProducts</abbr></a></td><td class="text-right">60%</td></tr>
+       <tr><td><a href="ProductController.php.html#22"><abbr title="App\Http\Controllers\Api\ProductController::productViewId">productViewId</abbr></a></td><td class="text-right">66%</td></tr>
+       <tr><td><a href="AuthController.php.html#51"><abbr title="App\Http\Controllers\Api\AuthController::refresh">refresh</abbr></a></td><td class="text-right">69%</td></tr>
+       <tr><td><a href="ProductController.php.html#57"><abbr title="App\Http\Controllers\Api\ProductController::searchProducts">searchProducts</abbr></a></td><td class="text-right">73%</td></tr>
+       <tr><td><a href="TeacherController.php.html#71"><abbr title="App\Http\Controllers\Api\TeacherController::teacherReject">teacherReject</abbr></a></td><td class="text-right">78%</td></tr>
+       <tr><td><a href="ProductController.php.html#412"><abbr title="App\Http\Controllers\Api\ProductController::incrementView">incrementView</abbr></a></td><td class="text-right">83%</td></tr>
+       <tr><td><a href="ProductController.php.html#425"><abbr title="App\Http\Controllers\Api\ProductController::incrementLike">incrementLike</abbr></a></td><td class="text-right">83%</td></tr>
+       <tr><td><a href="ProductController.php.html#438"><abbr title="App\Http\Controllers\Api\ProductController::incrementShare">incrementShare</abbr></a></td><td class="text-right">83%</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Project Risks</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Method</th>
+         <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="AdminController.php.html#217"><abbr title="App\Http\Controllers\Api\AdminController::buildFallbackDashboardInsights">buildFallbackDashboardInsights</abbr></a></td><td class="text-right">56</td></tr>
+       <tr><td><a href="AdminController.php.html#114"><abbr title="App\Http\Controllers\Api\AdminController::buildDashboardAiInsights">buildDashboardAiInsights</abbr></a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="ProductController.php.html#303"><abbr title="App\Http\Controllers\Api\ProductController::majorAliases">majorAliases</abbr></a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="ProductController.php.html#314"><abbr title="App\Http\Controllers\Api\ProductController::majorKeywordAliases">majorKeywordAliases</abbr></a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="AdminController.php.html#438"><abbr title="App\Http\Controllers\Api\AdminController::updateChatboxTrainingLog">updateChatboxTrainingLog</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="AdminController.php.html#513"><abbr title="App\Http\Controllers\Api\AdminController::sendPasswordRecovery">sendPasswordRecovery</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="UserController.php.html#162"><abbr title="App\Http\Controllers\Api\UserController::search">search</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="ProductController.php.html#57"><abbr title="App\Http\Controllers\Api\ProductController::searchProducts">searchProducts</abbr></a></td><td class="text-right">25</td></tr>
+       <tr><td><a href="AdminController.php.html#200"><abbr title="App\Http\Controllers\Api\AdminController::decodeDashboardInsightJson">decodeDashboardInsightJson</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="AdminController.php.html#755"><abbr title="App\Http\Controllers\Api\AdminController::rejectUnsafeInput">rejectUnsafeInput</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="ProductController.php.html#261"><abbr title="App\Http\Controllers\Api\ProductController::cleanKeywordForMajor">cleanKeywordForMajor</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="UploadController.php.html#39"><abbr title="App\Http\Controllers\Api\UploadController::upload">upload</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="UserController.php.html#78"><abbr title="App\Http\Controllers\Api\UserController::statistics">statistics</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="AdminController.php.html#312"><abbr title="App\Http\Controllers\Api\AdminController::updateUser">updateUser</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="AdminController.php.html#389"><abbr title="App\Http\Controllers\Api\AdminController::chatboxTrainingLogs">chatboxTrainingLogs</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="AdminController.php.html#589"><abbr title="App\Http\Controllers\Api\AdminController::products">products</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="AdminController.php.html#727"><abbr title="App\Http\Controllers\Api\AdminController::destroyMajor">destroyMajor</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="AuthController.php.html#79"><abbr title="App\Http\Controllers\Api\AuthController::submitPasswordRecovery">submitPasswordRecovery</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="UserController.php.html#120"><abbr title="App\Http\Controllers\Api\UserController::updatePassword">updatePassword</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="AdminController.php.html#284"><abbr title="App\Http\Controllers\Api\AdminController::storeUser">storeUser</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="AdminController.php.html#345"><abbr title="App\Http\Controllers\Api\AdminController::destroyUser">destroyUser</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="AdminController.php.html#362"><abbr title="App\Http\Controllers\Api\AdminController::lookupPasswordRecoveryUser">lookupPasswordRecoveryUser</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="AdminController.php.html#637"><abbr title="App\Http\Controllers\Api\AdminController::updateProductStatus">updateProductStatus</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="AdminController.php.html#683"><abbr title="App\Http\Controllers\Api\AdminController::storeMajor">storeMajor</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="AdminController.php.html#704"><abbr title="App\Http\Controllers\Api\AdminController::updateMajor">updateMajor</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="MajorController.php.html#14"><abbr title="App\Http\Controllers\Api\MajorController::majorName">majorName</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="MajorController.php.html#36"><abbr title="App\Http\Controllers\Api\MajorController::majorNameCode">majorNameCode</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="UserController.php.html#29"><abbr title="App\Http\Controllers\Api\UserController::show">show</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="UserController.php.html#49"><abbr title="App\Http\Controllers\Api\UserController::update">update</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="TeacherController.php.html#71"><abbr title="App\Http\Controllers\Api\TeacherController::teacherReject">teacherReject</abbr></a></td><td class="text-right">4</td></tr>
+       <tr><td><a href="TeacherController.php.html#18"><abbr title="App\Http\Controllers\Api\TeacherController::getTeacherStatistic">getTeacherStatistic</abbr></a></td><td class="text-right">2</td></tr>
+       <tr><td><a href="TeacherController.php.html#54"><abbr title="App\Http\Controllers\Api\TeacherController::teacherApprove">teacherApprove</abbr></a></td><td class="text-right">2</td></tr>
+       <tr><td><a href="UploadController.php.html#22"><abbr title="App\Http\Controllers\Api\UploadController::countPublishedProducts">countPublishedProducts</abbr></a></td><td class="text-right">2</td></tr>
+       <tr><td><a href="ProductController.php.html#22"><abbr title="App\Http\Controllers\Api\ProductController::productViewId">productViewId</abbr></a></td><td class="text-right">2</td></tr>
+       <tr><td><a href="AuthController.php.html#51"><abbr title="App\Http\Controllers\Api\AuthController::refresh">refresh</abbr></a></td><td class="text-right">2</td></tr>
+       <tr><td><a href="ProductController.php.html#412"><abbr title="App\Http\Controllers\Api\ProductController::incrementView">incrementView</abbr></a></td><td class="text-right">2</td></tr>
+       <tr><td><a href="ProductController.php.html#425"><abbr title="App\Http\Controllers\Api\ProductController::incrementLike">incrementLike</abbr></a></td><td class="text-right">2</td></tr>
+       <tr><td><a href="ProductController.php.html#438"><abbr title="App\Http\Controllers\Api\ProductController::incrementShare">incrementShare</abbr></a></td><td class="text-right">2</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+   </div>
+   <footer>
+    <hr/>
+    <p>
+     <small>Generated by <a href="https://github.com/sebastianbergmann/php-code-coverage" target="_top">php-code-coverage 11.0.12</a> using <a href="https://www.php.net/" target="_top">PHP 8.2.12</a> and <a href="https://phpunit.de/">PHPUnit 11.5.55</a> at Tue Jul 7 10:49:03 UTC 2026.</small>
+    </p>
+   </footer>
+  </div>
+  <script src="../../../_js/jquery.min.js?v=11.0.12" type="text/javascript"></script>
+  <script src="../../../_js/d3.min.js?v=11.0.12" type="text/javascript"></script>
+  <script src="../../../_js/nv.d3.min.js?v=11.0.12" type="text/javascript"></script>
+  <script type="text/javascript">
+$(document).ready(function() {
+  nv.addGraph(function() {
+    var chart = nv.models.multiBarChart();
+    chart.tooltips(false)
+      .showControls(false)
+      .showLegend(false)
+      .reduceXTicks(false)
+      .staggerLabels(true)
+      .yAxis.tickFormat(d3.format('d'));
+
+    d3.select('#classCoverageDistribution svg')
+      .datum(getCoverageDistributionData([2,0,2,2,0,0,0,0,2,0,0,1], "Class Coverage"))
+      .transition().duration(500).call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  nv.addGraph(function() {
+    var chart = nv.models.multiBarChart();
+    chart.tooltips(false)
+      .showControls(false)
+      .showLegend(false)
+      .reduceXTicks(false)
+      .staggerLabels(true)
+      .yAxis.tickFormat(d3.format('d'));
+
+    d3.select('#methodCoverageDistribution svg')
+      .datum(getCoverageDistributionData([45,0,0,0,0,0,0,5,2,3,1,22], "Method Coverage"))
+      .transition().duration(500).call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  function getCoverageDistributionData(data, label) {
+    var labels = [
+      '0%',
+      '0-10%',
+      '10-20%',
+      '20-30%',
+      '30-40%',
+      '40-50%',
+      '50-60%',
+      '60-70%',
+      '70-80%',
+      '80-90%',
+      '90-100%',
+      '100%'
+    ];
+    var values = [];
+    $.each(labels, function(key) {
+      values.push({x: labels[key], y: data[key]});
+    });
+
+    return [
+      {
+        key: label,
+        values: values,
+        color: "#4572A7"
+      }
+    ];
+  }
+  nv.addGraph(function() {
+    var chart = nv.models.scatterChart()
+      .showDistX(true)
+      .showDistY(true)
+      .showLegend(false)
+      .forceX([0, 100]);
+    chart.tooltipContent(function(graph) {
+      return '<p>' + graph.point.class + '</p>';
+    });
+
+    chart.xAxis.axisLabel('Code Coverage (in percent)');
+    chart.yAxis.axisLabel('Cyclomatic Complexity');
+
+    d3.select('#classComplexity svg')
+      .datum(getComplexityData([[0,66,"<a href=\"AdminController.php.html#22\">App\\Http\\Controllers\\Api\\AdminController<\/a>"],[16.27906976744186,11,"<a href=\"AuthController.php.html#13\">App\\Http\\Controllers\\Api\\AuthController<\/a>"],[100,2,"<a href=\"CategoryController.php.html#8\">App\\Http\\Controllers\\Api\\CategoryController<\/a>"],[15.789473684210526,6,"<a href=\"MajorController.php.html#8\">App\\Http\\Controllers\\Api\\MajorController<\/a>"],[71.72413793103448,62,"<a href=\"ProductController.php.html#14\">App\\Http\\Controllers\\Api\\ProductController<\/a>"],[29.411764705882355,3,"<a href=\"SystemSettingController.php.html#9\">App\\Http\\Controllers\\Api\\SystemSettingController<\/a>"],[78.94736842105263,11,"<a href=\"TeacherController.php.html#11\">App\\Http\\Controllers\\Api\\TeacherController<\/a>"],[26.923076923076923,7,"<a href=\"UploadController.php.html#15\">App\\Http\\Controllers\\Api\\UploadController<\/a>"],[0,17,"<a href=\"UserController.php.html#13\">App\\Http\\Controllers\\Api\\UserController<\/a>"]], 'Class Complexity'))
+      .transition()
+      .duration(500)
+      .call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  nv.addGraph(function() {
+    var chart = nv.models.scatterChart()
+      .showDistX(true)
+      .showDistY(true)
+      .showLegend(false)
+      .forceX([0, 100]);
+    chart.tooltipContent(function(graph) {
+      return '<p>' + graph.point.class + '</p>';
+    });
+
+    chart.xAxis.axisLabel('Code Coverage (in percent)');
+    chart.yAxis.axisLabel('Method Complexity');
+
+    d3.select('#methodComplexity svg')
+      .datum(getComplexityData([[0,1,"<a href=\"AdminController.php.html#24\">App\\Http\\Controllers\\Api\\AdminController::__construct<\/a>"],[0,1,"<a href=\"AdminController.php.html#28\">App\\Http\\Controllers\\Api\\AdminController::dashboard<\/a>"],[0,6,"<a href=\"AdminController.php.html#114\">App\\Http\\Controllers\\Api\\AdminController::buildDashboardAiInsights<\/a>"],[0,1,"<a href=\"AdminController.php.html#180\">App\\Http\\Controllers\\Api\\AdminController::buildDashboardInsightPrompt<\/a>"],[0,4,"<a href=\"AdminController.php.html#200\">App\\Http\\Controllers\\Api\\AdminController::decodeDashboardInsightJson<\/a>"],[0,7,"<a href=\"AdminController.php.html#217\">App\\Http\\Controllers\\Api\\AdminController::buildFallbackDashboardInsights<\/a>"],[0,1,"<a href=\"AdminController.php.html#255\">App\\Http\\Controllers\\Api\\AdminController::users<\/a>"],[0,2,"<a href=\"AdminController.php.html#284\">App\\Http\\Controllers\\Api\\AdminController::storeUser<\/a>"],[0,3,"<a href=\"AdminController.php.html#312\">App\\Http\\Controllers\\Api\\AdminController::updateUser<\/a>"],[0,2,"<a href=\"AdminController.php.html#345\">App\\Http\\Controllers\\Api\\AdminController::destroyUser<\/a>"],[0,2,"<a href=\"AdminController.php.html#362\">App\\Http\\Controllers\\Api\\AdminController::lookupPasswordRecoveryUser<\/a>"],[0,3,"<a href=\"AdminController.php.html#389\">App\\Http\\Controllers\\Api\\AdminController::chatboxTrainingLogs<\/a>"],[0,5,"<a href=\"AdminController.php.html#438\">App\\Http\\Controllers\\Api\\AdminController::updateChatboxTrainingLog<\/a>"],[0,1,"<a href=\"AdminController.php.html#471\">App\\Http\\Controllers\\Api\\AdminController::destroyChatboxTrainingLog<\/a>"],[0,1,"<a href=\"AdminController.php.html#481\">App\\Http\\Controllers\\Api\\AdminController::supportRequests<\/a>"],[0,1,"<a href=\"AdminController.php.html#498\">App\\Http\\Controllers\\Api\\AdminController::markSupportProcessed<\/a>"],[0,5,"<a href=\"AdminController.php.html#513\">App\\Http\\Controllers\\Api\\AdminController::sendPasswordRecovery<\/a>"],[0,1,"<a href=\"AdminController.php.html#577\">App\\Http\\Controllers\\Api\\AdminController::findPasswordRecoveryUser<\/a>"],[0,3,"<a href=\"AdminController.php.html#589\">App\\Http\\Controllers\\Api\\AdminController::products<\/a>"],[0,2,"<a href=\"AdminController.php.html#637\">App\\Http\\Controllers\\Api\\AdminController::updateProductStatus<\/a>"],[0,1,"<a href=\"AdminController.php.html#660\">App\\Http\\Controllers\\Api\\AdminController::destroyProduct<\/a>"],[0,1,"<a href=\"AdminController.php.html#670\">App\\Http\\Controllers\\Api\\AdminController::majors<\/a>"],[0,2,"<a href=\"AdminController.php.html#683\">App\\Http\\Controllers\\Api\\AdminController::storeMajor<\/a>"],[0,2,"<a href=\"AdminController.php.html#704\">App\\Http\\Controllers\\Api\\AdminController::updateMajor<\/a>"],[0,3,"<a href=\"AdminController.php.html#727\">App\\Http\\Controllers\\Api\\AdminController::destroyMajor<\/a>"],[0,1,"<a href=\"AdminController.php.html#747\">App\\Http\\Controllers\\Api\\AdminController::categories<\/a>"],[0,4,"<a href=\"AdminController.php.html#755\">App\\Http\\Controllers\\Api\\AdminController::rejectUnsafeInput<\/a>"],[100,1,"<a href=\"AuthController.php.html#15\">App\\Http\\Controllers\\Api\\AuthController::__construct<\/a>"],[100,2,"<a href=\"AuthController.php.html#17\">App\\Http\\Controllers\\Api\\AuthController::login<\/a>"],[0,1,"<a href=\"AuthController.php.html#28\">App\\Http\\Controllers\\Api\\AuthController::logout<\/a>"],[69.23076923076923,2,"<a href=\"AuthController.php.html#51\">App\\Http\\Controllers\\Api\\AuthController::refresh<\/a>"],[0,1,"<a href=\"AuthController.php.html#71\">App\\Http\\Controllers\\Api\\AuthController::me<\/a>"],[0,3,"<a href=\"AuthController.php.html#79\">App\\Http\\Controllers\\Api\\AuthController::submitPasswordRecovery<\/a>"],[0,1,"<a href=\"AuthController.php.html#110\">App\\Http\\Controllers\\Api\\AuthController::submitContact<\/a>"],[100,1,"<a href=\"CategoryController.php.html#10\">App\\Http\\Controllers\\Api\\CategoryController::__construct<\/a>"],[100,1,"<a href=\"CategoryController.php.html#12\">App\\Http\\Controllers\\Api\\CategoryController::getAllCategories<\/a>"],[100,1,"<a href=\"MajorController.php.html#10\">App\\Http\\Controllers\\Api\\MajorController::__construct<\/a>"],[0,2,"<a href=\"MajorController.php.html#14\">App\\Http\\Controllers\\Api\\MajorController::majorName<\/a>"],[100,1,"<a href=\"MajorController.php.html#29\">App\\Http\\Controllers\\Api\\MajorController::getMajorAll<\/a>"],[0,2,"<a href=\"MajorController.php.html#36\">App\\Http\\Controllers\\Api\\MajorController::majorNameCode<\/a>"],[100,1,"<a href=\"ProductController.php.html#17\">App\\Http\\Controllers\\Api\\ProductController::__construct<\/a>"],[66.66666666666666,2,"<a href=\"ProductController.php.html#22\">App\\Http\\Controllers\\Api\\ProductController::productViewId<\/a>"],[100,1,"<a href=\"ProductController.php.html#38\">App\\Http\\Controllers\\Api\\ProductController::productAll<\/a>"],[73.87387387387388,19,"<a href=\"ProductController.php.html#57\">App\\Http\\Controllers\\Api\\ProductController::searchProducts<\/a>"],[100,1,"<a href=\"ProductController.php.html#201\">App\\Http\\Controllers\\Api\\ProductController::baseProductSearchQuery<\/a>"],[100,1,"<a href=\"ProductController.php.html#206\">App\\Http\\Controllers\\Api\\ProductController::applyProductSearchJoins<\/a>"],[92.85714285714286,5,"<a href=\"ProductController.php.html#235\">App\\Http\\Controllers\\Api\\ProductController::detectMajorCodeFromKeyword<\/a>"],[0,4,"<a href=\"ProductController.php.html#261\">App\\Http\\Controllers\\Api\\ProductController::cleanKeywordForMajor<\/a>"],[0,6,"<a href=\"ProductController.php.html#303\">App\\Http\\Controllers\\Api\\ProductController::majorAliases<\/a>"],[0,6,"<a href=\"ProductController.php.html#314\">App\\Http\\Controllers\\Api\\ProductController::majorKeywordAliases<\/a>"],[100,1,"<a href=\"ProductController.php.html#325\">App\\Http\\Controllers\\Api\\ProductController::normalizeSearchText<\/a>"],[100,1,"<a href=\"ProductController.php.html#338\">App\\Http\\Controllers\\Api\\ProductController::containsUnsafeInput<\/a>"],[100,2,"<a href=\"ProductController.php.html#343\">App\\Http\\Controllers\\Api\\ProductController::productViewIdTeacher<\/a>"],[100,2,"<a href=\"ProductController.php.html#362\">App\\Http\\Controllers\\Api\\ProductController::deleteProductStudent<\/a>"],[100,2,"<a href=\"ProductController.php.html#379\">App\\Http\\Controllers\\Api\\ProductController::getProductsVisitor<\/a>"],[100,1,"<a href=\"ProductController.php.html#403\">App\\Http\\Controllers\\Api\\ProductController::getVisitorProductById<\/a>"],[83.33333333333334,2,"<a href=\"ProductController.php.html#412\">App\\Http\\Controllers\\Api\\ProductController::incrementView<\/a>"],[83.33333333333334,2,"<a href=\"ProductController.php.html#425\">App\\Http\\Controllers\\Api\\ProductController::incrementLike<\/a>"],[83.33333333333334,2,"<a href=\"ProductController.php.html#438\">App\\Http\\Controllers\\Api\\ProductController::incrementShare<\/a>"],[0,1,"<a href=\"ProductController.php.html#451\">App\\Http\\Controllers\\Api\\ProductController::getMatchingAiProducts<\/a>"],[100,1,"<a href=\"SystemSettingController.php.html#11\">App\\Http\\Controllers\\Api\\SystemSettingController::__construct<\/a>"],[100,1,"<a href=\"SystemSettingController.php.html#15\">App\\Http\\Controllers\\Api\\SystemSettingController::index<\/a>"],[0,1,"<a href=\"SystemSettingController.php.html#23\">App\\Http\\Controllers\\Api\\SystemSettingController::update<\/a>"],[100,1,"<a href=\"TeacherController.php.html#14\">App\\Http\\Controllers\\Api\\TeacherController::__construct<\/a>"],[60,2,"<a href=\"TeacherController.php.html#18\">App\\Http\\Controllers\\Api\\TeacherController::getTeacherStatistic<\/a>"],[100,1,"<a href=\"TeacherController.php.html#35\">App\\Http\\Controllers\\Api\\TeacherController::getTeacherData<\/a>"],[60,2,"<a href=\"TeacherController.php.html#54\">App\\Http\\Controllers\\Api\\TeacherController::teacherApprove<\/a>"],[78.94736842105263,4,"<a href=\"TeacherController.php.html#71\">App\\Http\\Controllers\\Api\\TeacherController::teacherReject<\/a>"],[100,1,"<a href=\"TeacherController.php.html#99\">App\\Http\\Controllers\\Api\\TeacherController::storeReview<\/a>"],[100,1,"<a href=\"UploadController.php.html#17\">App\\Http\\Controllers\\Api\\UploadController::__construct<\/a>"],[60,2,"<a href=\"UploadController.php.html#22\">App\\Http\\Controllers\\Api\\UploadController::countPublishedProducts<\/a>"],[0,4,"<a href=\"UploadController.php.html#39\">App\\Http\\Controllers\\Api\\UploadController::upload<\/a>"],[0,1,"<a href=\"UserController.php.html#18\">App\\Http\\Controllers\\Api\\UserController::profile<\/a>"],[0,2,"<a href=\"UserController.php.html#29\">App\\Http\\Controllers\\Api\\UserController::show<\/a>"],[0,2,"<a href=\"UserController.php.html#49\">App\\Http\\Controllers\\Api\\UserController::update<\/a>"],[0,4,"<a href=\"UserController.php.html#78\">App\\Http\\Controllers\\Api\\UserController::statistics<\/a>"],[0,3,"<a href=\"UserController.php.html#120\">App\\Http\\Controllers\\Api\\UserController::updatePassword<\/a>"],[0,5,"<a href=\"UserController.php.html#162\">App\\Http\\Controllers\\Api\\UserController::search<\/a>"]], 'Method Complexity'))
+      .transition()
+      .duration(500)
+      .call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  function getComplexityData(data, label) {
+    var values = [];
+    $.each(data, function(key) {
+      var value = Math.round(data[key][0]*100) / 100;
+      values.push({
+        x: value,
+        y: data[key][1],
+        class: data[key][2],
+        size: 0.05,
+        shape: 'diamond'
+      });
+    });
+
+    return [
+      {
+        key: label,
+        values: values,
+        color: "#4572A7"
+      }
+    ];
+  }
+});
+  </script>
+ </body>
+</html>

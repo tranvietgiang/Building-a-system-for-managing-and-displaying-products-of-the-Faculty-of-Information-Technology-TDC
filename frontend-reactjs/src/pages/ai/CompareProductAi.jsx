@@ -5,7 +5,8 @@ import { Icons } from "../../components/common/Icon";
 import BackButton from "../../components/common/BackButton";
 import useMajorName from "../../hooks/common/useMajorName";
 import { getStatusBadge } from "../../utils/getStatusBadge";
-
+import useCompareProduct from "../../hooks/ai/useCompareProduct";
+import { toast } from "react-toastify";
 export default function CompareProductAi() {
   const location = useLocation();
   const [productData, setProductData] = useState(null);
@@ -17,6 +18,86 @@ export default function CompareProductAi() {
 
   const { majorName } = useMajorName(currentProduct?.major_id);
 
+  const { checkCompareProductImages, loadingImageCompare, errorImageCompare } =
+    useCompareProduct(currentProduct?.product_id);
+
+  const handleCheckSelectedImages = async () => {
+    const matchProductId = selectedMatch?.product_id;
+
+    if (!matchProductId || loadingImageCompare) return;
+
+    try {
+      const data = await checkCompareProductImages(
+        matchProductId,
+        selectedMatch.ai_similarity ?? 0,
+      );
+
+      if (!data) return;
+
+      const imageResultFields = {
+        image_checked: true,
+        images: Array.isArray(data.product_b_images)
+          ? data.product_b_images
+          : selectedMatch.images,
+        image_similarity: data.image_similarity ?? 0,
+        image_level: data.image_level,
+        image_level_code: data.image_level_code,
+        image_reason: data.image_reason,
+        duplicate_images: data.duplicate_images || [],
+        duplicate_image_count: data.duplicate_image_count ?? 0,
+        has_duplicate_images: data.has_duplicate_images ?? false,
+        ai_unavailable: data.ai_unavailable ?? false,
+        overall_similarity:
+          data.overall_similarity ?? selectedMatch.ai_similarity ?? 0,
+        overall_level: data.overall_level,
+        overall_reason: data.overall_reason,
+      };
+
+      setSelectedMatch((current) =>
+        current?.product_id === matchProductId
+          ? { ...current, ...imageResultFields }
+          : current,
+      );
+
+      setAllMatches((prev) =>
+        prev.map((item) =>
+          item.product_id === matchProductId
+            ? { ...item, ...imageResultFields }
+            : item,
+        ),
+      );
+
+      if (Array.isArray(data.product_a_images)) {
+        setProductData((current) =>
+          current ? { ...current, images: data.product_a_images } : current,
+        );
+      }
+
+      const imageReason =
+        data.image_reason || data.message || "Đã kiểm tra hình ảnh.";
+      const duplicateCount = data.duplicate_image_count ?? 0;
+      const shouldWarn =
+        data.has_duplicate_images ||
+        duplicateCount > 0 ||
+        /ai chưa thể|không thể|lỗi/i.test(imageReason);
+
+      if (shouldWarn) {
+        toast.warning(
+          duplicateCount > 0
+            ? `Phát hiện ${duplicateCount} ảnh nghi trùng. ${imageReason}`
+            : imageReason,
+          { toastId: `compare-image-${matchProductId}` },
+        );
+      } else {
+        toast.success(imageReason, {
+          toastId: `compare-image-${matchProductId}`,
+        });
+      }
+    } catch {
+      // error đã được hook lưu vào errorImageCompare
+    }
+  };
+
   useEffect(() => {
     // Xử lý data khi có currentProduct
     if (currentProduct) {
@@ -27,22 +108,29 @@ export default function CompareProductAi() {
     }
 
     // Xử lý matches - có thể là object {approved: [], unapproved: []} hoặc array
-    if (initialMatches) {
-      let combined = [];
-      if (Array.isArray(initialMatches)) {
-        combined = initialMatches;
-      } else if (initialMatches.approved || initialMatches.unapproved) {
-        // Gộp cả approved và unapproved lại
-        combined = [
-          ...(initialMatches.approved || []),
-          ...(initialMatches.unapproved || []),
-        ];
-      }
-      setAllMatches(combined);
-      if (combined.length > 0 && !selectedMatch) {
-        setSelectedMatch(combined[0]);
-      }
+    let combined = [];
+
+    if (Array.isArray(initialMatches)) {
+      combined = initialMatches;
+    } else if (initialMatches?.approved || initialMatches?.unapproved) {
+      // Gộp cả approved và unapproved lại
+      combined = [
+        ...(initialMatches.approved || []),
+        ...(initialMatches.unapproved || []),
+      ];
     }
+
+    setAllMatches(combined);
+    setSelectedMatch((current) => {
+      if (combined.length === 0) return null;
+
+      if (!current?.product_id) return combined[0];
+
+      return (
+        combined.find((item) => item.product_id === current.product_id) ||
+        combined[0]
+      );
+    });
   }, [currentProduct, majorName, initialMatches]);
 
   const _getComparisonFields = (product, majorName) => {
@@ -323,23 +411,79 @@ export default function CompareProductAi() {
     return String(url || "")
       .split("?")[0]
       .trim()
+      .replace(/\/$/, "")
       .toLowerCase();
   };
 
   const isSameImageUrl = (imageUrl, otherImages) => {
     const current = normalizeImageUrl(imageUrl);
 
-    return otherImages.some((other) => normalizeImageUrl(other) === current);
+    return (otherImages || []).some(
+      (other) => normalizeImageUrl(other) === current,
+    );
+  };
+
+  const getImageAiDuplicate = (src, duplicateImages, side) => {
+    const current = normalizeImageUrl(src);
+    const key = side === "a" ? "image_a" : "image_b";
+
+    return (duplicateImages || []).find(
+      (item) => normalizeImageUrl(item?.[key]) === current,
+    );
+  };
+
+  const isAiDuplicateImage = (src, duplicateImages, side) => {
+    return Boolean(getImageAiDuplicate(src, duplicateImages, side));
+  };
+
+  const getImageDuplicateBadge = (src, otherImages, duplicateImages, side) => {
+    const urlDuplicated = isSameImageUrl(src, otherImages);
+    const aiDuplicated = isAiDuplicateImage(src, duplicateImages, side);
+
+    if (urlDuplicated && aiDuplicated) {
+      return {
+        text: "Trùng URL + AI",
+        className: "bg-red-900 text-white",
+      };
+    }
+
+    if (urlDuplicated) {
+      return {
+        text: "Trùng URL",
+        className: "bg-red-800 text-white",
+      };
+    }
+
+    if (aiDuplicated) {
+      return {
+        text: "AI nghi trùng",
+        className: "bg-orange-600 text-white",
+      };
+    }
+
+    return null;
   };
 
   const productAImages = getProductImages(productData);
   const productBImages = getProductImages(selectedMatch);
+  const selectedDuplicateImages = selectedMatch?.duplicate_images || [];
 
-  const duplicatedImageCount = productAImages.filter((img) =>
+  const urlDuplicatedImageCount = productAImages.filter((img) =>
     isSameImageUrl(img, productBImages),
   ).length;
+
+  const suspectedDuplicateImageCount =
+    selectedMatch?.duplicate_image_count ?? selectedDuplicateImages.length;
   //
-  const GalleryColumn = ({ title, subtitle, images, otherImages, color }) => {
+  const GalleryColumn = ({
+    title,
+    subtitle,
+    images,
+    otherImages,
+    duplicateImages,
+    side,
+    color,
+  }) => {
     return (
       <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
         <div className="mb-4 flex items-center justify-between gap-3">
@@ -356,7 +500,18 @@ export default function CompareProductAi() {
         {images.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {images.map((src, index) => {
-              const duplicated = isSameImageUrl(src, otherImages);
+              const badge = getImageDuplicateBadge(
+                src,
+                otherImages,
+                duplicateImages,
+                side,
+              );
+              const aiDuplicate = getImageAiDuplicate(
+                src,
+                duplicateImages,
+                side,
+              );
+              const duplicated = Boolean(badge);
 
               return (
                 <div
@@ -366,6 +521,7 @@ export default function CompareProductAi() {
                       ? "border-red-700 ring-2 ring-red-300"
                       : "border-gray-200"
                   }`}
+                  title={aiDuplicate?.reason || ""}
                 >
                   <a href={src} target="_blank" rel="noreferrer">
                     <img
@@ -391,9 +547,11 @@ export default function CompareProductAi() {
                     </div>
                   )}
 
-                  {duplicated && (
-                    <div className="absolute bottom-2 left-2 right-2 rounded-md bg-red-800 px-2 py-1 text-center text-xs font-bold text-white">
-                      Trùng URL ảnh
+                  {badge && (
+                    <div
+                      className={`absolute bottom-2 left-2 right-2 rounded-md px-2 py-1 text-center text-xs font-bold ${badge.className}`}
+                    >
+                      {badge.text}
                     </div>
                   )}
                 </div>
@@ -435,9 +593,9 @@ export default function CompareProductAi() {
               value={selectedMatch?.product_id || ""}
               onChange={(e) => {
                 const selected = allMatches.find(
-                  (m) => m.product_id === parseInt(e.target.value),
+                  (m) => String(m.product_id) === e.target.value,
                 );
-                setSelectedMatch(selected);
+                if (selected) setSelectedMatch(selected);
               }}
             >
               {allMatches.map((product) => (
@@ -460,8 +618,46 @@ export default function CompareProductAi() {
               Đã duyệt: {initialMatches?.approved?.length || 0}
             </span>
             <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm">
-              Chưa duyệt/Từ chối: {initialMatches?.unapproved?.length || 0}
+              Chờ duyệt: {initialMatches?.unapproved?.length || 0}
             </span>
+            <button
+              type="button"
+              onClick={handleCheckSelectedImages}
+              disabled={
+                loadingImageCompare ||
+                !selectedMatch?.product_id ||
+                selectedMatch?.image_checked
+              }
+              className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {loadingImageCompare
+                ? "Đang kiểm tra ảnh..."
+                : selectedMatch?.image_checked
+                  ? "Đã kiểm tra ảnh"
+                  : "Kiểm tra hình ảnh"}
+            </button>
+
+            {errorImageCompare && (
+              <p className="text-sm text-red-700 mt-2">{errorImageCompare}</p>
+            )}
+
+            {selectedMatch?.image_checked && !errorImageCompare && (
+              <p
+                className={`w-full text-sm mt-1 ${
+                  /ai chưa thể|không thể|lỗi/i.test(
+                    selectedMatch.image_reason || "",
+                  )
+                    ? "text-orange-700"
+                    : (selectedMatch.duplicate_image_count ?? 0) > 0
+                      ? "text-red-700"
+                      : "text-emerald-700"
+                }`}
+              >
+                {selectedMatch.image_reason ||
+                  selectedMatch.overall_reason ||
+                  "Đã kiểm tra hình ảnh."}
+              </p>
+            )}
           </div>
         )}
 
@@ -510,7 +706,32 @@ export default function CompareProductAi() {
 
                     <div className="mt-3 flex items-center gap-2 flex-wrap">
                       <span className="px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold">
-                        AI: {product.ai_similarity ?? 0}%
+                        AI nội dung: {product.ai_similarity ?? 0}%
+                      </span>
+                      <span className="px-2 py-1 rounded-full bg-orange-50 text-orange-700 text-xs font-semibold">
+                        AI hình ảnh: {product.image_similarity ?? 0}%
+                      </span>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                          (product.overall_similarity ?? 0) >= 85
+                            ? "bg-red-800 text-white"
+                            : "bg-emerald-50 text-emerald-700"
+                        }`}
+                      >
+                        Tổng hợp:{" "}
+                        {product.overall_similarity ??
+                          product.ai_similarity ??
+                          0}
+                        %
+                      </span>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                          (product.duplicate_image_count ?? 0) > 0
+                            ? "bg-red-800 text-white"
+                            : "bg-gray-100 text-gray-600"
+                        }`}
+                      >
+                        Ảnh nghi trùng: {product.duplicate_image_count ?? 0}
                       </span>
                       <span
                         className={`px-2 py-1 rounded-full text-xs font-semibold ${
@@ -524,7 +745,9 @@ export default function CompareProductAi() {
                     </div>
 
                     <p className="text-xs text-gray-600 mt-3 line-clamp-2">
-                      {product.duplicate_message ||
+                      {(product.image_checked && product.image_reason) ||
+                        product.overall_reason ||
+                        product.duplicate_message ||
                         "Không có trường chính trùng"}
                     </p>
                   </button>
@@ -788,7 +1011,7 @@ export default function CompareProductAi() {
                 </div>
 
                 <div className="p-6">
-                  <div className="mb-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div className="mb-4 grid grid-cols-1 md:grid-cols-4 gap-3">
                     <div className="rounded-lg bg-blue-50 p-4">
                       <p className="text-sm font-semibold text-blue-700">
                         Sản phẩm A
@@ -812,7 +1035,16 @@ export default function CompareProductAi() {
                         Ảnh trùng URL
                       </p>
                       <p className="text-2xl font-bold text-red-900">
-                        {duplicatedImageCount}
+                        {urlDuplicatedImageCount}
+                      </p>
+                    </div>
+
+                    <div className="rounded-lg bg-orange-50 p-4">
+                      <p className="text-sm font-semibold text-orange-700">
+                        Ảnh AI nghi trùng
+                      </p>
+                      <p className="text-2xl font-bold text-orange-900">
+                        {suspectedDuplicateImageCount}
                       </p>
                     </div>
                   </div>
@@ -823,6 +1055,8 @@ export default function CompareProductAi() {
                       subtitle={productData.title}
                       images={productAImages}
                       otherImages={productBImages}
+                      duplicateImages={selectedDuplicateImages}
+                      side="a"
                       color="bg-blue-600"
                     />
 
@@ -831,15 +1065,16 @@ export default function CompareProductAi() {
                       subtitle={selectedMatch.title}
                       images={productBImages}
                       otherImages={productAImages}
+                      duplicateImages={selectedDuplicateImages}
+                      side="b"
                       color="bg-purple-600"
                     />
                   </div>
 
                   <div className="mt-4 rounded-lg bg-yellow-50 border border-yellow-200 p-4 text-sm text-yellow-800">
-                    Lưu ý: phần này chỉ hỗ trợ xem trực quan gallery. Nếu ảnh bị
-                    crop, resize, đổi định dạng hoặc upload lại thành URL khác
-                    thì hệ thống có thể không tự đánh dấu trùng URL. Người duyệt
-                    vẫn nên xem bằng mắt trước khi quyết định.
+                    Lưu ý: phần này đánh dấu cả ảnh trùng URL và ảnh do AI nghi
+                    trùng về mặt nội dung/bố cục. Người duyệt vẫn nên mở ảnh để
+                    kiểm tra lại trước khi quyết định duyệt hoặc từ chối.
                   </div>
                 </div>
               </div>
@@ -853,7 +1088,7 @@ export default function CompareProductAi() {
                     <h2 className="text-xl font-bold">🤖 Đánh giá từ AI</h2>
                   </div>
                   <div className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div
                         className={`rounded-lg p-4 ${
                           selectedMatch.ai_similarity >= 85
@@ -861,42 +1096,94 @@ export default function CompareProductAi() {
                             : "bg-blue-50"
                         }`}
                       >
-                        <p
-                          className={`text-sm font-semibold ${
-                            selectedMatch.ai_similarity >= 85
-                              ? "text-red-800"
-                              : "text-blue-600"
-                          }`}
-                        >
-                          Độ tương đồng
+                        <p className="text-sm font-semibold text-blue-700">
+                          AI nội dung
                         </p>
-                        <p
-                          className={`text-2xl font-bold ${
-                            selectedMatch.ai_similarity >= 85
-                              ? "text-red-950"
-                              : "text-blue-700"
-                          }`}
-                        >
-                          {selectedMatch.ai_similarity}%
+                        <p className="text-2xl font-bold text-blue-900">
+                          {selectedMatch.ai_similarity ?? 0}%
                         </p>
-                      </div>
-                      <div className="bg-purple-50 rounded-lg p-4">
-                        <p className="text-sm text-purple-600 font-semibold">
-                          Cấp độ
-                        </p>
-                        <p className="text-2xl font-bold text-purple-700">
+                        <p className="text-xs text-gray-600 mt-1">
                           {selectedMatch.ai_level}
                         </p>
                       </div>
+
+                      <div
+                        className={`rounded-lg p-4 ${
+                          (selectedMatch.image_similarity ?? 0) >= 85
+                            ? "bg-red-100 border-2 border-red-700"
+                            : "bg-orange-50"
+                        }`}
+                      >
+                        <p className="text-sm font-semibold text-orange-700">
+                          AI hình ảnh
+                        </p>
+                        <p className="text-2xl font-bold text-orange-900">
+                          {selectedMatch.image_similarity ?? 0}%
+                        </p>
+                        <p className="text-xs text-gray-600 mt-1">
+                          {selectedMatch.image_level || "Thấp"}
+                        </p>
+                      </div>
+
+                      <div
+                        className={`rounded-lg p-4 ${
+                          (selectedMatch.overall_similarity ?? 0) >= 85
+                            ? "bg-red-100 border-2 border-red-700"
+                            : "bg-emerald-50"
+                        }`}
+                      >
+                        <p className="text-sm font-semibold text-emerald-700">
+                          Tổng hợp
+                        </p>
+                        <p className="text-2xl font-bold text-emerald-900">
+                          {selectedMatch.overall_similarity ??
+                            selectedMatch.ai_similarity ??
+                            0}
+                          %
+                        </p>
+                        <p className="text-xs text-gray-600 mt-1">
+                          {selectedMatch.overall_level ||
+                            selectedMatch.ai_level}
+                        </p>
+                      </div>
                     </div>
-                    {selectedMatch.ai_reason && (
-                      <div className="mt-4 bg-gray-50 rounded-lg p-4">
-                        <p className="text-sm text-gray-600 font-semibold mb-1">
-                          Lý do
-                        </p>
-                        <p className="text-gray-700 leading-relaxed">
-                          {selectedMatch.ai_reason}
-                        </p>
+
+                    {(selectedMatch.ai_reason ||
+                      selectedMatch.image_reason ||
+                      selectedMatch.overall_reason) && (
+                      <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {selectedMatch.ai_reason && (
+                          <div className="bg-gray-50 rounded-lg p-4">
+                            <p className="text-sm text-gray-600 font-semibold mb-1">
+                              Lý do nội dung
+                            </p>
+                            <p className="text-gray-700 leading-relaxed">
+                              {selectedMatch.ai_reason}
+                            </p>
+                          </div>
+                        )}
+
+                        {selectedMatch.image_reason && (
+                          <div className="bg-orange-50 rounded-lg p-4">
+                            <p className="text-sm text-orange-700 font-semibold mb-1">
+                              Lý do hình ảnh
+                            </p>
+                            <p className="text-gray-700 leading-relaxed">
+                              {selectedMatch.image_reason}
+                            </p>
+                          </div>
+                        )}
+
+                        {selectedMatch.overall_reason && (
+                          <div className="bg-emerald-50 rounded-lg p-4">
+                            <p className="text-sm text-emerald-700 font-semibold mb-1">
+                              Lý do tổng hợp
+                            </p>
+                            <p className="text-gray-700 leading-relaxed">
+                              {selectedMatch.overall_reason}
+                            </p>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>

@@ -6,6 +6,7 @@ import ProductScreen from "./screens/ProductsScreen";
 import MajorScreen from "./screens/MajorsScreen";
 import SettingScreen from "./screens/SettingsScreen";
 import SupportScreen from "./screens/SupportScreen";
+import ChatboxTrainingScreen from "./screens/ChatboxTrainingScreen";
 
 const AdminScreen = () => {
   const [activeSection, setActiveSection] = useState("dashboard");
@@ -14,6 +15,10 @@ const AdminScreen = () => {
     dashboard: {
       title: "Dashboard",
       component: <DashboardScreen />,
+    },
+    "chatbox-training": {
+      title: "Huấn luyện chatbot",
+      component: <ChatboxTrainingScreen />,
     },
     users: {
       title: "Quản lý người dùng",

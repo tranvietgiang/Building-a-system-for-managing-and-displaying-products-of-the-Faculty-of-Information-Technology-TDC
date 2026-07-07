@@ -424,6 +424,13 @@ export default function useUploadBaseForm({
         const res = await uploadApi.uploadProduct(payload);
 
         if (!res.success) {
+          if (res.image_index !== null && res.image_index !== undefined) {
+            setErrors((prev) => ({
+              ...prev,
+              images: res.message || "Ảnh sản phẩm không hợp lệ",
+            }));
+          }
+
           setSubmitStatus("error");
           setStatusApi(res);
           toast.error(res.message || "Upload thất bại");

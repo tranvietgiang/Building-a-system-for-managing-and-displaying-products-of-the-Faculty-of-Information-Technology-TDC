@@ -1,0 +1,677 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hướng dẫn chạy website local</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f8fb;
+        --panel: #ffffff;
+        --text: #172033;
+        --muted: #667085;
+        --border: #d9e2ef;
+        --brand: #0f766e;
+        --brand-dark: #115e59;
+        --brand-soft: #ccfbf1;
+        --danger: #dc2626;
+        --warning: #d97706;
+        --success: #059669;
+        --code-bg: #101828;
+        --code-text: #eef4ff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+        line-height: 1.6;
+      }
+
+      main {
+        width: min(1040px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 32px 0 56px;
+      }
+
+      header {
+        margin-bottom: 24px;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        background:
+          linear-gradient(135deg, rgba(15, 118, 110, 0.08), rgba(255, 255, 255, 0.9)),
+          var(--panel);
+        padding: 32px;
+        box-shadow: 0 16px 38px rgba(15, 23, 42, 0.08);
+      }
+
+      h1,
+      h2,
+      h3 {
+        margin: 0;
+        line-height: 1.25;
+      }
+
+      h1 {
+        font-size: clamp(30px, 4vw, 46px);
+      }
+
+      h2 {
+        margin-bottom: 12px;
+        font-size: 22px;
+      }
+
+      h3 {
+        font-size: 17px;
+      }
+
+      p {
+        margin: 0 0 12px;
+        color: var(--muted);
+      }
+
+      a {
+        color: var(--brand);
+        font-weight: 700;
+        text-decoration: none;
+      }
+
+      a:hover {
+        color: var(--brand-dark);
+        text-decoration: underline;
+      }
+
+      .subtitle {
+        margin-top: 10px;
+        max-width: 760px;
+      }
+
+      .toc {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 20px;
+      }
+
+      .toc a {
+        display: block;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: #ffffff;
+        padding: 12px 14px;
+        color: var(--text);
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .toc a:hover {
+        border-color: #5eead4;
+        color: var(--brand);
+        text-decoration: none;
+      }
+
+      .steps {
+        display: grid;
+        gap: 16px;
+      }
+
+      section {
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        background: var(--panel);
+        padding: 24px;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+      }
+
+      .step-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .badge {
+        display: inline-flex;
+        min-width: 36px;
+        height: 36px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 999px;
+        background: var(--brand-soft);
+        color: var(--brand-dark);
+        font-weight: 900;
+      }
+
+      .note {
+        margin-top: 12px;
+        border-left: 4px solid var(--brand);
+        border-radius: 8px;
+        background: #f0fdfa;
+        padding: 12px 14px;
+        color: #115e59;
+      }
+
+      .warning {
+        border-left-color: var(--warning);
+        background: #fffbeb;
+        color: #92400e;
+      }
+
+      .danger {
+        border-left-color: var(--danger);
+        background: #fef2f2;
+        color: #991b1b;
+      }
+
+      .success {
+        border-left-color: var(--success);
+        background: #ecfdf5;
+        color: #065f46;
+      }
+
+      .command {
+        position: relative;
+        margin-top: 12px;
+      }
+
+      pre {
+        margin: 0;
+        overflow-x: auto;
+        border-radius: 10px;
+        background: var(--code-bg);
+        color: var(--code-text);
+        padding: 16px 92px 16px 16px;
+      }
+
+      code {
+        font-family:
+          "Cascadia Code", "Fira Code", Consolas, "Courier New", monospace;
+        font-size: 14px;
+      }
+
+      .copy-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+        padding: 6px 10px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .copy-btn:hover {
+        background: rgba(255, 255, 255, 0.18);
+      }
+
+      .url-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 12px;
+      }
+
+      .url-box {
+        border: 1px solid #99f6e4;
+        border-radius: 10px;
+        background: #f0fdfa;
+        padding: 14px 16px;
+      }
+
+      .url-box strong {
+        display: block;
+        margin-bottom: 4px;
+        color: var(--text);
+      }
+
+      .quick-list {
+        margin: 0;
+        padding-left: 20px;
+        color: var(--muted);
+      }
+
+      .quick-list li {
+        margin: 8px 0;
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .small {
+        font-size: 14px;
+      }
+
+      @media (max-width: 820px) {
+        .toc,
+        .url-grid,
+        .grid-2 {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 640px) {
+        main {
+          width: min(100% - 20px, 1040px);
+          padding-top: 16px;
+        }
+
+        header,
+        section {
+          padding: 18px;
+        }
+
+        pre {
+          padding-right: 16px;
+          padding-top: 48px;
+        }
+
+        .copy-btn {
+          left: 10px;
+          right: auto;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <main>
+      <header>
+        <h1>Hướng dẫn chạy website local</h1>
+        <p class="subtitle">
+          Tài liệu này dùng để chạy dự án trên máy local bằng Vagrant và Docker Compose.
+          Làm theo đúng thứ tự: mở terminal, bật Vagrant, SSH vào máy ảo, build Docker,
+          chạy container, setup database rồi mở website.
+        </p>
+
+        <div class="toc">
+          <a href="#requirements">Yêu cầu trước khi chạy</a>
+          <a href="#first-run">Lần đầu chạy</a>
+          <a href="#daily-run">Chạy lần sau</a>
+          <a href="#troubleshoot">Xử lý lỗi</a>
+        </div>
+      </header>
+
+      <div class="steps">
+        <section id="requirements">
+          <div class="step-title">
+            <span class="badge">0</span>
+            <h2>Yêu cầu trước khi chạy</h2>
+          </div>
+
+          <p>Máy cần có các công cụ sau:</p>
+          <ul class="quick-list">
+            <li>VirtualBox để chạy máy ảo.</li>
+            <li>Vagrant để quản lý máy ảo.</li>
+            <li>Source code dự án nằm trong folder <strong>D:\nckh-tdc</strong>.</li>
+            <li>Docker và Docker Compose đã được cấu hình trong máy ảo Vagrant.</li>
+          </ul>
+
+          <div class="note warning">
+            Nếu chưa cài Vagrant hoặc VirtualBox thì lệnh <strong>vagrant up</strong> sẽ không chạy được.
+          </div>
+        </section>
+
+        <section id="first-run">
+          <div class="step-title">
+            <span class="badge">1</span>
+            <h2>Mở terminal trong folder dự án</h2>
+          </div>
+
+          <p>Mở CMD, PowerShell hoặc Terminal tại folder dự án, sau đó chạy:</p>
+
+          <div class="command">
+            <button class="copy-btn">Copy</button>
+            <pre><code>cd D:\nckh-tdc</code></pre>
+          </div>
+        </section>
+
+        <section>
+          <div class="step-title">
+            <span class="badge">2</span>
+            <h2>Bật máy ảo Vagrant</h2>
+          </div>
+
+          <p>Lệnh này dùng để khởi động máy ảo Ubuntu của dự án:</p>
+
+          <div class="command">
+            <button class="copy-btn">Copy</button>
+            <pre><code>vagrant up</code></pre>
+          </div>
+
+          <div class="note">
+            Nếu máy ảo đã bật sẵn thì có thể bỏ qua bước này và chuyển sang bước SSH.
+          </div>
+        </section>
+
+        <section>
+          <div class="step-title">
+            <span class="badge">3</span>
+            <h2>SSH vào máy ảo</h2>
+          </div>
+
+          <p>Sau khi Vagrant chạy xong, vào máy ảo bằng lệnh:</p>
+
+          <div class="command">
+            <button class="copy-btn">Copy</button>
+            <pre><code>vagrant ssh</code></pre>
+          </div>
+        </section>
+
+        <section>
+          <div class="step-title">
+            <span class="badge">4</span>
+            <h2>Vào folder source trong máy ảo</h2>
+          </div>
+
+          <p>Sau khi SSH thành công, chạy:</p>
+
+          <div class="command">
+            <button class="copy-btn">Copy</button>
+            <pre><code>cd /vagrant</code></pre>
+          </div>
+
+          <div class="note">
+            Thư mục <strong>/vagrant</strong> chính là source code được đồng bộ từ máy Windows vào máy ảo.
+          </div>
+        </section>
+
+        <section>
+          <div class="step-title">
+            <span class="badge">5</span>
+            <h2>Build Docker Compose</h2>
+          </div>
+
+          <p>Lần đầu chạy hoặc sau khi sửa Dockerfile/docker-compose thì cần build lại:</p>
+
+          <div class="command">
+            <button class="copy-btn">Copy</button>
+            <pre><code>docker-compose build</code></pre>
+          </div>
+
+          <p>Nếu máy dùng Docker Compose bản mới, dùng lệnh:</p>
+
+          <div class="command">
+            <button class="copy-btn">Copy</button>
+            <pre><code>docker compose build</code></pre>
+          </div>
+        </section>
+
+        <section>
+          <div class="step-title">
+            <span class="badge">6</span>
+            <h2>Chạy các container</h2>
+          </div>
+
+          <p>Chạy website ở chế độ nền:</p>
+
+          <div class="command">
+            <button class="copy-btn">Copy</button>
+            <pre><code>docker-compose up -d</code></pre>
+          </div>
+
+          <p>Hoặc:</p>
+
+          <div class="command">
+            <button class="copy-btn">Copy</button>
+            <pre><code>docker compose up -d</code></pre>
+          </div>
+        </section>
+
+        <section>
+          <div class="step-title">
+            <span class="badge">7</span>
+            <h2>Kiểm tra container</h2>
+          </div>
+
+          <p>Kiểm tra các service backend, frontend, mysql, phpMyAdmin có chạy chưa:</p>
+
+          <div class="command">
+            <button class="copy-btn">Copy</button>
+            <pre><code>docker-compose ps</code></pre>
+          </div>
+
+          <div class="note success">
+            Nếu trạng thái là <strong>Up</strong> thì container đã chạy.
+          </div>
+        </section>
+
+        <section>
+          <div class="step-title">
+            <span class="badge">8</span>
+            <h2>Setup database Laravel lần đầu</h2>
+          </div>
+
+          <p>Nếu backend Laravel chưa có file môi trường, tạo file <strong>.env</strong> và key trước:</p>
+
+          <div class="command">
+            <button class="copy-btn">Copy</button>
+            <pre><code>docker-compose exec backend cp .env.example .env
+docker-compose exec backend php artisan key:generate</code></pre>
+          </div>
+
+          <p>Sau đó reset database và thêm dữ liệu mẫu bằng lệnh:</p>
+
+          <div class="command">
+            <button class="copy-btn">Copy</button>
+            <pre><code>docker-compose exec backend php artisan migrate:fresh --seed --force</code></pre>
+          </div>
+
+          <p>Nếu dùng Docker Compose bản mới:</p>
+
+          <div class="command">
+            <button class="copy-btn">Copy</button>
+            <pre><code>docker compose exec backend cp .env.example .env
+docker compose exec backend php artisan key:generate
+docker compose exec backend php artisan migrate:fresh --seed --force</code></pre>
+          </div>
+
+          <div class="note warning">
+            Nếu project đã có sẵn file <strong>.env</strong> thì không cần copy lại từ <strong>.env.example</strong>.
+          </div>
+
+          <div class="note danger">
+            Lưu ý: lệnh <strong>migrate:fresh --seed --force</strong> sẽ xóa toàn bộ bảng cũ,
+            tạo lại database mới và thêm dữ liệu mẫu. Chỉ dùng khi muốn reset dữ liệu local.
+          </div>
+        </section>
+
+        <section>
+          <div class="step-title">
+            <span class="badge">9</span>
+            <h2>Mở website</h2>
+          </div>
+
+          <p>Mở trình duyệt và truy cập các đường dẫn sau:</p>
+
+          <div class="url-grid">
+            <div class="url-box">
+              <strong>Frontend</strong>
+              <a href="http://192.168.33.11:5173/dang-nhap">
+                http://192.168.33.11:5173/dang-nhap
+              </a>
+            </div>
+
+            <div class="url-box">
+              <strong>Backend API</strong>
+              <a href="http://192.168.33.11:8000">
+                http://192.168.33.11:8000
+              </a>
+            </div>
+
+            <div class="url-box">
+              <strong>phpMyAdmin</strong>
+              <a href="http://192.168.33.11:8080">
+                http://192.168.33.11:8080
+              </a>
+            </div>
+          </div>
+
+          <div class="note">
+            Nếu phpMyAdmin không mở được, kiểm tra lại port trong file <strong>docker-compose.yml</strong>.
+          </div>
+        </section>
+
+        <section id="daily-run">
+          <div class="step-title">
+            <span class="badge">10</span>
+            <h2>Chạy lại website lần sau</h2>
+          </div>
+
+          <p>Nếu Docker đã build rồi, lần sau chỉ cần chạy:</p>
+
+          <div class="command">
+            <button class="copy-btn">Copy</button>
+            <pre><code>cd D:\nckh-tdc
+vagrant up
+vagrant ssh
+cd /vagrant
+docker-compose start</code></pre>
+          </div>
+
+          <p>Hoặc nếu muốn chắc chắn container chạy lại đầy đủ:</p>
+
+          <div class="command">
+            <button class="copy-btn">Copy</button>
+            <pre><code>cd D:\nckh-tdc
+vagrant up
+vagrant ssh
+cd /vagrant
+docker-compose up -d</code></pre>
+          </div>
+        </section>
+
+        <section>
+          <div class="step-title">
+            <span class="badge">11</span>
+            <h2>Dừng website</h2>
+          </div>
+
+          <p>Khi muốn dừng các container nhưng vẫn giữ máy ảo:</p>
+
+          <div class="command">
+            <button class="copy-btn">Copy</button>
+            <pre><code>docker-compose stop</code></pre>
+          </div>
+
+          <p>Khi muốn thoát SSH và tắt luôn máy ảo Vagrant:</p>
+
+          <div class="command">
+            <button class="copy-btn">Copy</button>
+            <pre><code>exit
+vagrant halt</code></pre>
+          </div>
+        </section>
+
+        <section id="troubleshoot">
+          <div class="step-title">
+            <span class="badge">?</span>
+            <h2>Lệnh kiểm tra và xử lý lỗi nhanh</h2>
+          </div>
+
+          <div class="grid-2">
+            <div>
+              <h3>Xem log toàn bộ container</h3>
+              <div class="command">
+                <button class="copy-btn">Copy</button>
+                <pre><code>docker-compose logs -f</code></pre>
+              </div>
+            </div>
+
+            <div>
+              <h3>Xem log backend</h3>
+              <div class="command">
+                <button class="copy-btn">Copy</button>
+                <pre><code>docker-compose logs -f backend</code></pre>
+              </div>
+            </div>
+
+            <div>
+              <h3>Restart toàn bộ container</h3>
+              <div class="command">
+                <button class="copy-btn">Copy</button>
+                <pre><code>docker-compose restart</code></pre>
+              </div>
+            </div>
+
+            <div>
+              <h3>Xóa cache Laravel</h3>
+              <div class="command">
+                <button class="copy-btn">Copy</button>
+                <pre><code>docker-compose exec backend php artisan optimize:clear</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="note danger">
+            Nếu website không vào được, hãy kiểm tra theo thứ tự:
+            Vagrant đã bật chưa → container có trạng thái Up chưa → đúng IP/port chưa → backend có lỗi log không.
+          </div>
+        </section>
+
+        <section>
+          <div class="step-title">
+            <span class="badge">!</span>
+            <h2>Lỗi thường gặp</h2>
+          </div>
+
+          <ul class="quick-list">
+            <li>
+              <strong>Không vào được website:</strong>
+              kiểm tra lại link <strong>http://192.168.33.11:5173/dang-nhap</strong>.
+            </li>
+            <li>
+              <strong>Frontend gọi API lỗi:</strong>
+              kiểm tra backend có chạy ở port <strong>8000</strong> không.
+            </li>
+            <li>
+              <strong>Database lỗi:</strong>
+              chạy lại <strong>php artisan migrate:fresh --seed --force</strong> nếu muốn reset dữ liệu local.
+            </li>
+            <li>
+              <strong>Sửa code nhưng chưa thấy thay đổi:</strong>
+              restart container hoặc clear cache Laravel.
+            </li>
+            <li>
+              <strong>Docker Compose không nhận lệnh:</strong>
+              thử đổi giữa <strong>docker-compose</strong> và <strong>docker compose</strong>.
+            </li>
+          </ul>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      document.querySelectorAll(".copy-btn").forEach((button) => {
+        button.addEventListener("click", async () => {
+          const code = button.parentElement.querySelector("code").innerText;
+
+          try {
+            await navigator.clipboard.writeText(code);
+            button.innerText = "Đã copy";
+            setTimeout(() => {
+              button.innerText = "Copy";
+            }, 1200);
+          } catch (error) {
+            button.innerText = "Lỗi";
+            setTimeout(() => {
+              button.innerText = "Copy";
+            }, 1200);
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -15,6 +15,17 @@ class SearchAi
         protected SystemSettingService $settings
     ) {}
 
+    private function containsAny(string $value, array $needles): bool
+    {
+        foreach ($needles as $needle) {
+            if ($needle !== '' && str_contains($value, $needle)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public function searchAi(Request $request)
     {
         if (!$this->settings->enabled(SystemSettingService::AI_SEARCH)) {
@@ -82,6 +93,27 @@ class SearchAi
             ], 422);
         }
 
+        // Chặn câu không phải tìm sản phẩm trước khi gọi AI / query DB
+        $guardReply = $this->guardNonProductSearch($message);
+        if ($guardReply !== null) {
+            return response()->json([
+                'message' => $guardReply,
+                'query' => $message,
+                'intent' => [
+                    'keyword' => '',
+                    'expanded_keywords' => [],
+                    'major_code' => null,
+                    'category' => null,
+                    'status' => null,
+                    'sort' => 'relevance',
+                    'limit' => 12,
+                    'blocked' => true,
+                ],
+                'count' => 0,
+                'products' => [],
+            ]);
+        }
+
         $user = $this->resolveUser($request);
         $role = $user->role ?? 'guest';
         $majorId = $user->major_id ?? null;
@@ -118,14 +150,136 @@ class SearchAi
             ]);
         }
 
+        // Nếu sau khi phân tích vẫn không có dấu hiệu tìm sản phẩm thì không search bừa
+        if (!$this->shouldRunProductSearch($message, $intent)) {
+            return response()->json([
+                'message' => 'Mình chỉ hỗ trợ tìm kiếm sản phẩm, đồ án, công nghệ, ngành hoặc danh mục liên quan trong hệ thống.',
+                'query' => $message,
+                'intent' => $intent,
+                'count' => 0,
+                'products' => [],
+            ]);
+        }
+
         $products = $this->searchProducts($intent, $role, $majorId);
 
         return response()->json([
-            'message' => 'Tìm kiếm thành công.',
+            'message' => $products->isNotEmpty()
+                ? 'Tìm kiếm thành công.'
+                : 'Không tìm thấy sản phẩm phù hợp trong danh sách hiện có.',
             'query' => $message,
             'intent' => $intent,
             'count' => $products->count(),
             'products' => $products,
+        ]);
+    }
+
+    private function guardNonProductSearch(string $message): ?string
+    {
+        $normalized = $this->normalizeSearchText($message);
+
+        if ($this->isCredentialOrAdminSecretQuestion($normalized)) {
+            return 'Mình không có thông tin về mật khẩu, tài khoản quản trị hoặc dữ liệu đăng nhập nội bộ.';
+        }
+
+        if ($this->isGreetingOrChatOnly($normalized)) {
+            return 'Bạn có thể nhập tên sản phẩm, chủ đề, công nghệ hoặc ngành để mình tìm kiếm trong hệ thống.';
+        }
+
+        return null;
+    }
+
+    private function isCredentialOrAdminSecretQuestion(string $normalized): bool
+    {
+        $credentialWords = [
+            'password',
+            'pass',
+            'mat khau',
+            'mk',
+            'tai khoan admin',
+            'account admin',
+            'admin account',
+            'token',
+            'secret',
+            'api key',
+            'apikey',
+            'key',
+            'dang nhap admin',
+            'login admin',
+        ];
+
+        $adminWords = [
+            'admin',
+            'quan tri',
+            'quan tri vien',
+            'root',
+            'super admin',
+            'superadmin',
+        ];
+
+        return $this->containsAny($normalized, $credentialWords)
+            && $this->containsAny($normalized, $adminWords);
+    }
+
+    private function isGreetingOrChatOnly(string $normalized): bool
+    {
+        $normalized = trim($normalized);
+
+        $greetings = [
+            'hi',
+            'hello',
+            'chao',
+            'xin chao',
+            'alo',
+            'ok',
+            'cam on',
+            'thanks',
+            'thank you',
+        ];
+
+        return in_array($normalized, $greetings, true);
+    }
+
+    private function shouldRunProductSearch(string $message, array $intent): bool
+    {
+        if (!empty($intent['major_code']) || !empty($intent['category']) || !empty($intent['status'])) {
+            return true;
+        }
+
+        if (!empty($this->getSearchTerms($intent))) {
+            return true;
+        }
+
+        $normalized = $this->normalizeSearchText($message);
+
+        return $this->containsAny($normalized, [
+            'san pham',
+            'do an',
+            'du an',
+            'de tai',
+            'project',
+            'website',
+            'web',
+            'ung dung',
+            'he thong',
+            'quan ly',
+            'java',
+            'spring',
+            'spring boot',
+            'react',
+            'reactjs',
+            'mysql',
+            'laravel',
+            'php',
+            'api',
+            'figma',
+            'photoshop',
+            'ai',
+            'machine learning',
+            'mang',
+            'bao mat',
+            'do hoa',
+            'thiet ke',
         ]);
     }
 
@@ -539,9 +693,12 @@ Searchable fields in the system:
 - product_mmt.simulation_tool
 - product_graphic.design_type
 - product_graphic.tools_used
+- product_tags.tag_name
 
 IMPORTANT RULES:
-- Do not use tags. The product upload form no longer has a tag field.
+- Search tags when the user mentions hashtags, keywords, technologies, frameworks, tools, or topic labels.
+- Tags may contain values like #Java, #MySQL, #Quản lý, #Spring Boot, React.
+- Treat hashtags as normal keywords.
 - This is a database search system, not a web search engine.
 - Do not invent information that may not exist in the database.
 - Do not generate marketing-style feature words unless the user explicitly typed them.
@@ -818,6 +975,9 @@ PROMPT;
                         ->orWhere('product_mmt.topology_type', 'like', $like)
                         ->orWhere('product_mmt.simulation_tool', 'like', $like)
                         ->orWhere('product_graphic.design_type', 'like', $like)
+                        ->orWhere('products.github_link', 'like', $like)
+                        ->orWhere('products.demo_link', 'like', $like)
+                        ->orWhere('tag_summary.tags', 'like', $like)
                         ->orWhere('product_graphic.tools_used', 'like', $like);
                 }
             });
@@ -854,10 +1014,20 @@ PROMPT;
 
     private function baseProductQuery()
     {
+        $tagSummary = DB::table('product_tags')
+            ->select(
+                'product_id',
+                DB::raw('GROUP_CONCAT(DISTINCT tag_name SEPARATOR ", ") as tags')
+            )
+            ->groupBy('product_id');
+
         return DB::table('products')
             ->leftJoin('majors', 'products.major_id', '=', 'majors.major_id')
             ->leftJoin('categories', 'products.cate_id', '=', 'categories.cate_id')
             ->leftJoin('product_statistics', 'products.product_id', '=', 'product_statistics.product_id')
+            ->leftJoinSub($tagSummary, 'tag_summary', function ($join) {
+                $join->on('products.product_id', '=', 'tag_summary.product_id');
+            })
             ->leftJoin('product_ai', 'products.product_id', '=', 'product_ai.product_id')
             ->leftJoin('product_cntt', 'products.product_id', '=', 'product_cntt.product_id')
             ->leftJoin('product_mmt', 'products.product_id', '=', 'product_mmt.product_id')
@@ -878,6 +1048,7 @@ PROMPT;
                 'categories.category_name',
                 DB::raw('COALESCE(product_statistics.views, 0) as views'),
                 DB::raw('COALESCE(product_statistics.likes, 0) as likes'),
+                DB::raw('COALESCE(tag_summary.tags, "") as tags'),
                 'product_ai.model_used',
                 'product_ai.framework as ai_framework',
                 'product_ai.language as ai_language',
@@ -919,30 +1090,60 @@ PROMPT;
         }
 
         $searchTerms = $this->getSearchTerms($intent);
-        $mainKeyword = $searchTerms[0] ?? '';
 
-        if ($mainKeyword !== '') {
-            $query->orderByRaw(
-                'CASE
-                    WHEN products.title LIKE ? THEN 0
-                    WHEN products.title LIKE ? THEN 1
-                    WHEN categories.category_name LIKE ? THEN 2
-                    WHEN products.description LIKE ? THEN 3
-                    WHEN majors.major_name LIKE ? OR majors.major_code LIKE ? THEN 4
-                    ELSE 5
-                END',
-                [
-                    $mainKeyword . '%',
-                    '%' . $mainKeyword . '%',
-                    '%' . $mainKeyword . '%',
-                    '%' . $mainKeyword . '%',
-                    '%' . $mainKeyword . '%',
-                    '%' . $mainKeyword . '%',
-                ]
-            );
+        if (!empty($searchTerms)) {
+            $scoreParts = [];
+            $bindings = [];
+
+            foreach (array_slice($searchTerms, 0, 10) as $term) {
+                $like = '%' . $term . '%';
+
+                $scoreParts[] = '
+                CASE
+                    WHEN products.title LIKE ? THEN 120
+                    WHEN tag_summary.tags LIKE ? THEN 100
+                    WHEN product_cntt.programming_language LIKE ? THEN 100
+                    WHEN product_cntt.framework LIKE ? THEN 100
+                    WHEN product_cntt.database_used LIKE ? THEN 100
+                    WHEN product_ai.framework LIKE ? THEN 90
+                    WHEN product_ai.language LIKE ? THEN 90
+                    WHEN product_ai.model_used LIKE ? THEN 90
+                    WHEN products.description LIKE ? THEN 70
+                    WHEN categories.category_name LIKE ? THEN 45
+                    WHEN products.github_link LIKE ? THEN 35
+                    WHEN products.demo_link LIKE ? THEN 35
+                    WHEN majors.major_name LIKE ? OR majors.major_code LIKE ? THEN 20
+                    ELSE 0
+                END
+            ';
+
+                array_push(
+                    $bindings,
+                    $like,
+                    $like,
+                    $like,
+                    $like,
+                    $like,
+                    $like,
+                    $like,
+                    $like,
+                    $like,
+                    $like,
+                    $like,
+                    $like,
+                    $like,
+                    $like
+                );
+            }
+
+            if (!empty($scoreParts)) {
+                $query->orderByRaw('(' . implode(' + ', $scoreParts) . ') DESC', $bindings);
+            }
         }
 
-        $query->orderByDesc('views')->orderByDesc('products.submitted_at');
+        $query->orderByDesc('views')
+            ->orderByDesc('likes')
+            ->orderByDesc('products.submitted_at');
     }
 
     private function fallbackSearch(array $intent, string $role, ?int $majorId)
@@ -974,9 +1175,12 @@ PROMPT;
                     $subQuery
                         ->orWhere('products.title', 'like', $like)
                         ->orWhere('products.description', 'like', $like)
+                        ->orWhere('products.github_link', 'like', $like)
+                        ->orWhere('products.demo_link', 'like', $like)
                         ->orWhere('majors.major_name', 'like', $like)
                         ->orWhere('majors.major_code', 'like', $like)
                         ->orWhere('categories.category_name', 'like', $like)
+                        ->orWhere('tag_summary.tags', 'like', $like)
                         ->orWhere('product_ai.model_used', 'like', $like)
                         ->orWhere('product_ai.framework', 'like', $like)
                         ->orWhere('product_ai.language', 'like', $like)
@@ -993,9 +1197,9 @@ PROMPT;
             });
         }
 
+        $this->orderByRelevance($query, $intent);
+
         return $query
-            ->orderByDesc('views')
-            ->orderByDesc('products.submitted_at')
             ->limit($intent['limit'])
             ->get();
     }
@@ -1018,8 +1222,8 @@ PROMPT;
         ];
 
         $commandPatterns = [
-            '/[;&|`$(){}]/i',
-            '/(cat|ls|rm|wget|curl|exec|system|passthru)\s+/i',
+            '/[`$]/i',
+            '/\b(cat|ls|rm|wget|curl|exec|system|passthru)\s+/i',
         ];
 
         $allPatterns = array_merge($sqlPatterns, $xssPatterns, $commandPatterns);

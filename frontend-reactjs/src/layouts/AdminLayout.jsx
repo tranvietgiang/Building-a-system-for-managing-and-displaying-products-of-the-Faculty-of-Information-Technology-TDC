@@ -2,6 +2,7 @@ import { useContext } from "react";
 import {
   BarChart3,
   BookOpen,
+  BrainCircuit,
   Eye,
   GraduationCap,
   LifeBuoy,
@@ -16,6 +17,7 @@ import { AuthContext } from "../contexts/AuthContext";
 
 const menuItems = [
   { id: "dashboard", label: "Dashboard", icon: BarChart3 },
+  { id: "chatbox-training", label: "Huấn luyện chatbot", icon: BrainCircuit },
   { id: "users", label: "Người dùng", icon: Users },
   { id: "products", label: "Sản phẩm", icon: PackageCheck },
   { id: "majors", label: "Chuyên ngành", icon: GraduationCap },

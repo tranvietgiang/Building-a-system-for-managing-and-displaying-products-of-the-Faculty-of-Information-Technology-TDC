@@ -97,6 +97,9 @@ Route::prefix('v1')->group(function () {
         Route::post('/product/{product_id}/approve', [TeacherController::class, 'teacherApprove']);
         Route::post('/product/{product_id}/reviews', [TeacherController::class, 'storeReview']);
         Route::post('/product/reject', [TeacherController::class, 'teacherReject']);
+
+        // Kiểm tra hình ảnh chỉ khi teacher/admin chọn 1 sản phẩm để so sánh
+        Route::post('/product/{productId}/compare-images/{matchProductId}', [CompareAi::class, 'compareProductImages']);
     });
     /*
 |--------------------------------------------------------------------------
@@ -115,7 +118,7 @@ Route::prefix('v1')->group(function () {
 */
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/upload/count-published', [UploadController::class, 'countPublishedProducts']);
-        Route::post('/upload', [UploadController::class, 'upload']);
+        Route::post('/upload', [UploadController::class, 'upload'])->middleware('role:student');
     });
 
     /*
@@ -161,6 +164,10 @@ Route::prefix('v1')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard']);
         Route::get('/system-settings', [SystemSettingController::class, 'index']);
         Route::patch('/system-settings', [SystemSettingController::class, 'update']);
+
+        Route::get('/chatbox-training-logs', [AdminController::class, 'chatboxTrainingLogs']);
+        Route::patch('/chatbox-training-logs/{log}', [AdminController::class, 'updateChatboxTrainingLog']);
+        Route::delete('/chatbox-training-logs/{log}', [AdminController::class, 'destroyChatboxTrainingLog']);
 
         Route::get('/users', [AdminController::class, 'users']);
         Route::post('/users', [AdminController::class, 'storeUser']);

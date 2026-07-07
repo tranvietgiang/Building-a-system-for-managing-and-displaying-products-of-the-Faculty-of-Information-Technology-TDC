@@ -413,12 +413,19 @@ export default function VisitorScreen() {
     searchProducts(getSearchParams(keyword, currentPage));
   }, [currentPage, selectedMajor, sortBy]);
 
-  const activeSearchResult = effectiveAiEnabled ? searchResult : productSearchResult;
+  const activeSearchResult = effectiveAiEnabled
+    ? searchResult
+    : productSearchResult;
   const activeSearchError =
     localSearchError || (effectiveAiEnabled ? searchError : productSearchError);
   const activeSearchLoading = effectiveAiEnabled
     ? loadingSearchAi
     : loadingProductSearch;
+
+  const activeSearchMessage =
+    activeSearchResult?.message && effectiveAiEnabled
+      ? activeSearchResult.message
+      : "";
 
   const handleViewDetail = useCallback(
     (id) => {
@@ -741,9 +748,7 @@ export default function VisitorScreen() {
               <span>Thường</span>
               <button
                 type="button"
-                onClick={() =>
-                  canUseAiSearch && setAiEnabled((prev) => !prev)
-                }
+                onClick={() => canUseAiSearch && setAiEnabled((prev) => !prev)}
                 disabled={!canUseAiSearch}
                 className={`relative h-6 w-11 rounded-full transition ${
                   effectiveAiEnabled ? "bg-[#003087]" : "bg-gray-300"
@@ -786,21 +791,36 @@ export default function VisitorScreen() {
           )}
 
           {activeSearchResult && (
-            <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-sm text-gray-600">
-              <p>
-                {effectiveAiEnabled ? "AI" : "Tìm thường"} tìm thấy{" "}
-                <span className="font-semibold text-[#003087]">
-                  {activeSearchResult.count ?? filteredProducts.length}
-                </span>{" "}
-                sản phẩm phù hợp
-              </p>
-              <button
-                type="button"
-                onClick={handleClearSearch}
-                className="text-[#003087] font-medium hover:underline"
-              >
-                Quay lại danh sách ban đầu
-              </button>
+            <div className="mt-3 space-y-2">
+              {activeSearchMessage && (
+                <p
+                  className={`text-sm rounded-md px-4 py-2 border ${
+                    activeSearchResult.count > 0
+                      ? "text-green-700 bg-green-50 border-green-100"
+                      : "text-amber-700 bg-amber-50 border-amber-100"
+                  }`}
+                >
+                  {activeSearchMessage}
+                </p>
+              )}
+
+              <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-gray-600">
+                <p>
+                  {effectiveAiEnabled ? "AI" : "Tìm thường"} tìm thấy{" "}
+                  <span className="font-semibold text-[#003087]">
+                    {activeSearchResult.count ?? filteredProducts.length}
+                  </span>{" "}
+                  sản phẩm phù hợp
+                </p>
+
+                <button
+                  type="button"
+                  onClick={handleClearSearch}
+                  className="text-[#003087] font-medium hover:underline"
+                >
+                  Quay lại danh sách ban đầu
+                </button>
+              </div>
             </div>
           )}
 
@@ -989,7 +1009,9 @@ export default function VisitorScreen() {
                   onClick={() =>
                     setCurrentPage((prev) => Math.max(prev - 1, 1))
                   }
-                  disabled={currentPage <= 1 || loadingVisitor || activeSearchLoading}
+                  disabled={
+                    currentPage <= 1 || loadingVisitor || activeSearchLoading
+                  }
                   className="px-3 py-2 border rounded-md bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   ‹
@@ -1004,7 +1026,9 @@ export default function VisitorScreen() {
                     setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                   }
                   disabled={
-                    currentPage >= totalPages || loadingVisitor || activeSearchLoading
+                    currentPage >= totalPages ||
+                    loadingVisitor ||
+                    activeSearchLoading
                   }
                   className="px-3 py-2 border rounded-md bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >

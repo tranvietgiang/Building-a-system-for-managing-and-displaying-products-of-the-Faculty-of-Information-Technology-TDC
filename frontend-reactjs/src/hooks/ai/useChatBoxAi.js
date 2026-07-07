@@ -16,10 +16,9 @@ export default function useChatBoxAi() {
       console.error("Error sending message to AI:", err);
       const fallback =
         err?.response?.data?.reply ||
-        err?.response?.data?.message ||
-        "Server error";
+        "Lỗi kết nối AI, vui lòng thử lại sau.";
       setReplyAi(fallback);
-      return { reply: fallback, products: [] };
+      return { reply: fallback, products: err?.response?.data?.products || [] };
     } finally {
       setLoadingAi(false);
     }

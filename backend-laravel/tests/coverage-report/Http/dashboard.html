@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <title>Dashboard for D:\nckh-tdc\backend-laravel\app\Http</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="../_css/bootstrap.min.css?v=11.0.12" rel="stylesheet" type="text/css">
+  <link href="../_css/nv.d3.min.css?v=11.0.12" rel="stylesheet" type="text/css">
+  <link href="../_css/style.css?v=11.0.12" rel="stylesheet" type="text/css">
+  <link href="../_css/custom.css" rel="stylesheet" type="text/css">
+ </head>
+ <body>
+  <header>
+   <div class="container-fluid">
+    <div class="row">
+     <div class="col-md-12">
+      <nav aria-label="breadcrumb">
+       <ol class="breadcrumb">
+         <li class="breadcrumb-item"><a href="../index.html">D:\nckh-tdc\backend-laravel\app</a></li>
+         <li class="breadcrumb-item"><a href="index.html">Http</a></li>
+         <li class="breadcrumb-item active">(Dashboard)</li>
+
+       </ol>
+      </nav>
+     </div>
+    </div>
+   </div>
+  </header>
+  <div class="container-fluid">
+   <div class="row">
+    <div class="col-md-12">
+     <h2>Classes</h2>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Coverage Distribution</h3>
+     <div id="classCoverageDistribution" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Complexity</h3>
+     <div id="classComplexity" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Insufficient Coverage</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Class</th>
+         <th class="text-right">Coverage</th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="Ai/SearchAi.php.html#12">App\Http\Ai\SearchAi</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#22">App\Http\Controllers\Api\AdminController</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/UserController.php.html#13">App\Http\Controllers\Api\UserController</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Requests/CategoryRequest.php.html#7">App\Http\Requests\categoryRequest</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Requests/ProductRequest.php.html#7">App\Http\Requests\ProductRequest</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Requests/TeacherRequest.php.html#7">App\Http\Requests\TeacherRequest</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Requests/UserRequest.php.html#8">App\Http\Requests\UserRequest</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Requests/majorRequest.php.html#7">App\Http\Requests\majorRequest</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Resources/UserResource.php.html#8">App\Http\Resources\UserResource</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/ContentModeration.php.html#13">App\Http\Ai\ContentModeration</a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#12">App\Http\Ai\CompareAi</a></td><td class="text-right">1%</td></tr>
+       <tr><td><a href="Ai/CheckImage.php.html#8">App\Http\Ai\CheckImage</a></td><td class="text-right">5%</td></tr>
+       <tr><td><a href="Controllers/Api/MajorController.php.html#8">App\Http\Controllers\Api\MajorController</a></td><td class="text-right">15%</td></tr>
+       <tr><td><a href="Controllers/Api/AuthController.php.html#13">App\Http\Controllers\Api\AuthController</a></td><td class="text-right">16%</td></tr>
+       <tr><td><a href="Controllers/Api/UploadController.php.html#15">App\Http\Controllers\Api\UploadController</a></td><td class="text-right">26%</td></tr>
+       <tr><td><a href="Controllers/Api/SystemSettingController.php.html#9">App\Http\Controllers\Api\SystemSettingController</a></td><td class="text-right">29%</td></tr>
+       <tr><td><a href="Middleware/CheckRole.php.html#9">App\Http\Middleware\CheckRole</a></td><td class="text-right">66%</td></tr>
+       <tr><td><a href="Controllers/Api/ProductController.php.html#14">App\Http\Controllers\Api\ProductController</a></td><td class="text-right">71%</td></tr>
+       <tr><td><a href="Controllers/Api/TeacherController.php.html#11">App\Http\Controllers\Api\TeacherController</a></td><td class="text-right">78%</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#17">App\Http\Ai\ChatBoxAi</a></td><td class="text-right">87%</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Project Risks</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Class</th>
+         <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="Ai/SearchAi.php.html#12">App\Http\Ai\SearchAi</a></td><td class="text-right">18360</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#12">App\Http\Ai\CompareAi</a></td><td class="text-right">16736</td></tr>
+       <tr><td><a href="Ai/ContentModeration.php.html#13">App\Http\Ai\ContentModeration</a></td><td class="text-right">5078</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#22">App\Http\Controllers\Api\AdminController</a></td><td class="text-right">4422</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#17">App\Http\Ai\ChatBoxAi</a></td><td class="text-right">502</td></tr>
+       <tr><td><a href="Controllers/Api/UserController.php.html#13">App\Http\Controllers\Api\UserController</a></td><td class="text-right">306</td></tr>
+       <tr><td><a href="Controllers/Api/ProductController.php.html#14">App\Http\Controllers\Api\ProductController</a></td><td class="text-right">148</td></tr>
+       <tr><td><a href="Controllers/Api/AuthController.php.html#13">App\Http\Controllers\Api\AuthController</a></td><td class="text-right">82</td></tr>
+       <tr><td><a href="Ai/CheckImage.php.html#8">App\Http\Ai\CheckImage</a></td><td class="text-right">49</td></tr>
+       <tr><td><a href="Controllers/Api/MajorController.php.html#8">App\Http\Controllers\Api\MajorController</a></td><td class="text-right">27</td></tr>
+       <tr><td><a href="Controllers/Api/UploadController.php.html#15">App\Http\Controllers\Api\UploadController</a></td><td class="text-right">26</td></tr>
+       <tr><td><a href="Controllers/Api/TeacherController.php.html#11">App\Http\Controllers\Api\TeacherController</a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="Middleware/CheckRole.php.html#9">App\Http\Middleware\CheckRole</a></td><td class="text-right">3</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-12">
+     <h2>Methods</h2>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Coverage Distribution</h3>
+     <div id="methodCoverageDistribution" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Complexity</h3>
+     <div id="methodComplexity" style="height: 300px;">
+       <svg></svg>
+     </div>
+    </div>
+   </div>
+   <div class="row">
+    <div class="col-md-6">
+     <h3>Insufficient Coverage</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Method</th>
+         <th class="text-right">Coverage</th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#1528"><abbr title="App\Http\Ai\ChatBoxAi::searchGuideText">searchGuideText</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#1533"><abbr title="App\Http\Ai\ChatBoxAi::imageCheckGuideText">imageCheckGuideText</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#1564"><abbr title="App\Http\Ai\ChatBoxAi::askOpenAiForRetrievedProducts">askOpenAiForRetrievedProducts</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#1734"><abbr title="App\Http\Ai\ChatBoxAi::formatProductList">formatProductList</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#1751"><abbr title="App\Http\Ai\ChatBoxAi::buildFoundLocalProductsReply">buildFoundLocalProductsReply</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#1761"><abbr title="App\Http\Ai\ChatBoxAi::replyMentionsAnyProduct">replyMentionsAnyProduct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#1780"><abbr title="App\Http\Ai\ChatBoxAi::looksLikeNoProductReply">looksLikeNoProductReply</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#1795"><abbr title="App\Http\Ai\ChatBoxAi::productRelevanceText">productRelevanceText</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#1869"><abbr title="App\Http\Ai\ChatBoxAi::openAiFallbackResponse">openAiFallbackResponse</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#2739"><abbr title="App\Http\Ai\ChatBoxAi::detectedMajorOutsideUserScope">detectedMajorOutsideUserScope</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/CheckImage.php.html#19"><abbr title="App\Http\Ai\CheckImage::checkNSFW">checkNSFW</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#21"><abbr title="App\Http\Ai\CompareAi::compareProductImages">compareProductImages</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#251"><abbr title="App\Http\Ai\CompareAi::normalizeAiLevelCode">normalizeAiLevelCode</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#265"><abbr title="App\Http\Ai\CompareAi::formatAiLevel">formatAiLevel</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#278"><abbr title="App\Http\Ai\CompareAi::getProjectType">getProjectType</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#324"><abbr title="App\Http\Ai\CompareAi::compareWithAi">compareWithAi</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#360"><abbr title="App\Http\Ai\CompareAi::buildComparisonPrompt">buildComparisonPrompt</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#506"><abbr title="App\Http\Ai\CompareAi::getDuplicateFields">getDuplicateFields</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#560"><abbr title="App\Http\Ai\CompareAi::normalizeCompareValue">normalizeCompareValue</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#571"><abbr title="App\Http\Ai\CompareAi::compareImagesWithAi">compareImagesWithAi</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#676"><abbr title="App\Http\Ai\CompareAi::buildImageComparisonPrompt">buildImageComparisonPrompt</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#729"><abbr title="App\Http\Ai\CompareAi::normalizeImageLevelCode">normalizeImageLevelCode</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#734"><abbr title="App\Http\Ai\CompareAi::calculateOverallSimilarity">calculateOverallSimilarity</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#743"><abbr title="App\Http\Ai\CompareAi::formatDuplicateImages">formatDuplicateImages</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#774"><abbr title="App\Http\Ai\CompareAi::normalizeImageUrl">normalizeImageUrl</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#782"><abbr title="App\Http\Ai\CompareAi::decodeJsonContent">decodeJsonContent</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#803"><abbr title="App\Http\Ai\CompareAi::compareImagesLocally">compareImagesLocally</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#865"><abbr title="App\Http\Ai\CompareAi::imageSignatureFromUrl">imageSignatureFromUrl</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#908"><abbr title="App\Http\Ai\CompareAi::imageSignatureFromBytes">imageSignatureFromBytes</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#922"><abbr title="App\Http\Ai\CompareAi::compareImageSignatures">compareImageSignatures</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#952"><abbr title="App\Http\Ai\CompareAi::averageImageHash">averageImageHash</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#1008"><abbr title="App\Http\Ai\CompareAi::hammingDistance">hammingDistance</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#1022"><abbr title="App\Http\Ai\CompareAi::imageCompareFallback">imageCompareFallback</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#1035"><abbr title="App\Http\Ai\CompareAi::formatProduct">formatProduct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#1070"><abbr title="App\Http\Ai\CompareAi::getProductImages">getProductImages</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/ContentModeration.php.html#19"><abbr title="App\Http\Ai\ContentModeration::moderateProduct">moderateProduct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/ContentModeration.php.html#138"><abbr title="App\Http\Ai\ContentModeration::moderateUploadedImage">moderateUploadedImage</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/ContentModeration.php.html#233"><abbr title="App\Http\Ai\ContentModeration::parseJson">parseJson</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/ContentModeration.php.html#253"><abbr title="App\Http\Ai\ContentModeration::formatViolations">formatViolations</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/ContentModeration.php.html#279"><abbr title="App\Http\Ai\ContentModeration::normalizeModerationResult">normalizeModerationResult</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/ContentModeration.php.html#320"><abbr title="App\Http\Ai\ContentModeration::isSafeEducationalSoftwareScreenshot">isSafeEducationalSoftwareScreenshot</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/ContentModeration.php.html#410"><abbr title="App\Http\Ai\ContentModeration::isSoftwareOrInterfaceProject">isSoftwareOrInterfaceProject</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/ContentModeration.php.html#461"><abbr title="App\Http\Ai\ContentModeration::isSafeCreativeDesignWork">isSafeCreativeDesignWork</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/ContentModeration.php.html#487"><abbr title="App\Http\Ai\ContentModeration::hasStrongUnsafeSignal">hasStrongUnsafeSignal</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/ContentModeration.php.html#546"><abbr title="App\Http\Ai\ContentModeration::resolveImageUrl">resolveImageUrl</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/ContentModeration.php.html#573"><abbr title="App\Http\Ai\ContentModeration::isSupportedImageReference">isSupportedImageReference</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/ContentModeration.php.html#578"><abbr title="App\Http\Ai\ContentModeration::extractErrorMessage">extractErrorMessage</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/ContentModeration.php.html#609"><abbr title="App\Http\Ai\ContentModeration::blocked">blocked</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/ContentModeration.php.html#619"><abbr title="App\Http\Ai\ContentModeration::skipped">skipped</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/ContentModeration.php.html#630"><abbr title="App\Http\Ai\ContentModeration::aiBusySkippedResult">aiBusySkippedResult</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/ContentModeration.php.html#643"><abbr title="App\Http\Ai\ContentModeration::buildPrompt">buildPrompt</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#14"><abbr title="App\Http\Ai\SearchAi::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#18"><abbr title="App\Http\Ai\SearchAi::containsAny">containsAny</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#29"><abbr title="App\Http\Ai\SearchAi::searchAi">searchAi</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#177"><abbr title="App\Http\Ai\SearchAi::guardNonProductSearch">guardNonProductSearch</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#192"><abbr title="App\Http\Ai\SearchAi::isCredentialOrAdminSecretQuestion">isCredentialOrAdminSecretQuestion</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#224"><abbr title="App\Http\Ai\SearchAi::isGreetingOrChatOnly">isGreetingOrChatOnly</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#243"><abbr title="App\Http\Ai\SearchAi::shouldRunProductSearch">shouldRunProductSearch</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#286"><abbr title="App\Http\Ai\SearchAi::resolveUser">resolveUser</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#293"><abbr title="App\Http\Ai\SearchAi::isRestrictedRoleWithoutMajor">isRestrictedRoleWithoutMajor</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#298"><abbr title="App\Http\Ai\SearchAi::isDifferentMajorSearch">isDifferentMajorSearch</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#315"><abbr title="App\Http\Ai\SearchAi::majorCodeMatches">majorCodeMatches</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#338"><abbr title="App\Http\Ai\SearchAi::mergeLocalIntent">mergeLocalIntent</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#356"><abbr title="App\Http\Ai\SearchAi::detectLocalMajorCode">detectLocalMajorCode</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#448"><abbr title="App\Http\Ai\SearchAi::cleanKeywordForMajor">cleanKeywordForMajor</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#521"><abbr title="App\Http\Ai\SearchAi::normalizeSearchText">normalizeSearchText</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#529"><abbr title="App\Http\Ai\SearchAi::majorAliases">majorAliases</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#569"><abbr title="App\Http\Ai\SearchAi::removeVietnameseAccents">removeVietnameseAccents</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#649"><abbr title="App\Http\Ai\SearchAi::detectSearchIntent">detectSearchIntent</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#828"><abbr title="App\Http\Ai\SearchAi::decodeJsonIntent">decodeJsonIntent</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#853"><abbr title="App\Http\Ai\SearchAi::normalizeIntent">normalizeIntent</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#895"><abbr title="App\Http\Ai\SearchAi::getSearchTerms">getSearchTerms</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#932"><abbr title="App\Http\Ai\SearchAi::searchProducts">searchProducts</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#1015"><abbr title="App\Http\Ai\SearchAi::baseProductQuery">baseProductQuery</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#1069"><abbr title="App\Http\Ai\SearchAi::majorCodeAliases">majorCodeAliases</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#1080"><abbr title="App\Http\Ai\SearchAi::orderByRelevance">orderByRelevance</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#1149"><abbr title="App\Http\Ai\SearchAi::fallbackSearch">fallbackSearch</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#1207"><abbr title="App\Http\Ai\SearchAi::containsDangerousPatterns">containsDangerousPatterns</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#1245"><abbr title="App\Http\Ai\SearchAi::sanitizeSearchMessage">sanitizeSearchMessage</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#24"><abbr title="App\Http\Controllers\Api\AdminController::__construct">__construct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#28"><abbr title="App\Http\Controllers\Api\AdminController::dashboard">dashboard</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#114"><abbr title="App\Http\Controllers\Api\AdminController::buildDashboardAiInsights">buildDashboardAiInsights</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#180"><abbr title="App\Http\Controllers\Api\AdminController::buildDashboardInsightPrompt">buildDashboardInsightPrompt</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#200"><abbr title="App\Http\Controllers\Api\AdminController::decodeDashboardInsightJson">decodeDashboardInsightJson</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#217"><abbr title="App\Http\Controllers\Api\AdminController::buildFallbackDashboardInsights">buildFallbackDashboardInsights</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#255"><abbr title="App\Http\Controllers\Api\AdminController::users">users</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#284"><abbr title="App\Http\Controllers\Api\AdminController::storeUser">storeUser</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#312"><abbr title="App\Http\Controllers\Api\AdminController::updateUser">updateUser</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#345"><abbr title="App\Http\Controllers\Api\AdminController::destroyUser">destroyUser</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#362"><abbr title="App\Http\Controllers\Api\AdminController::lookupPasswordRecoveryUser">lookupPasswordRecoveryUser</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#389"><abbr title="App\Http\Controllers\Api\AdminController::chatboxTrainingLogs">chatboxTrainingLogs</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#438"><abbr title="App\Http\Controllers\Api\AdminController::updateChatboxTrainingLog">updateChatboxTrainingLog</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#471"><abbr title="App\Http\Controllers\Api\AdminController::destroyChatboxTrainingLog">destroyChatboxTrainingLog</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#481"><abbr title="App\Http\Controllers\Api\AdminController::supportRequests">supportRequests</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#498"><abbr title="App\Http\Controllers\Api\AdminController::markSupportProcessed">markSupportProcessed</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#513"><abbr title="App\Http\Controllers\Api\AdminController::sendPasswordRecovery">sendPasswordRecovery</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#577"><abbr title="App\Http\Controllers\Api\AdminController::findPasswordRecoveryUser">findPasswordRecoveryUser</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#589"><abbr title="App\Http\Controllers\Api\AdminController::products">products</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#637"><abbr title="App\Http\Controllers\Api\AdminController::updateProductStatus">updateProductStatus</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#660"><abbr title="App\Http\Controllers\Api\AdminController::destroyProduct">destroyProduct</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#670"><abbr title="App\Http\Controllers\Api\AdminController::majors">majors</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#683"><abbr title="App\Http\Controllers\Api\AdminController::storeMajor">storeMajor</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#704"><abbr title="App\Http\Controllers\Api\AdminController::updateMajor">updateMajor</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#727"><abbr title="App\Http\Controllers\Api\AdminController::destroyMajor">destroyMajor</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#747"><abbr title="App\Http\Controllers\Api\AdminController::categories">categories</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#755"><abbr title="App\Http\Controllers\Api\AdminController::rejectUnsafeInput">rejectUnsafeInput</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/AuthController.php.html#28"><abbr title="App\Http\Controllers\Api\AuthController::logout">logout</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/AuthController.php.html#71"><abbr title="App\Http\Controllers\Api\AuthController::me">me</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/AuthController.php.html#79"><abbr title="App\Http\Controllers\Api\AuthController::submitPasswordRecovery">submitPasswordRecovery</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/AuthController.php.html#110"><abbr title="App\Http\Controllers\Api\AuthController::submitContact">submitContact</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/MajorController.php.html#14"><abbr title="App\Http\Controllers\Api\MajorController::majorName">majorName</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/MajorController.php.html#36"><abbr title="App\Http\Controllers\Api\MajorController::majorNameCode">majorNameCode</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/ProductController.php.html#261"><abbr title="App\Http\Controllers\Api\ProductController::cleanKeywordForMajor">cleanKeywordForMajor</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/ProductController.php.html#303"><abbr title="App\Http\Controllers\Api\ProductController::majorAliases">majorAliases</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/ProductController.php.html#314"><abbr title="App\Http\Controllers\Api\ProductController::majorKeywordAliases">majorKeywordAliases</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/ProductController.php.html#451"><abbr title="App\Http\Controllers\Api\ProductController::getMatchingAiProducts">getMatchingAiProducts</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/SystemSettingController.php.html#23"><abbr title="App\Http\Controllers\Api\SystemSettingController::update">update</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/UploadController.php.html#39"><abbr title="App\Http\Controllers\Api\UploadController::upload">upload</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/UserController.php.html#18"><abbr title="App\Http\Controllers\Api\UserController::profile">profile</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/UserController.php.html#29"><abbr title="App\Http\Controllers\Api\UserController::show">show</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/UserController.php.html#49"><abbr title="App\Http\Controllers\Api\UserController::update">update</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/UserController.php.html#78"><abbr title="App\Http\Controllers\Api\UserController::statistics">statistics</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/UserController.php.html#120"><abbr title="App\Http\Controllers\Api\UserController::updatePassword">updatePassword</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Controllers/Api/UserController.php.html#162"><abbr title="App\Http\Controllers\Api\UserController::search">search</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Requests/CategoryRequest.php.html#12"><abbr title="App\Http\Requests\categoryRequest::authorize">authorize</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Requests/CategoryRequest.php.html#22"><abbr title="App\Http\Requests\categoryRequest::rules">rules</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Requests/ProductRequest.php.html#12"><abbr title="App\Http\Requests\ProductRequest::authorize">authorize</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Requests/ProductRequest.php.html#23"><abbr title="App\Http\Requests\ProductRequest::rules">rules</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Requests/ProductRequest.php.html#45"><abbr title="App\Http\Requests\ProductRequest::messages">messages</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Requests/TeacherRequest.php.html#12"><abbr title="App\Http\Requests\TeacherRequest::authorize">authorize</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Requests/TeacherRequest.php.html#22"><abbr title="App\Http\Requests\TeacherRequest::rules">rules</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Requests/UserRequest.php.html#10"><abbr title="App\Http\Requests\UserRequest::authorize">authorize</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Requests/UserRequest.php.html#15"><abbr title="App\Http\Requests\UserRequest::rules">rules</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Requests/UserRequest.php.html#48"><abbr title="App\Http\Requests\UserRequest::messages">messages</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Requests/majorRequest.php.html#12"><abbr title="App\Http\Requests\majorRequest::authorize">authorize</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Requests/majorRequest.php.html#22"><abbr title="App\Http\Requests\majorRequest::rules">rules</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Resources/UserResource.php.html#15"><abbr title="App\Http\Resources\UserResource::toArray">toArray</abbr></a></td><td class="text-right">0%</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#122"><abbr title="App\Http\Ai\CompareAi::compareProduct">compareProduct</abbr></a></td><td class="text-right">6%</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#999"><abbr title="App\Http\Ai\ChatBoxAi::extractMentionedProducts">extractMentionedProducts</abbr></a></td><td class="text-right">34%</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#1455"><abbr title="App\Http\Ai\ChatBoxAi::localProductSearchResponse">localProductSearchResponse</abbr></a></td><td class="text-right">36%</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#566"><abbr title="App\Http\Ai\ChatBoxAi::recordTrainingFromJsonResponse">recordTrainingFromJsonResponse</abbr></a></td><td class="text-right">37%</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#641"><abbr title="App\Http\Ai\ChatBoxAi::compactTrainingProducts">compactTrainingProducts</abbr></a></td><td class="text-right">44%</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#1542"><abbr title="App\Http\Ai\ChatBoxAi::compareGuideText">compareGuideText</abbr></a></td><td class="text-right">50%</td></tr>
+       <tr><td><a href="Controllers/Api/TeacherController.php.html#18"><abbr title="App\Http\Controllers\Api\TeacherController::getTeacherStatistic">getTeacherStatistic</abbr></a></td><td class="text-right">60%</td></tr>
+       <tr><td><a href="Controllers/Api/TeacherController.php.html#54"><abbr title="App\Http\Controllers\Api\TeacherController::teacherApprove">teacherApprove</abbr></a></td><td class="text-right">60%</td></tr>
+       <tr><td><a href="Controllers/Api/UploadController.php.html#22"><abbr title="App\Http\Controllers\Api\UploadController::countPublishedProducts">countPublishedProducts</abbr></a></td><td class="text-right">60%</td></tr>
+       <tr><td><a href="Controllers/Api/ProductController.php.html#22"><abbr title="App\Http\Controllers\Api\ProductController::productViewId">productViewId</abbr></a></td><td class="text-right">66%</td></tr>
+       <tr><td><a href="Middleware/CheckRole.php.html#16"><abbr title="App\Http\Middleware\CheckRole::handle">handle</abbr></a></td><td class="text-right">66%</td></tr>
+       <tr><td><a href="Controllers/Api/AuthController.php.html#51"><abbr title="App\Http\Controllers\Api\AuthController::refresh">refresh</abbr></a></td><td class="text-right">69%</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#625"><abbr title="App\Http\Ai\ChatBoxAi::trainingAnalysisForMessage">trainingAnalysisForMessage</abbr></a></td><td class="text-right">71%</td></tr>
+       <tr><td><a href="Controllers/Api/ProductController.php.html#57"><abbr title="App\Http\Controllers\Api\ProductController::searchProducts">searchProducts</abbr></a></td><td class="text-right">73%</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#336"><abbr title="App\Http\Ai\ChatBoxAi::chat">chat</abbr></a></td><td class="text-right">74%</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#1418"><abbr title="App\Http\Ai\ChatBoxAi::featureGuideResponse">featureGuideResponse</abbr></a></td><td class="text-right">75%</td></tr>
+       <tr><td><a href="Controllers/Api/TeacherController.php.html#71"><abbr title="App\Http\Controllers\Api\TeacherController::teacherReject">teacherReject</abbr></a></td><td class="text-right">78%</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#921"><abbr title="App\Http\Ai\ChatBoxAi::buildSpecializedData">buildSpecializedData</abbr></a></td><td class="text-right">80%</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#1893"><abbr title="App\Http\Ai\ChatBoxAi::findLocalProductsForMessage">findLocalProductsForMessage</abbr></a></td><td class="text-right">80%</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#1493"><abbr title="App\Http\Ai\ChatBoxAi::buildNoLocalProductsReply">buildNoLocalProductsReply</abbr></a></td><td class="text-right">83%</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#1836"><abbr title="App\Http\Ai\ChatBoxAi::productDetailUrl">productDetailUrl</abbr></a></td><td class="text-right">83%</td></tr>
+       <tr><td><a href="Controllers/Api/ProductController.php.html#412"><abbr title="App\Http\Controllers\Api\ProductController::incrementView">incrementView</abbr></a></td><td class="text-right">83%</td></tr>
+       <tr><td><a href="Controllers/Api/ProductController.php.html#425"><abbr title="App\Http\Controllers\Api\ProductController::incrementLike">incrementLike</abbr></a></td><td class="text-right">83%</td></tr>
+       <tr><td><a href="Controllers/Api/ProductController.php.html#438"><abbr title="App\Http\Controllers\Api\ProductController::incrementShare">incrementShare</abbr></a></td><td class="text-right">83%</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#587"><abbr title="App\Http\Ai\ChatBoxAi::recordChatboxTrainingLog">recordChatboxTrainingLog</abbr></a></td><td class="text-right">84%</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#713"><abbr title="App\Http\Ai\ChatBoxAi::resolveMajorIdFromCode">resolveMajorIdFromCode</abbr></a></td><td class="text-right">84%</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#733"><abbr title="App\Http\Ai\ChatBoxAi::buildTeacherContext">buildTeacherContext</abbr></a></td><td class="text-right">88%</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+    <div class="col-md-6">
+     <h3>Project Risks</h3>
+     <div class="scrollbox">
+      <table class="table">
+       <thead>
+        <tr>
+         <th>Method</th>
+         <th class="text-right"><abbr title="Change Risk Anti-Patterns (CRAP) Index">CRAP</abbr></th>
+        </tr>
+       </thead>
+       <tbody>
+       <tr><td><a href="Ai/CompareAi.php.html#278"><abbr title="App\Http\Ai\CompareAi::getProjectType">getProjectType</abbr></a></td><td class="text-right">420</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#932"><abbr title="App\Http\Ai\SearchAi::searchProducts">searchProducts</abbr></a></td><td class="text-right">306</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#29"><abbr title="App\Http\Ai\SearchAi::searchAi">searchAi</abbr></a></td><td class="text-right">182</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#21"><abbr title="App\Http\Ai\CompareAi::compareProductImages">compareProductImages</abbr></a></td><td class="text-right">132</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#803"><abbr title="App\Http\Ai\CompareAi::compareImagesLocally">compareImagesLocally</abbr></a></td><td class="text-right">110</td></tr>
+       <tr><td><a href="Ai/ContentModeration.php.html#19"><abbr title="App\Http\Ai\ContentModeration::moderateProduct">moderateProduct</abbr></a></td><td class="text-right">110</td></tr>
+       <tr><td><a href="Ai/ContentModeration.php.html#279"><abbr title="App\Http\Ai\ContentModeration::normalizeModerationResult">normalizeModerationResult</abbr></a></td><td class="text-right">110</td></tr>
+       <tr><td><a href="Ai/ContentModeration.php.html#320"><abbr title="App\Http\Ai\ContentModeration::isSafeEducationalSoftwareScreenshot">isSafeEducationalSoftwareScreenshot</abbr></a></td><td class="text-right">110</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#571"><abbr title="App\Http\Ai\CompareAi::compareImagesWithAi">compareImagesWithAi</abbr></a></td><td class="text-right">90</td></tr>
+       <tr><td><a href="Ai/ContentModeration.php.html#578"><abbr title="App\Http\Ai\ContentModeration::extractErrorMessage">extractErrorMessage</abbr></a></td><td class="text-right">90</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#315"><abbr title="App\Http\Ai\SearchAi::majorCodeMatches">majorCodeMatches</abbr></a></td><td class="text-right">90</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#1795"><abbr title="App\Http\Ai\ChatBoxAi::productRelevanceText">productRelevanceText</abbr></a></td><td class="text-right">72</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#2739"><abbr title="App\Http\Ai\ChatBoxAi::detectedMajorOutsideUserScope">detectedMajorOutsideUserScope</abbr></a></td><td class="text-right">72</td></tr>
+       <tr><td><a href="Ai/ContentModeration.php.html#138"><abbr title="App\Http\Ai\ContentModeration::moderateUploadedImage">moderateUploadedImage</abbr></a></td><td class="text-right">72</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#122"><abbr title="App\Http\Ai\CompareAi::compareProduct">compareProduct</abbr></a></td><td class="text-right">60</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#251"><abbr title="App\Http\Ai\CompareAi::normalizeAiLevelCode">normalizeAiLevelCode</abbr></a></td><td class="text-right">56</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#865"><abbr title="App\Http\Ai\CompareAi::imageSignatureFromUrl">imageSignatureFromUrl</abbr></a></td><td class="text-right">56</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#922"><abbr title="App\Http\Ai\CompareAi::compareImageSignatures">compareImageSignatures</abbr></a></td><td class="text-right">56</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#952"><abbr title="App\Http\Ai\CompareAi::averageImageHash">averageImageHash</abbr></a></td><td class="text-right">56</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#356"><abbr title="App\Http\Ai\SearchAi::detectLocalMajorCode">detectLocalMajorCode</abbr></a></td><td class="text-right">56</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#828"><abbr title="App\Http\Ai\SearchAi::decodeJsonIntent">decodeJsonIntent</abbr></a></td><td class="text-right">56</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#895"><abbr title="App\Http\Ai\SearchAi::getSearchTerms">getSearchTerms</abbr></a></td><td class="text-right">56</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#1149"><abbr title="App\Http\Ai\SearchAi::fallbackSearch">fallbackSearch</abbr></a></td><td class="text-right">56</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#217"><abbr title="App\Http\Controllers\Api\AdminController::buildFallbackDashboardInsights">buildFallbackDashboardInsights</abbr></a></td><td class="text-right">56</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#336"><abbr title="App\Http\Ai\ChatBoxAi::chat">chat</abbr></a></td><td class="text-right">43</td></tr>
+       <tr><td><a href="Ai/CheckImage.php.html#19"><abbr title="App\Http\Ai\CheckImage::checkNSFW">checkNSFW</abbr></a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#743"><abbr title="App\Http\Ai\CompareAi::formatDuplicateImages">formatDuplicateImages</abbr></a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="Ai/ContentModeration.php.html#253"><abbr title="App\Http\Ai\ContentModeration::formatViolations">formatViolations</abbr></a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#448"><abbr title="App\Http\Ai\SearchAi::cleanKeywordForMajor">cleanKeywordForMajor</abbr></a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#529"><abbr title="App\Http\Ai\SearchAi::majorAliases">majorAliases</abbr></a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#853"><abbr title="App\Http\Ai\SearchAi::normalizeIntent">normalizeIntent</abbr></a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#1069"><abbr title="App\Http\Ai\SearchAi::majorCodeAliases">majorCodeAliases</abbr></a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#114"><abbr title="App\Http\Controllers\Api\AdminController::buildDashboardAiInsights">buildDashboardAiInsights</abbr></a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="Controllers/Api/ProductController.php.html#303"><abbr title="App\Http\Controllers\Api\ProductController::majorAliases">majorAliases</abbr></a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="Controllers/Api/ProductController.php.html#314"><abbr title="App\Http\Controllers\Api\ProductController::majorKeywordAliases">majorKeywordAliases</abbr></a></td><td class="text-right">42</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#1564"><abbr title="App\Http\Ai\ChatBoxAi::askOpenAiForRetrievedProducts">askOpenAiForRetrievedProducts</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#360"><abbr title="App\Http\Ai\CompareAi::buildComparisonPrompt">buildComparisonPrompt</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#782"><abbr title="App\Http\Ai\CompareAi::decodeJsonContent">decodeJsonContent</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#1070"><abbr title="App\Http\Ai\CompareAi::getProductImages">getProductImages</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#243"><abbr title="App\Http\Ai\SearchAi::shouldRunProductSearch">shouldRunProductSearch</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#298"><abbr title="App\Http\Ai\SearchAi::isDifferentMajorSearch">isDifferentMajorSearch</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#1080"><abbr title="App\Http\Ai\SearchAi::orderByRelevance">orderByRelevance</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#438"><abbr title="App\Http\Controllers\Api\AdminController::updateChatboxTrainingLog">updateChatboxTrainingLog</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#513"><abbr title="App\Http\Controllers\Api\AdminController::sendPasswordRecovery">sendPasswordRecovery</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="Controllers/Api/UserController.php.html#162"><abbr title="App\Http\Controllers\Api\UserController::search">search</abbr></a></td><td class="text-right">30</td></tr>
+       <tr><td><a href="Controllers/Api/ProductController.php.html#57"><abbr title="App\Http\Controllers\Api\ProductController::searchProducts">searchProducts</abbr></a></td><td class="text-right">25</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#999"><abbr title="App\Http\Ai\ChatBoxAi::extractMentionedProducts">extractMentionedProducts</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#1761"><abbr title="App\Http\Ai\ChatBoxAi::replyMentionsAnyProduct">replyMentionsAnyProduct</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#265"><abbr title="App\Http\Ai\CompareAi::formatAiLevel">formatAiLevel</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#506"><abbr title="App\Http\Ai\CompareAi::getDuplicateFields">getDuplicateFields</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="Ai/ContentModeration.php.html#233"><abbr title="App\Http\Ai\ContentModeration::parseJson">parseJson</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="Ai/ContentModeration.php.html#546"><abbr title="App\Http\Ai\ContentModeration::resolveImageUrl">resolveImageUrl</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#18"><abbr title="App\Http\Ai\SearchAi::containsAny">containsAny</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#338"><abbr title="App\Http\Ai\SearchAi::mergeLocalIntent">mergeLocalIntent</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#649"><abbr title="App\Http\Ai\SearchAi::detectSearchIntent">detectSearchIntent</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#200"><abbr title="App\Http\Controllers\Api\AdminController::decodeDashboardInsightJson">decodeDashboardInsightJson</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#755"><abbr title="App\Http\Controllers\Api\AdminController::rejectUnsafeInput">rejectUnsafeInput</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="Controllers/Api/ProductController.php.html#261"><abbr title="App\Http\Controllers\Api\ProductController::cleanKeywordForMajor">cleanKeywordForMajor</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="Controllers/Api/UploadController.php.html#39"><abbr title="App\Http\Controllers\Api\UploadController::upload">upload</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="Controllers/Api/UserController.php.html#78"><abbr title="App\Http\Controllers\Api\UserController::statistics">statistics</abbr></a></td><td class="text-right">20</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#641"><abbr title="App\Http\Ai\ChatBoxAi::compactTrainingProducts">compactTrainingProducts</abbr></a></td><td class="text-right">15</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#1008"><abbr title="App\Http\Ai\CompareAi::hammingDistance">hammingDistance</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#177"><abbr title="App\Http\Ai\SearchAi::guardNonProductSearch">guardNonProductSearch</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#1207"><abbr title="App\Http\Ai\SearchAi::containsDangerousPatterns">containsDangerousPatterns</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#312"><abbr title="App\Http\Controllers\Api\AdminController::updateUser">updateUser</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#389"><abbr title="App\Http\Controllers\Api\AdminController::chatboxTrainingLogs">chatboxTrainingLogs</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#589"><abbr title="App\Http\Controllers\Api\AdminController::products">products</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#727"><abbr title="App\Http\Controllers\Api\AdminController::destroyMajor">destroyMajor</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="Controllers/Api/AuthController.php.html#79"><abbr title="App\Http\Controllers\Api\AuthController::submitPasswordRecovery">submitPasswordRecovery</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="Controllers/Api/UserController.php.html#120"><abbr title="App\Http\Controllers\Api\UserController::updatePassword">updatePassword</abbr></a></td><td class="text-right">12</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#1455"><abbr title="App\Http\Ai\ChatBoxAi::localProductSearchResponse">localProductSearchResponse</abbr></a></td><td class="text-right">11</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#1893"><abbr title="App\Http\Ai\ChatBoxAi::findLocalProductsForMessage">findLocalProductsForMessage</abbr></a></td><td class="text-right">10</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#1418"><abbr title="App\Http\Ai\ChatBoxAi::featureGuideResponse">featureGuideResponse</abbr></a></td><td class="text-right">7</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#921"><abbr title="App\Http\Ai\ChatBoxAi::buildSpecializedData">buildSpecializedData</abbr></a></td><td class="text-right">7</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#713"><abbr title="App\Http\Ai\ChatBoxAi::resolveMajorIdFromCode">resolveMajorIdFromCode</abbr></a></td><td class="text-right">7</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#1533"><abbr title="App\Http\Ai\ChatBoxAi::imageCheckGuideText">imageCheckGuideText</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#1542"><abbr title="App\Http\Ai\ChatBoxAi::compareGuideText">compareGuideText</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#1734"><abbr title="App\Http\Ai\ChatBoxAi::formatProductList">formatProductList</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#1751"><abbr title="App\Http\Ai\ChatBoxAi::buildFoundLocalProductsReply">buildFoundLocalProductsReply</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#1869"><abbr title="App\Http\Ai\ChatBoxAi::openAiFallbackResponse">openAiFallbackResponse</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#324"><abbr title="App\Http\Ai\CompareAi::compareWithAi">compareWithAi</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#734"><abbr title="App\Http\Ai\CompareAi::calculateOverallSimilarity">calculateOverallSimilarity</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Ai/CompareAi.php.html#908"><abbr title="App\Http\Ai\CompareAi::imageSignatureFromBytes">imageSignatureFromBytes</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Ai/ContentModeration.php.html#461"><abbr title="App\Http\Ai\ContentModeration::isSafeCreativeDesignWork">isSafeCreativeDesignWork</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#192"><abbr title="App\Http\Ai\SearchAi::isCredentialOrAdminSecretQuestion">isCredentialOrAdminSecretQuestion</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Ai/SearchAi.php.html#293"><abbr title="App\Http\Ai\SearchAi::isRestrictedRoleWithoutMajor">isRestrictedRoleWithoutMajor</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#284"><abbr title="App\Http\Controllers\Api\AdminController::storeUser">storeUser</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#345"><abbr title="App\Http\Controllers\Api\AdminController::destroyUser">destroyUser</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#362"><abbr title="App\Http\Controllers\Api\AdminController::lookupPasswordRecoveryUser">lookupPasswordRecoveryUser</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#637"><abbr title="App\Http\Controllers\Api\AdminController::updateProductStatus">updateProductStatus</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#683"><abbr title="App\Http\Controllers\Api\AdminController::storeMajor">storeMajor</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Controllers/Api/AdminController.php.html#704"><abbr title="App\Http\Controllers\Api\AdminController::updateMajor">updateMajor</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Controllers/Api/MajorController.php.html#14"><abbr title="App\Http\Controllers\Api\MajorController::majorName">majorName</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Controllers/Api/MajorController.php.html#36"><abbr title="App\Http\Controllers\Api\MajorController::majorNameCode">majorNameCode</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Controllers/Api/UserController.php.html#29"><abbr title="App\Http\Controllers\Api\UserController::show">show</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Controllers/Api/UserController.php.html#49"><abbr title="App\Http\Controllers\Api\UserController::update">update</abbr></a></td><td class="text-right">6</td></tr>
+       <tr><td><a href="Controllers/Api/TeacherController.php.html#71"><abbr title="App\Http\Controllers\Api\TeacherController::teacherReject">teacherReject</abbr></a></td><td class="text-right">4</td></tr>
+       <tr><td><a href="Middleware/CheckRole.php.html#16"><abbr title="App\Http\Middleware\CheckRole::handle">handle</abbr></a></td><td class="text-right">3</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#625"><abbr title="App\Http\Ai\ChatBoxAi::trainingAnalysisForMessage">trainingAnalysisForMessage</abbr></a></td><td class="text-right">3</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#587"><abbr title="App\Http\Ai\ChatBoxAi::recordChatboxTrainingLog">recordChatboxTrainingLog</abbr></a></td><td class="text-right">3</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#1836"><abbr title="App\Http\Ai\ChatBoxAi::productDetailUrl">productDetailUrl</abbr></a></td><td class="text-right">3</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#566"><abbr title="App\Http\Ai\ChatBoxAi::recordTrainingFromJsonResponse">recordTrainingFromJsonResponse</abbr></a></td><td class="text-right">2</td></tr>
+       <tr><td><a href="Controllers/Api/TeacherController.php.html#18"><abbr title="App\Http\Controllers\Api\TeacherController::getTeacherStatistic">getTeacherStatistic</abbr></a></td><td class="text-right">2</td></tr>
+       <tr><td><a href="Controllers/Api/TeacherController.php.html#54"><abbr title="App\Http\Controllers\Api\TeacherController::teacherApprove">teacherApprove</abbr></a></td><td class="text-right">2</td></tr>
+       <tr><td><a href="Controllers/Api/UploadController.php.html#22"><abbr title="App\Http\Controllers\Api\UploadController::countPublishedProducts">countPublishedProducts</abbr></a></td><td class="text-right">2</td></tr>
+       <tr><td><a href="Controllers/Api/ProductController.php.html#22"><abbr title="App\Http\Controllers\Api\ProductController::productViewId">productViewId</abbr></a></td><td class="text-right">2</td></tr>
+       <tr><td><a href="Controllers/Api/AuthController.php.html#51"><abbr title="App\Http\Controllers\Api\AuthController::refresh">refresh</abbr></a></td><td class="text-right">2</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#1493"><abbr title="App\Http\Ai\ChatBoxAi::buildNoLocalProductsReply">buildNoLocalProductsReply</abbr></a></td><td class="text-right">2</td></tr>
+       <tr><td><a href="Controllers/Api/ProductController.php.html#412"><abbr title="App\Http\Controllers\Api\ProductController::incrementView">incrementView</abbr></a></td><td class="text-right">2</td></tr>
+       <tr><td><a href="Controllers/Api/ProductController.php.html#425"><abbr title="App\Http\Controllers\Api\ProductController::incrementLike">incrementLike</abbr></a></td><td class="text-right">2</td></tr>
+       <tr><td><a href="Controllers/Api/ProductController.php.html#438"><abbr title="App\Http\Controllers\Api\ProductController::incrementShare">incrementShare</abbr></a></td><td class="text-right">2</td></tr>
+       <tr><td><a href="Ai/ChatBoxAi.php.html#733"><abbr title="App\Http\Ai\ChatBoxAi::buildTeacherContext">buildTeacherContext</abbr></a></td><td class="text-right">2</td></tr>
+
+       </tbody>
+      </table>
+     </div>
+    </div>
+   </div>
+   <footer>
+    <hr/>
+    <p>
+     <small>Generated by <a href="https://github.com/sebastianbergmann/php-code-coverage" target="_top">php-code-coverage 11.0.12</a> using <a href="https://www.php.net/" target="_top">PHP 8.2.12</a> and <a href="https://phpunit.de/">PHPUnit 11.5.55</a> at Tue Jul 7 10:49:03 UTC 2026.</small>
+    </p>
+   </footer>
+  </div>
+  <script src="../_js/jquery.min.js?v=11.0.12" type="text/javascript"></script>
+  <script src="../_js/d3.min.js?v=11.0.12" type="text/javascript"></script>
+  <script src="../_js/nv.d3.min.js?v=11.0.12" type="text/javascript"></script>
+  <script type="text/javascript">
+$(document).ready(function() {
+  nv.addGraph(function() {
+    var chart = nv.models.multiBarChart();
+    chart.tooltips(false)
+      .showControls(false)
+      .showLegend(false)
+      .reduceXTicks(false)
+      .staggerLabels(true)
+      .yAxis.tickFormat(d3.format('d'));
+
+    d3.select('#classCoverageDistribution svg')
+      .datum(getCoverageDistributionData([9,3,2,2,0,0,0,1,2,1,0,8], "Class Coverage"))
+      .transition().duration(500).call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  nv.addGraph(function() {
+    var chart = nv.models.multiBarChart();
+    chart.tooltips(false)
+      .showControls(false)
+      .showLegend(false)
+      .reduceXTicks(false)
+      .staggerLabels(true)
+      .yAxis.tickFormat(d3.format('d'));
+
+    d3.select('#methodCoverageDistribution svg')
+      .datum(getCoverageDistributionData([137,1,0,0,3,1,1,6,5,10,7,83], "Method Coverage"))
+      .transition().duration(500).call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  function getCoverageDistributionData(data, label) {
+    var labels = [
+      '0%',
+      '0-10%',
+      '10-20%',
+      '20-30%',
+      '30-40%',
+      '40-50%',
+      '50-60%',
+      '60-70%',
+      '70-80%',
+      '80-90%',
+      '90-100%',
+      '100%'
+    ];
+    var values = [];
+    $.each(labels, function(key) {
+      values.push({x: labels[key], y: data[key]});
+    });
+
+    return [
+      {
+        key: label,
+        values: values,
+        color: "#4572A7"
+      }
+    ];
+  }
+  nv.addGraph(function() {
+    var chart = nv.models.scatterChart()
+      .showDistX(true)
+      .showDistY(true)
+      .showLegend(false)
+      .forceX([0, 100]);
+    chart.tooltipContent(function(graph) {
+      return '<p>' + graph.point.class + '</p>';
+    });
+
+    chart.xAxis.axisLabel('Code Coverage (in percent)');
+    chart.yAxis.axisLabel('Cyclomatic Complexity');
+
+    d3.select('#classComplexity svg')
+      .datum(getComplexityData([[87.1498443752779,305,"<a href=\"Ai\/ChatBoxAi.php.html#17\">App\\Http\\Ai\\ChatBoxAi<\/a>"],[5,7,"<a href=\"Ai\/CheckImage.php.html#8\">App\\Http\\Ai\\CheckImage<\/a>"],[1.0903426791277258,131,"<a href=\"Ai\/CompareAi.php.html#12\">App\\Http\\Ai\\CompareAi<\/a>"],[0.22075055187637968,71,"<a href=\"Ai\/ContentModeration.php.html#13\">App\\Http\\Ai\\ContentModeration<\/a>"],[0,135,"<a href=\"Ai\/SearchAi.php.html#12\">App\\Http\\Ai\\SearchAi<\/a>"],[100,6,"<a href=\"Common\/NormalizeMajorCode.php.html#5\">App\\Http\\Common\\NormalizeMajorCode<\/a>"],[0,66,"<a href=\"Controllers\/Api\/AdminController.php.html#22\">App\\Http\\Controllers\\Api\\AdminController<\/a>"],[16.27906976744186,11,"<a href=\"Controllers\/Api\/AuthController.php.html#13\">App\\Http\\Controllers\\Api\\AuthController<\/a>"],[100,2,"<a href=\"Controllers\/Api\/CategoryController.php.html#8\">App\\Http\\Controllers\\Api\\CategoryController<\/a>"],[15.789473684210526,6,"<a href=\"Controllers\/Api\/MajorController.php.html#8\">App\\Http\\Controllers\\Api\\MajorController<\/a>"],[71.72413793103448,62,"<a href=\"Controllers\/Api\/ProductController.php.html#14\">App\\Http\\Controllers\\Api\\ProductController<\/a>"],[29.411764705882355,3,"<a href=\"Controllers\/Api\/SystemSettingController.php.html#9\">App\\Http\\Controllers\\Api\\SystemSettingController<\/a>"],[78.94736842105263,11,"<a href=\"Controllers\/Api\/TeacherController.php.html#11\">App\\Http\\Controllers\\Api\\TeacherController<\/a>"],[26.923076923076923,7,"<a href=\"Controllers\/Api\/UploadController.php.html#15\">App\\Http\\Controllers\\Api\\UploadController<\/a>"],[0,17,"<a href=\"Controllers\/Api\/UserController.php.html#13\">App\\Http\\Controllers\\Api\\UserController<\/a>"],[100,0,"<a href=\"Controllers\/Controller.php.html#5\">App\\Http\\Controllers\\Controller<\/a>"],[66.66666666666666,3,"<a href=\"Middleware\/CheckRole.php.html#9\">App\\Http\\Middleware\\CheckRole<\/a>"],[0,2,"<a href=\"Requests\/CategoryRequest.php.html#7\">App\\Http\\Requests\\categoryRequest<\/a>"],[100,3,"<a href=\"Requests\/LoginRequest.php.html#7\">App\\Http\\Requests\\LoginRequest<\/a>"],[0,3,"<a href=\"Requests\/ProductRequest.php.html#7\">App\\Http\\Requests\\ProductRequest<\/a>"],[100,3,"<a href=\"Requests\/ProductViewRequest.php.html#7\">App\\Http\\Requests\\ProductViewRequest<\/a>"],[100,3,"<a href=\"Requests\/RejectProductRequest.php.html#7\">App\\Http\\Requests\\RejectProductRequest<\/a>"],[100,3,"<a href=\"Requests\/StoreReviewRequest.php.html#7\">App\\Http\\Requests\\StoreReviewRequest<\/a>"],[0,2,"<a href=\"Requests\/TeacherRequest.php.html#7\">App\\Http\\Requests\\TeacherRequest<\/a>"],[100,8,"<a href=\"Requests\/UploadRequest.php.html#8\">App\\Http\\Requests\\UploadRequest<\/a>"],[0,3,"<a href=\"Requests\/UserRequest.php.html#8\">App\\Http\\Requests\\UserRequest<\/a>"],[0,2,"<a href=\"Requests\/majorRequest.php.html#7\">App\\Http\\Requests\\majorRequest<\/a>"],[0,1,"<a href=\"Resources\/UserResource.php.html#8\">App\\Http\\Resources\\UserResource<\/a>"]], 'Class Complexity'))
+      .transition()
+      .duration(500)
+      .call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  nv.addGraph(function() {
+    var chart = nv.models.scatterChart()
+      .showDistX(true)
+      .showDistY(true)
+      .showLegend(false)
+      .forceX([0, 100]);
+    chart.tooltipContent(function(graph) {
+      return '<p>' + graph.point.class + '</p>';
+    });
+
+    chart.xAxis.axisLabel('Code Coverage (in percent)');
+    chart.yAxis.axisLabel('Method Complexity');
+
+    d3.select('#methodComplexity svg')
+      .datum(getComplexityData([[100,1,"<a href=\"Ai\/ChatBoxAi.php.html#19\">App\\Http\\Ai\\ChatBoxAi::__construct<\/a>"],[100,3,"<a href=\"Ai\/ChatBoxAi.php.html#24\">App\\Http\\Ai\\ChatBoxAi::isRelevantQuestion<\/a>"],[74.26470588235294,29,"<a href=\"Ai\/ChatBoxAi.php.html#336\">App\\Http\\Ai\\ChatBoxAi::chat<\/a>"],[100,1,"<a href=\"Ai\/ChatBoxAi.php.html#552\">App\\Http\\Ai\\ChatBoxAi::respondAndTrain<\/a>"],[37.5,2,"<a href=\"Ai\/ChatBoxAi.php.html#566\">App\\Http\\Ai\\ChatBoxAi::recordTrainingFromJsonResponse<\/a>"],[84,3,"<a href=\"Ai\/ChatBoxAi.php.html#587\">App\\Http\\Ai\\ChatBoxAi::recordChatboxTrainingLog<\/a>"],[71.42857142857143,3,"<a href=\"Ai\/ChatBoxAi.php.html#625\">App\\Http\\Ai\\ChatBoxAi::trainingAnalysisForMessage<\/a>"],[44,7,"<a href=\"Ai\/ChatBoxAi.php.html#641\">App\\Http\\Ai\\ChatBoxAi::compactTrainingProducts<\/a>"],[100,3,"<a href=\"Ai\/ChatBoxAi.php.html#677\">App\\Http\\Ai\\ChatBoxAi::shouldMarkTrainingNeeded<\/a>"],[100,2,"<a href=\"Ai\/ChatBoxAi.php.html#695\">App\\Http\\Ai\\ChatBoxAi::limitTrainingString<\/a>"],[100,1,"<a href=\"Ai\/ChatBoxAi.php.html#706\">App\\Http\\Ai\\ChatBoxAi::resolveUser<\/a>"],[84.61538461538461,7,"<a href=\"Ai\/ChatBoxAi.php.html#713\">App\\Http\\Ai\\ChatBoxAi::resolveMajorIdFromCode<\/a>"],[88.88888888888889,2,"<a href=\"Ai\/ChatBoxAi.php.html#733\">App\\Http\\Ai\\ChatBoxAi::buildTeacherContext<\/a>"],[100,1,"<a href=\"Ai\/ChatBoxAi.php.html#749\">App\\Http\\Ai\\ChatBoxAi::buildAdminContext<\/a>"],[97.10144927536231,3,"<a href=\"Ai\/ChatBoxAi.php.html#838\">App\\Http\\Ai\\ChatBoxAi::buildMajorContext<\/a>"],[80,7,"<a href=\"Ai\/ChatBoxAi.php.html#921\">App\\Http\\Ai\\ChatBoxAi::buildSpecializedData<\/a>"],[100,1,"<a href=\"Ai\/ChatBoxAi.php.html#964\">App\\Http\\Ai\\ChatBoxAi::buildGuestContext<\/a>"],[34.21052631578947,7,"<a href=\"Ai\/ChatBoxAi.php.html#999\">App\\Http\\Ai\\ChatBoxAi::extractMentionedProducts<\/a>"],[100,3,"<a href=\"Ai\/ChatBoxAi.php.html#1058\">App\\Http\\Ai\\ChatBoxAi::buildNonRelevantReply<\/a>"],[95.16129032258065,8,"<a href=\"Ai\/ChatBoxAi.php.html#1073\">App\\Http\\Ai\\ChatBoxAi::detectNonRelevantReplyCategory<\/a>"],[100,1,"<a href=\"Ai\/ChatBoxAi.php.html#1150\">App\\Http\\Ai\\ChatBoxAi::nonRelevantReplyBank<\/a>"],[100,1,"<a href=\"Ai\/ChatBoxAi.php.html#1268\">App\\Http\\Ai\\ChatBoxAi::suggestionSetsForCategory<\/a>"],[100,1,"<a href=\"Ai\/ChatBoxAi.php.html#1305\">App\\Http\\Ai\\ChatBoxAi::randomItem<\/a>"],[100,8,"<a href=\"Ai\/ChatBoxAi.php.html#1310\">App\\Http\\Ai\\ChatBoxAi::answerFeatureQuestionIfAny<\/a>"],[100,7,"<a href=\"Ai\/ChatBoxAi.php.html#1337\">App\\Http\\Ai\\ChatBoxAi::detectFeatureIntents<\/a>"],[75,7,"<a href=\"Ai\/ChatBoxAi.php.html#1418\">App\\Http\\Ai\\ChatBoxAi::featureGuideResponse<\/a>"],[36,5,"<a href=\"Ai\/ChatBoxAi.php.html#1455\">App\\Http\\Ai\\ChatBoxAi::localProductSearchResponse<\/a>"],[83.33333333333334,2,"<a href=\"Ai\/ChatBoxAi.php.html#1493\">App\\Http\\Ai\\ChatBoxAi::buildNoLocalProductsReply<\/a>"],[100,8,"<a href=\"Ai\/ChatBoxAi.php.html#1506\">App\\Http\\Ai\\ChatBoxAi::noResultSearchSuggestions<\/a>"],[0,1,"<a href=\"Ai\/ChatBoxAi.php.html#1528\">App\\Http\\Ai\\ChatBoxAi::searchGuideText<\/a>"],[0,2,"<a href=\"Ai\/ChatBoxAi.php.html#1533\">App\\Http\\Ai\\ChatBoxAi::imageCheckGuideText<\/a>"],[50,4,"<a href=\"Ai\/ChatBoxAi.php.html#1542\">App\\Http\\Ai\\ChatBoxAi::compareGuideText<\/a>"],[100,1,"<a href=\"Ai\/ChatBoxAi.php.html#1559\">App\\Http\\Ai\\ChatBoxAi::technicalGuideText<\/a>"],[0,5,"<a href=\"Ai\/ChatBoxAi.php.html#1564\">App\\Http\\Ai\\ChatBoxAi::askOpenAiForRetrievedProducts<\/a>"],[100,1,"<a href=\"Ai\/ChatBoxAi.php.html#1620\">App\\Http\\Ai\\ChatBoxAi::buildRetrievedProductsPrompt<\/a>"],[100,1,"<a href=\"Ai\/ChatBoxAi.php.html#1650\">App\\Http\\Ai\\ChatBoxAi::formatRetrievedProductsForPrompt<\/a>"],[100,2,"<a href=\"Ai\/ChatBoxAi.php.html#1670\">App\\Http\\Ai\\ChatBoxAi::productHighlightValues<\/a>"],[100,4,"<a href=\"Ai\/ChatBoxAi.php.html#1699\">App\\Http\\Ai\\ChatBoxAi::shouldAnswerProductSearchLocally<\/a>"],[100,2,"<a href=\"Ai\/ChatBoxAi.php.html#1721\">App\\Http\\Ai\\ChatBoxAi::safeFindLocalProductsForMessage<\/a>"],[0,2,"<a href=\"Ai\/ChatBoxAi.php.html#1734\">App\\Http\\Ai\\ChatBoxAi::formatProductList<\/a>"],[0,2,"<a href=\"Ai\/ChatBoxAi.php.html#1751\">App\\Http\\Ai\\ChatBoxAi::buildFoundLocalProductsReply<\/a>"],[0,4,"<a href=\"Ai\/ChatBoxAi.php.html#1761\">App\\Http\\Ai\\ChatBoxAi::replyMentionsAnyProduct<\/a>"],[0,1,"<a href=\"Ai\/ChatBoxAi.php.html#1780\">App\\Http\\Ai\\ChatBoxAi::looksLikeNoProductReply<\/a>"],[0,8,"<a href=\"Ai\/ChatBoxAi.php.html#1795\">App\\Http\\Ai\\ChatBoxAi::productRelevanceText<\/a>"],[83.33333333333334,3,"<a href=\"Ai\/ChatBoxAi.php.html#1836\">App\\Http\\Ai\\ChatBoxAi::productDetailUrl<\/a>"],[100,3,"<a href=\"Ai\/ChatBoxAi.php.html#1858\">App\\Http\\Ai\\ChatBoxAi::containsAny<\/a>"],[0,2,"<a href=\"Ai\/ChatBoxAi.php.html#1869\">App\\Http\\Ai\\ChatBoxAi::openAiFallbackResponse<\/a>"],[80,10,"<a href=\"Ai\/ChatBoxAi.php.html#1893\">App\\Http\\Ai\\ChatBoxAi::findLocalProductsForMessage<\/a>"],[100,1,"<a href=\"Ai\/ChatBoxAi.php.html#1958\">App\\Http\\Ai\\ChatBoxAi::localProductSearchBaseQuery<\/a>"],[94.44444444444444,5,"<a href=\"Ai\/ChatBoxAi.php.html#2010\">App\\Http\\Ai\\ChatBoxAi::applyLocalProductSearchTerms<\/a>"],[90.19607843137256,6,"<a href=\"Ai\/ChatBoxAi.php.html#2059\">App\\Http\\Ai\\ChatBoxAi::fallbackProductSearchStages<\/a>"],[100,5,"<a href=\"Ai\/ChatBoxAi.php.html#2124\">App\\Http\\Ai\\ChatBoxAi::importantSearchTokens<\/a>"],[100,1,"<a href=\"Ai\/ChatBoxAi.php.html#2179\">App\\Http\\Ai\\ChatBoxAi::isClearlyCnttWebRelated<\/a>"],[91.66666666666666,5,"<a href=\"Ai\/ChatBoxAi.php.html#2218\">App\\Http\\Ai\\ChatBoxAi::uniqueSearchTerms<\/a>"],[100,1,"<a href=\"Ai\/ChatBoxAi.php.html#2243\">App\\Http\\Ai\\ChatBoxAi::normalizeTagText<\/a>"],[100,1,"<a href=\"Ai\/ChatBoxAi.php.html#2250\">App\\Http\\Ai\\ChatBoxAi::extractLocalSearchTerms<\/a>"],[100,5,"<a href=\"Ai\/ChatBoxAi.php.html#2255\">App\\Http\\Ai\\ChatBoxAi::analyzeLocalSearchQuery<\/a>"],[100,12,"<a href=\"Ai\/ChatBoxAi.php.html#2283\">App\\Http\\Ai\\ChatBoxAi::extractRawLocalSearchTerms<\/a>"],[100,2,"<a href=\"Ai\/ChatBoxAi.php.html#2342\">App\\Http\\Ai\\ChatBoxAi::isUsefulSearchWord<\/a>"],[100,4,"<a href=\"Ai\/ChatBoxAi.php.html#2372\">App\\Http\\Ai\\ChatBoxAi::detectSemanticMajorCode<\/a>"],[100,2,"<a href=\"Ai\/ChatBoxAi.php.html#2520\">App\\Http\\Ai\\ChatBoxAi::containsSemanticKeyword<\/a>"],[100,11,"<a href=\"Ai\/ChatBoxAi.php.html#2529\">App\\Http\\Ai\\ChatBoxAi::expandedSemanticTerms<\/a>"],[100,3,"<a href=\"Ai\/ChatBoxAi.php.html#2692\">App\\Http\\Ai\\ChatBoxAi::looksLikeProductTopicQuery<\/a>"],[100,6,"<a href=\"Ai\/ChatBoxAi.php.html#2717\">App\\Http\\Ai\\ChatBoxAi::majorCodeAliasesForSearch<\/a>"],[100,6,"<a href=\"Ai\/ChatBoxAi.php.html#2728\">App\\Http\\Ai\\ChatBoxAi::majorLabel<\/a>"],[0,8,"<a href=\"Ai\/ChatBoxAi.php.html#2739\">App\\Http\\Ai\\ChatBoxAi::detectedMajorOutsideUserScope<\/a>"],[96.96969696969697,5,"<a href=\"Ai\/ChatBoxAi.php.html#2775\">App\\Http\\Ai\\ChatBoxAi::orderLocalSearchByRelevance<\/a>"],[100,3,"<a href=\"Ai\/ChatBoxAi.php.html#2840\">App\\Http\\Ai\\ChatBoxAi::looksLikeProductListingRequest<\/a>"],[100,2,"<a href=\"Ai\/ChatBoxAi.php.html#2853\">App\\Http\\Ai\\ChatBoxAi::removeGenericSearchWords<\/a>"],[100,1,"<a href=\"Ai\/ChatBoxAi.php.html#2919\">App\\Http\\Ai\\ChatBoxAi::normalizeSearchText<\/a>"],[100,1,"<a href=\"Ai\/ChatBoxAi.php.html#2927\">App\\Http\\Ai\\ChatBoxAi::removeVietnameseAccents<\/a>"],[100,17,"<a href=\"Ai\/ChatBoxAi.php.html#3006\">App\\Http\\Ai\\ChatBoxAi::buildSystemPrompt<\/a>"],[100,1,"<a href=\"Ai\/CheckImage.php.html#13\">App\\Http\\Ai\\CheckImage::__construct<\/a>"],[0,6,"<a href=\"Ai\/CheckImage.php.html#19\">App\\Http\\Ai\\CheckImage::checkNSFW<\/a>"],[100,1,"<a href=\"Ai\/CompareAi.php.html#16\">App\\Http\\Ai\\CompareAi::__construct<\/a>"],[0,11,"<a href=\"Ai\/CompareAi.php.html#21\">App\\Http\\Ai\\CompareAi::compareProductImages<\/a>"],[6.593406593406594,8,"<a href=\"Ai\/CompareAi.php.html#122\">App\\Http\\Ai\\CompareAi::compareProduct<\/a>"],[0,7,"<a href=\"Ai\/CompareAi.php.html#251\">App\\Http\\Ai\\CompareAi::normalizeAiLevelCode<\/a>"],[0,4,"<a href=\"Ai\/CompareAi.php.html#265\">App\\Http\\Ai\\CompareAi::formatAiLevel<\/a>"],[0,20,"<a href=\"Ai\/CompareAi.php.html#278\">App\\Http\\Ai\\CompareAi::getProjectType<\/a>"],[0,2,"<a href=\"Ai\/CompareAi.php.html#324\">App\\Http\\Ai\\CompareAi::compareWithAi<\/a>"],[0,5,"<a href=\"Ai\/CompareAi.php.html#360\">App\\Http\\Ai\\CompareAi::buildComparisonPrompt<\/a>"],[0,4,"<a href=\"Ai\/CompareAi.php.html#506\">App\\Http\\Ai\\CompareAi::getDuplicateFields<\/a>"],[0,1,"<a href=\"Ai\/CompareAi.php.html#560\">App\\Http\\Ai\\CompareAi::normalizeCompareValue<\/a>"],[0,9,"<a href=\"Ai\/CompareAi.php.html#571\">App\\Http\\Ai\\CompareAi::compareImagesWithAi<\/a>"],[0,1,"<a href=\"Ai\/CompareAi.php.html#676\">App\\Http\\Ai\\CompareAi::buildImageComparisonPrompt<\/a>"],[0,1,"<a href=\"Ai\/CompareAi.php.html#729\">App\\Http\\Ai\\CompareAi::normalizeImageLevelCode<\/a>"],[0,2,"<a href=\"Ai\/CompareAi.php.html#734\">App\\Http\\Ai\\CompareAi::calculateOverallSimilarity<\/a>"],[0,6,"<a href=\"Ai\/CompareAi.php.html#743\">App\\Http\\Ai\\CompareAi::formatDuplicateImages<\/a>"],[0,1,"<a href=\"Ai\/CompareAi.php.html#774\">App\\Http\\Ai\\CompareAi::normalizeImageUrl<\/a>"],[0,5,"<a href=\"Ai\/CompareAi.php.html#782\">App\\Http\\Ai\\CompareAi::decodeJsonContent<\/a>"],[0,10,"<a href=\"Ai\/CompareAi.php.html#803\">App\\Http\\Ai\\CompareAi::compareImagesLocally<\/a>"],[0,7,"<a href=\"Ai\/CompareAi.php.html#865\">App\\Http\\Ai\\CompareAi::imageSignatureFromUrl<\/a>"],[0,2,"<a href=\"Ai\/CompareAi.php.html#908\">App\\Http\\Ai\\CompareAi::imageSignatureFromBytes<\/a>"],[0,7,"<a href=\"Ai\/CompareAi.php.html#922\">App\\Http\\Ai\\CompareAi::compareImageSignatures<\/a>"],[0,7,"<a href=\"Ai\/CompareAi.php.html#952\">App\\Http\\Ai\\CompareAi::averageImageHash<\/a>"],[0,3,"<a href=\"Ai\/CompareAi.php.html#1008\">App\\Http\\Ai\\CompareAi::hammingDistance<\/a>"],[0,1,"<a href=\"Ai\/CompareAi.php.html#1022\">App\\Http\\Ai\\CompareAi::imageCompareFallback<\/a>"],[0,1,"<a href=\"Ai\/CompareAi.php.html#1035\">App\\Http\\Ai\\CompareAi::formatProduct<\/a>"],[0,5,"<a href=\"Ai\/CompareAi.php.html#1070\">App\\Http\\Ai\\CompareAi::getProductImages<\/a>"],[100,1,"<a href=\"Ai\/ContentModeration.php.html#15\">App\\Http\\Ai\\ContentModeration::__construct<\/a>"],[0,10,"<a href=\"Ai\/ContentModeration.php.html#19\">App\\Http\\Ai\\ContentModeration::moderateProduct<\/a>"],[0,8,"<a href=\"Ai\/ContentModeration.php.html#138\">App\\Http\\Ai\\ContentModeration::moderateUploadedImage<\/a>"],[0,4,"<a href=\"Ai\/ContentModeration.php.html#233\">App\\Http\\Ai\\ContentModeration::parseJson<\/a>"],[0,6,"<a href=\"Ai\/ContentModeration.php.html#253\">App\\Http\\Ai\\ContentModeration::formatViolations<\/a>"],[0,10,"<a href=\"Ai\/ContentModeration.php.html#279\">App\\Http\\Ai\\ContentModeration::normalizeModerationResult<\/a>"],[0,10,"<a href=\"Ai\/ContentModeration.php.html#320\">App\\Http\\Ai\\ContentModeration::isSafeEducationalSoftwareScreenshot<\/a>"],[0,1,"<a href=\"Ai\/ContentModeration.php.html#410\">App\\Http\\Ai\\ContentModeration::isSoftwareOrInterfaceProject<\/a>"],[0,2,"<a href=\"Ai\/ContentModeration.php.html#461\">App\\Http\\Ai\\ContentModeration::isSafeCreativeDesignWork<\/a>"],[0,1,"<a href=\"Ai\/ContentModeration.php.html#487\">App\\Http\\Ai\\ContentModeration::hasStrongUnsafeSignal<\/a>"],[0,4,"<a href=\"Ai\/ContentModeration.php.html#546\">App\\Http\\Ai\\ContentModeration::resolveImageUrl<\/a>"],[0,1,"<a href=\"Ai\/ContentModeration.php.html#573\">App\\Http\\Ai\\ContentModeration::isSupportedImageReference<\/a>"],[0,9,"<a href=\"Ai\/ContentModeration.php.html#578\">App\\Http\\Ai\\ContentModeration::extractErrorMessage<\/a>"],[0,1,"<a href=\"Ai\/ContentModeration.php.html#609\">App\\Http\\Ai\\ContentModeration::blocked<\/a>"],[0,1,"<a href=\"Ai\/ContentModeration.php.html#619\">App\\Http\\Ai\\ContentModeration::skipped<\/a>"],[0,1,"<a href=\"Ai\/ContentModeration.php.html#630\">App\\Http\\Ai\\ContentModeration::aiBusySkippedResult<\/a>"],[0,1,"<a href=\"Ai\/ContentModeration.php.html#643\">App\\Http\\Ai\\ContentModeration::buildPrompt<\/a>"],[0,1,"<a href=\"Ai\/SearchAi.php.html#14\">App\\Http\\Ai\\SearchAi::__construct<\/a>"],[0,4,"<a href=\"Ai\/SearchAi.php.html#18\">App\\Http\\Ai\\SearchAi::containsAny<\/a>"],[0,13,"<a href=\"Ai\/SearchAi.php.html#29\">App\\Http\\Ai\\SearchAi::searchAi<\/a>"],[0,3,"<a href=\"Ai\/SearchAi.php.html#177\">App\\Http\\Ai\\SearchAi::guardNonProductSearch<\/a>"],[0,2,"<a href=\"Ai\/SearchAi.php.html#192\">App\\Http\\Ai\\SearchAi::isCredentialOrAdminSecretQuestion<\/a>"],[0,1,"<a href=\"Ai\/SearchAi.php.html#224\">App\\Http\\Ai\\SearchAi::isGreetingOrChatOnly<\/a>"],[0,5,"<a href=\"Ai\/SearchAi.php.html#243\">App\\Http\\Ai\\SearchAi::shouldRunProductSearch<\/a>"],[0,1,"<a href=\"Ai\/SearchAi.php.html#286\">App\\Http\\Ai\\SearchAi::resolveUser<\/a>"],[0,2,"<a href=\"Ai\/SearchAi.php.html#293\">App\\Http\\Ai\\SearchAi::isRestrictedRoleWithoutMajor<\/a>"],[0,5,"<a href=\"Ai\/SearchAi.php.html#298\">App\\Http\\Ai\\SearchAi::isDifferentMajorSearch<\/a>"],[0,9,"<a href=\"Ai\/SearchAi.php.html#315\">App\\Http\\Ai\\SearchAi::majorCodeMatches<\/a>"],[0,4,"<a href=\"Ai\/SearchAi.php.html#338\">App\\Http\\Ai\\SearchAi::mergeLocalIntent<\/a>"],[0,7,"<a href=\"Ai\/SearchAi.php.html#356\">App\\Http\\Ai\\SearchAi::detectLocalMajorCode<\/a>"],[0,6,"<a href=\"Ai\/SearchAi.php.html#448\">App\\Http\\Ai\\SearchAi::cleanKeywordForMajor<\/a>"],[0,1,"<a href=\"Ai\/SearchAi.php.html#521\">App\\Http\\Ai\\SearchAi::normalizeSearchText<\/a>"],[0,6,"<a href=\"Ai\/SearchAi.php.html#529\">App\\Http\\Ai\\SearchAi::majorAliases<\/a>"],[0,1,"<a href=\"Ai\/SearchAi.php.html#569\">App\\Http\\Ai\\SearchAi::removeVietnameseAccents<\/a>"],[0,4,"<a href=\"Ai\/SearchAi.php.html#649\">App\\Http\\Ai\\SearchAi::detectSearchIntent<\/a>"],[0,7,"<a href=\"Ai\/SearchAi.php.html#828\">App\\Http\\Ai\\SearchAi::decodeJsonIntent<\/a>"],[0,6,"<a href=\"Ai\/SearchAi.php.html#853\">App\\Http\\Ai\\SearchAi::normalizeIntent<\/a>"],[0,7,"<a href=\"Ai\/SearchAi.php.html#895\">App\\Http\\Ai\\SearchAi::getSearchTerms<\/a>"],[0,17,"<a href=\"Ai\/SearchAi.php.html#932\">App\\Http\\Ai\\SearchAi::searchProducts<\/a>"],[0,1,"<a href=\"Ai\/SearchAi.php.html#1015\">App\\Http\\Ai\\SearchAi::baseProductQuery<\/a>"],[0,6,"<a href=\"Ai\/SearchAi.php.html#1069\">App\\Http\\Ai\\SearchAi::majorCodeAliases<\/a>"],[0,5,"<a href=\"Ai\/SearchAi.php.html#1080\">App\\Http\\Ai\\SearchAi::orderByRelevance<\/a>"],[0,7,"<a href=\"Ai\/SearchAi.php.html#1149\">App\\Http\\Ai\\SearchAi::fallbackSearch<\/a>"],[0,3,"<a href=\"Ai\/SearchAi.php.html#1207\">App\\Http\\Ai\\SearchAi::containsDangerousPatterns<\/a>"],[0,1,"<a href=\"Ai\/SearchAi.php.html#1245\">App\\Http\\Ai\\SearchAi::sanitizeSearchMessage<\/a>"],[100,6,"<a href=\"Common\/NormalizeMajorCode.php.html#7\">App\\Http\\Common\\NormalizeMajorCode::NormalizeMajorCode<\/a>"],[0,1,"<a href=\"Controllers\/Api\/AdminController.php.html#24\">App\\Http\\Controllers\\Api\\AdminController::__construct<\/a>"],[0,1,"<a href=\"Controllers\/Api\/AdminController.php.html#28\">App\\Http\\Controllers\\Api\\AdminController::dashboard<\/a>"],[0,6,"<a href=\"Controllers\/Api\/AdminController.php.html#114\">App\\Http\\Controllers\\Api\\AdminController::buildDashboardAiInsights<\/a>"],[0,1,"<a href=\"Controllers\/Api\/AdminController.php.html#180\">App\\Http\\Controllers\\Api\\AdminController::buildDashboardInsightPrompt<\/a>"],[0,4,"<a href=\"Controllers\/Api\/AdminController.php.html#200\">App\\Http\\Controllers\\Api\\AdminController::decodeDashboardInsightJson<\/a>"],[0,7,"<a href=\"Controllers\/Api\/AdminController.php.html#217\">App\\Http\\Controllers\\Api\\AdminController::buildFallbackDashboardInsights<\/a>"],[0,1,"<a href=\"Controllers\/Api\/AdminController.php.html#255\">App\\Http\\Controllers\\Api\\AdminController::users<\/a>"],[0,2,"<a href=\"Controllers\/Api\/AdminController.php.html#284\">App\\Http\\Controllers\\Api\\AdminController::storeUser<\/a>"],[0,3,"<a href=\"Controllers\/Api\/AdminController.php.html#312\">App\\Http\\Controllers\\Api\\AdminController::updateUser<\/a>"],[0,2,"<a href=\"Controllers\/Api\/AdminController.php.html#345\">App\\Http\\Controllers\\Api\\AdminController::destroyUser<\/a>"],[0,2,"<a href=\"Controllers\/Api\/AdminController.php.html#362\">App\\Http\\Controllers\\Api\\AdminController::lookupPasswordRecoveryUser<\/a>"],[0,3,"<a href=\"Controllers\/Api\/AdminController.php.html#389\">App\\Http\\Controllers\\Api\\AdminController::chatboxTrainingLogs<\/a>"],[0,5,"<a href=\"Controllers\/Api\/AdminController.php.html#438\">App\\Http\\Controllers\\Api\\AdminController::updateChatboxTrainingLog<\/a>"],[0,1,"<a href=\"Controllers\/Api\/AdminController.php.html#471\">App\\Http\\Controllers\\Api\\AdminController::destroyChatboxTrainingLog<\/a>"],[0,1,"<a href=\"Controllers\/Api\/AdminController.php.html#481\">App\\Http\\Controllers\\Api\\AdminController::supportRequests<\/a>"],[0,1,"<a href=\"Controllers\/Api\/AdminController.php.html#498\">App\\Http\\Controllers\\Api\\AdminController::markSupportProcessed<\/a>"],[0,5,"<a href=\"Controllers\/Api\/AdminController.php.html#513\">App\\Http\\Controllers\\Api\\AdminController::sendPasswordRecovery<\/a>"],[0,1,"<a href=\"Controllers\/Api\/AdminController.php.html#577\">App\\Http\\Controllers\\Api\\AdminController::findPasswordRecoveryUser<\/a>"],[0,3,"<a href=\"Controllers\/Api\/AdminController.php.html#589\">App\\Http\\Controllers\\Api\\AdminController::products<\/a>"],[0,2,"<a href=\"Controllers\/Api\/AdminController.php.html#637\">App\\Http\\Controllers\\Api\\AdminController::updateProductStatus<\/a>"],[0,1,"<a href=\"Controllers\/Api\/AdminController.php.html#660\">App\\Http\\Controllers\\Api\\AdminController::destroyProduct<\/a>"],[0,1,"<a href=\"Controllers\/Api\/AdminController.php.html#670\">App\\Http\\Controllers\\Api\\AdminController::majors<\/a>"],[0,2,"<a href=\"Controllers\/Api\/AdminController.php.html#683\">App\\Http\\Controllers\\Api\\AdminController::storeMajor<\/a>"],[0,2,"<a href=\"Controllers\/Api\/AdminController.php.html#704\">App\\Http\\Controllers\\Api\\AdminController::updateMajor<\/a>"],[0,3,"<a href=\"Controllers\/Api\/AdminController.php.html#727\">App\\Http\\Controllers\\Api\\AdminController::destroyMajor<\/a>"],[0,1,"<a href=\"Controllers\/Api\/AdminController.php.html#747\">App\\Http\\Controllers\\Api\\AdminController::categories<\/a>"],[0,4,"<a href=\"Controllers\/Api\/AdminController.php.html#755\">App\\Http\\Controllers\\Api\\AdminController::rejectUnsafeInput<\/a>"],[100,1,"<a href=\"Controllers\/Api\/AuthController.php.html#15\">App\\Http\\Controllers\\Api\\AuthController::__construct<\/a>"],[100,2,"<a href=\"Controllers\/Api\/AuthController.php.html#17\">App\\Http\\Controllers\\Api\\AuthController::login<\/a>"],[0,1,"<a href=\"Controllers\/Api\/AuthController.php.html#28\">App\\Http\\Controllers\\Api\\AuthController::logout<\/a>"],[69.23076923076923,2,"<a href=\"Controllers\/Api\/AuthController.php.html#51\">App\\Http\\Controllers\\Api\\AuthController::refresh<\/a>"],[0,1,"<a href=\"Controllers\/Api\/AuthController.php.html#71\">App\\Http\\Controllers\\Api\\AuthController::me<\/a>"],[0,3,"<a href=\"Controllers\/Api\/AuthController.php.html#79\">App\\Http\\Controllers\\Api\\AuthController::submitPasswordRecovery<\/a>"],[0,1,"<a href=\"Controllers\/Api\/AuthController.php.html#110\">App\\Http\\Controllers\\Api\\AuthController::submitContact<\/a>"],[100,1,"<a href=\"Controllers\/Api\/CategoryController.php.html#10\">App\\Http\\Controllers\\Api\\CategoryController::__construct<\/a>"],[100,1,"<a href=\"Controllers\/Api\/CategoryController.php.html#12\">App\\Http\\Controllers\\Api\\CategoryController::getAllCategories<\/a>"],[100,1,"<a href=\"Controllers\/Api\/MajorController.php.html#10\">App\\Http\\Controllers\\Api\\MajorController::__construct<\/a>"],[0,2,"<a href=\"Controllers\/Api\/MajorController.php.html#14\">App\\Http\\Controllers\\Api\\MajorController::majorName<\/a>"],[100,1,"<a href=\"Controllers\/Api\/MajorController.php.html#29\">App\\Http\\Controllers\\Api\\MajorController::getMajorAll<\/a>"],[0,2,"<a href=\"Controllers\/Api\/MajorController.php.html#36\">App\\Http\\Controllers\\Api\\MajorController::majorNameCode<\/a>"],[100,1,"<a href=\"Controllers\/Api\/ProductController.php.html#17\">App\\Http\\Controllers\\Api\\ProductController::__construct<\/a>"],[66.66666666666666,2,"<a href=\"Controllers\/Api\/ProductController.php.html#22\">App\\Http\\Controllers\\Api\\ProductController::productViewId<\/a>"],[100,1,"<a href=\"Controllers\/Api\/ProductController.php.html#38\">App\\Http\\Controllers\\Api\\ProductController::productAll<\/a>"],[73.87387387387388,19,"<a href=\"Controllers\/Api\/ProductController.php.html#57\">App\\Http\\Controllers\\Api\\ProductController::searchProducts<\/a>"],[100,1,"<a href=\"Controllers\/Api\/ProductController.php.html#201\">App\\Http\\Controllers\\Api\\ProductController::baseProductSearchQuery<\/a>"],[100,1,"<a href=\"Controllers\/Api\/ProductController.php.html#206\">App\\Http\\Controllers\\Api\\ProductController::applyProductSearchJoins<\/a>"],[92.85714285714286,5,"<a href=\"Controllers\/Api\/ProductController.php.html#235\">App\\Http\\Controllers\\Api\\ProductController::detectMajorCodeFromKeyword<\/a>"],[0,4,"<a href=\"Controllers\/Api\/ProductController.php.html#261\">App\\Http\\Controllers\\Api\\ProductController::cleanKeywordForMajor<\/a>"],[0,6,"<a href=\"Controllers\/Api\/ProductController.php.html#303\">App\\Http\\Controllers\\Api\\ProductController::majorAliases<\/a>"],[0,6,"<a href=\"Controllers\/Api\/ProductController.php.html#314\">App\\Http\\Controllers\\Api\\ProductController::majorKeywordAliases<\/a>"],[100,1,"<a href=\"Controllers\/Api\/ProductController.php.html#325\">App\\Http\\Controllers\\Api\\ProductController::normalizeSearchText<\/a>"],[100,1,"<a href=\"Controllers\/Api\/ProductController.php.html#338\">App\\Http\\Controllers\\Api\\ProductController::containsUnsafeInput<\/a>"],[100,2,"<a href=\"Controllers\/Api\/ProductController.php.html#343\">App\\Http\\Controllers\\Api\\ProductController::productViewIdTeacher<\/a>"],[100,2,"<a href=\"Controllers\/Api\/ProductController.php.html#362\">App\\Http\\Controllers\\Api\\ProductController::deleteProductStudent<\/a>"],[100,2,"<a href=\"Controllers\/Api\/ProductController.php.html#379\">App\\Http\\Controllers\\Api\\ProductController::getProductsVisitor<\/a>"],[100,1,"<a href=\"Controllers\/Api\/ProductController.php.html#403\">App\\Http\\Controllers\\Api\\ProductController::getVisitorProductById<\/a>"],[83.33333333333334,2,"<a href=\"Controllers\/Api\/ProductController.php.html#412\">App\\Http\\Controllers\\Api\\ProductController::incrementView<\/a>"],[83.33333333333334,2,"<a href=\"Controllers\/Api\/ProductController.php.html#425\">App\\Http\\Controllers\\Api\\ProductController::incrementLike<\/a>"],[83.33333333333334,2,"<a href=\"Controllers\/Api\/ProductController.php.html#438\">App\\Http\\Controllers\\Api\\ProductController::incrementShare<\/a>"],[0,1,"<a href=\"Controllers\/Api\/ProductController.php.html#451\">App\\Http\\Controllers\\Api\\ProductController::getMatchingAiProducts<\/a>"],[100,1,"<a href=\"Controllers\/Api\/SystemSettingController.php.html#11\">App\\Http\\Controllers\\Api\\SystemSettingController::__construct<\/a>"],[100,1,"<a href=\"Controllers\/Api\/SystemSettingController.php.html#15\">App\\Http\\Controllers\\Api\\SystemSettingController::index<\/a>"],[0,1,"<a href=\"Controllers\/Api\/SystemSettingController.php.html#23\">App\\Http\\Controllers\\Api\\SystemSettingController::update<\/a>"],[100,1,"<a href=\"Controllers\/Api\/TeacherController.php.html#14\">App\\Http\\Controllers\\Api\\TeacherController::__construct<\/a>"],[60,2,"<a href=\"Controllers\/Api\/TeacherController.php.html#18\">App\\Http\\Controllers\\Api\\TeacherController::getTeacherStatistic<\/a>"],[100,1,"<a href=\"Controllers\/Api\/TeacherController.php.html#35\">App\\Http\\Controllers\\Api\\TeacherController::getTeacherData<\/a>"],[60,2,"<a href=\"Controllers\/Api\/TeacherController.php.html#54\">App\\Http\\Controllers\\Api\\TeacherController::teacherApprove<\/a>"],[78.94736842105263,4,"<a href=\"Controllers\/Api\/TeacherController.php.html#71\">App\\Http\\Controllers\\Api\\TeacherController::teacherReject<\/a>"],[100,1,"<a href=\"Controllers\/Api\/TeacherController.php.html#99\">App\\Http\\Controllers\\Api\\TeacherController::storeReview<\/a>"],[100,1,"<a href=\"Controllers\/Api\/UploadController.php.html#17\">App\\Http\\Controllers\\Api\\UploadController::__construct<\/a>"],[60,2,"<a href=\"Controllers\/Api\/UploadController.php.html#22\">App\\Http\\Controllers\\Api\\UploadController::countPublishedProducts<\/a>"],[0,4,"<a href=\"Controllers\/Api\/UploadController.php.html#39\">App\\Http\\Controllers\\Api\\UploadController::upload<\/a>"],[0,1,"<a href=\"Controllers\/Api\/UserController.php.html#18\">App\\Http\\Controllers\\Api\\UserController::profile<\/a>"],[0,2,"<a href=\"Controllers\/Api\/UserController.php.html#29\">App\\Http\\Controllers\\Api\\UserController::show<\/a>"],[0,2,"<a href=\"Controllers\/Api\/UserController.php.html#49\">App\\Http\\Controllers\\Api\\UserController::update<\/a>"],[0,4,"<a href=\"Controllers\/Api\/UserController.php.html#78\">App\\Http\\Controllers\\Api\\UserController::statistics<\/a>"],[0,3,"<a href=\"Controllers\/Api\/UserController.php.html#120\">App\\Http\\Controllers\\Api\\UserController::updatePassword<\/a>"],[0,5,"<a href=\"Controllers\/Api\/UserController.php.html#162\">App\\Http\\Controllers\\Api\\UserController::search<\/a>"],[66.66666666666666,3,"<a href=\"Middleware\/CheckRole.php.html#16\">App\\Http\\Middleware\\CheckRole::handle<\/a>"],[0,1,"<a href=\"Requests\/CategoryRequest.php.html#12\">App\\Http\\Requests\\categoryRequest::authorize<\/a>"],[0,1,"<a href=\"Requests\/CategoryRequest.php.html#22\">App\\Http\\Requests\\categoryRequest::rules<\/a>"],[100,1,"<a href=\"Requests\/LoginRequest.php.html#12\">App\\Http\\Requests\\LoginRequest::authorize<\/a>"],[100,1,"<a href=\"Requests\/LoginRequest.php.html#22\">App\\Http\\Requests\\LoginRequest::rules<\/a>"],[100,1,"<a href=\"Requests\/LoginRequest.php.html#31\">App\\Http\\Requests\\LoginRequest::messages<\/a>"],[0,1,"<a href=\"Requests\/ProductRequest.php.html#12\">App\\Http\\Requests\\ProductRequest::authorize<\/a>"],[0,1,"<a href=\"Requests\/ProductRequest.php.html#23\">App\\Http\\Requests\\ProductRequest::rules<\/a>"],[0,1,"<a href=\"Requests\/ProductRequest.php.html#45\">App\\Http\\Requests\\ProductRequest::messages<\/a>"],[100,1,"<a href=\"Requests\/ProductViewRequest.php.html#9\">App\\Http\\Requests\\ProductViewRequest::authorize<\/a>"],[100,1,"<a href=\"Requests\/ProductViewRequest.php.html#14\">App\\Http\\Requests\\ProductViewRequest::rules<\/a>"],[100,1,"<a href=\"Requests\/ProductViewRequest.php.html#21\">App\\Http\\Requests\\ProductViewRequest::validationData<\/a>"],[100,1,"<a href=\"Requests\/RejectProductRequest.php.html#9\">App\\Http\\Requests\\RejectProductRequest::authorize<\/a>"],[100,1,"<a href=\"Requests\/RejectProductRequest.php.html#15\">App\\Http\\Requests\\RejectProductRequest::rules<\/a>"],[100,1,"<a href=\"Requests\/RejectProductRequest.php.html#23\">App\\Http\\Requests\\RejectProductRequest::messages<\/a>"],[100,1,"<a href=\"Requests\/StoreReviewRequest.php.html#9\">App\\Http\\Requests\\StoreReviewRequest::authorize<\/a>"],[100,1,"<a href=\"Requests\/StoreReviewRequest.php.html#14\">App\\Http\\Requests\\StoreReviewRequest::rules<\/a>"],[100,1,"<a href=\"Requests\/StoreReviewRequest.php.html#21\">App\\Http\\Requests\\StoreReviewRequest::messages<\/a>"],[0,1,"<a href=\"Requests\/TeacherRequest.php.html#12\">App\\Http\\Requests\\TeacherRequest::authorize<\/a>"],[0,1,"<a href=\"Requests\/TeacherRequest.php.html#22\">App\\Http\\Requests\\TeacherRequest::rules<\/a>"],[100,1,"<a href=\"Requests\/UploadRequest.php.html#11\">App\\Http\\Requests\\UploadRequest::__construct<\/a>"],[100,1,"<a href=\"Requests\/UploadRequest.php.html#18\">App\\Http\\Requests\\UploadRequest::authorize<\/a>"],[100,5,"<a href=\"Requests\/UploadRequest.php.html#30\">App\\Http\\Requests\\UploadRequest::rules<\/a>"],[100,1,"<a href=\"Requests\/UploadRequest.php.html#108\">App\\Http\\Requests\\UploadRequest::messages<\/a>"],[0,1,"<a href=\"Requests\/UserRequest.php.html#10\">App\\Http\\Requests\\UserRequest::authorize<\/a>"],[0,1,"<a href=\"Requests\/UserRequest.php.html#15\">App\\Http\\Requests\\UserRequest::rules<\/a>"],[0,1,"<a href=\"Requests\/UserRequest.php.html#48\">App\\Http\\Requests\\UserRequest::messages<\/a>"],[0,1,"<a href=\"Requests\/majorRequest.php.html#12\">App\\Http\\Requests\\majorRequest::authorize<\/a>"],[0,1,"<a href=\"Requests\/majorRequest.php.html#22\">App\\Http\\Requests\\majorRequest::rules<\/a>"],[0,1,"<a href=\"Resources\/UserResource.php.html#15\">App\\Http\\Resources\\UserResource::toArray<\/a>"]], 'Method Complexity'))
+      .transition()
+      .duration(500)
+      .call(chart);
+
+    nv.utils.windowResize(chart.update);
+
+    return chart;
+  });
+
+  function getComplexityData(data, label) {
+    var values = [];
+    $.each(data, function(key) {
+      var value = Math.round(data[key][0]*100) / 100;
+      values.push({
+        x: value,
+        y: data[key][1],
+        class: data[key][2],
+        size: 0.05,
+        shape: 'diamond'
+      });
+    });
+
+    return [
+      {
+        key: label,
+        values: values,
+        color: "#4572A7"
+      }
+    ];
+  }
+});
+  </script>
+ </body>
+</html>

@@ -20,6 +20,13 @@ const adminApi = {
   updateSystemSettings: (payload) =>
     axiosClient.patch("/admin/system-settings", payload),
 
+  getChatboxTrainingLogs: (params = {}) =>
+    axiosClient.get(`/admin/chatbox-training-logs${buildQuery(params)}`),
+  updateChatboxTrainingLog: (logId, payload) =>
+    axiosClient.patch(`/admin/chatbox-training-logs/${logId}`, payload),
+  deleteChatboxTrainingLog: (logId) =>
+    axiosClient.delete(`/admin/chatbox-training-logs/${logId}`),
+
   getUsers: (params) => axiosClient.get(`/admin/users${buildQuery(params)}`),
   createUser: (payload) => axiosClient.post("/admin/users", payload),
   updateUser: (userId, payload) =>

@@ -1027,6 +1027,7 @@ class ProductRepository extends BaseRepository
             ->leftJoin('product_graphic as gr', 'p.product_id', '=', 'gr.product_id')
             ->where('p.product_id', '!=', $productId)
             ->where('p.major_id', $current->major_id)
+            ->whereIn('p.status', ['approved', 'pending'])
             ->select(
                 'p.product_id',
                 'p.title',
